@@ -1,18 +1,13 @@
 fn main() {
-    let primes = primes_below(50);
-    for p in primes.iter() {
-        print!(" {}", p);
-    }
-    println!("");
-    for x in prime_limit(50) {
-        println!("{}", x);
+    for (n, x) in prime_limit(50) {
+        println!("{}: {}", n, x);
     }
 }
 
-fn prime_limit(n: u16) -> Vec<f64> {
-    let mut result: Vec<f64> = Vec::new();
+fn prime_limit(n: u16) -> Vec<(u16, f64)> {
+    let mut result: Vec<(u16, f64)> = Vec::new();
     for p in primes_below(n + 1) {
-        result.push(cents(p as f64));
+        result.push((p, cents(p as f64)));
     }
     result
 }
