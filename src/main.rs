@@ -1,12 +1,12 @@
 fn main() {
     let primes = primes_below(50);
     let mut plimit: Vec<f64> = Vec::new();
-    for p in &primes {
+    for p in primes.iter() {
         print!(" {}", p);
         plimit.push(cents(*p as f64));
     }
     println!("");
-    for x in &plimit {
+    for x in plimit.iter() {
         println!("{}", x);
     }
 }
