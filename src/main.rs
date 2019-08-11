@@ -4,6 +4,13 @@ fn main() {
         print!(" {}", p);
     }
     println!("");
+    for p in &mut primes {
+        println!("{}", cents(*p as f64));
+    }
+}
+
+fn cents(ratio: f64) -> f64 {
+    ratio.log2() * 12e2
 }
 
 fn primes_below(n: u16) -> Vec<u16> {
