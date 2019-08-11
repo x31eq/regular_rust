@@ -1,10 +1,10 @@
 fn main() {
-    let mut primes = primes_below(50);
-    for p in &mut primes {
+    let primes = primes_below(50);
+    for p in &primes {
         print!(" {}", p);
     }
     println!("");
-    for p in &mut primes {
+    for p in &primes {
         println!("{}", cents(*p as f64));
     }
 }
