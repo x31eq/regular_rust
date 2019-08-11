@@ -1,8 +1,9 @@
 fn main() {
     let mut primes = primes_below(50);
     for p in &mut primes {
-        println!("{} is prime", p);
+        print!(" {}", p);
     }
+    println!("");
 }
 
 fn primes_below(n: u16) -> Vec<u16> {
