@@ -1,14 +1,20 @@
 fn main() {
     let primes = primes_below(50);
-    let mut plimit: Vec<f64> = Vec::new();
     for p in primes.iter() {
         print!(" {}", p);
-        plimit.push(cents(*p as f64));
     }
     println!("");
-    for x in plimit.iter() {
+    for x in prime_limit(50) {
         println!("{}", x);
     }
+}
+
+fn prime_limit(n: u16) -> Vec<f64> {
+    let mut result: Vec<f64> = Vec::new();
+    for p in primes_below(n + 1) {
+        result.push(cents(p as f64));
+    }
+    result
 }
 
 fn cents(ratio: f64) -> f64 {
