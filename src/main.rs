@@ -8,10 +8,7 @@ fn main() {
 
 fn primes_below(n: u16) -> Vec<u16> {
     let n = n as usize;
-    let mut hasfactors: Vec<bool> = Vec::new();
-    for _ in 2..n {
-        hasfactors.push(false);
-    }
+    let mut hasfactors = vec![false; n - 2];
     for i in 2..(n/2) {
         if !hasfactors[i - 2] {
             let mut j = 2 * i;
