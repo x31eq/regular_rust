@@ -5,23 +5,23 @@ fn main() {
     }
 }
 
-fn primes_below(n: usize) -> Vec<usize> {
+fn primes_below(n: u16) -> Vec<u16> {
     let mut hasfactors: Vec<bool> = Vec::new();
     for _ in 2..n {
         hasfactors.push(false);
     }
     for i in 2..(n/2) {
-        if !hasfactors[i - 2] {
+        if !hasfactors[i as usize - 2] {
             let mut j = 2 * i;
             while j < n {
-                hasfactors[j - 2] = true;
+                hasfactors[j as usize - 2] = true;
                 j += i;
             }
         }
     }
-    let mut result: Vec<usize> = Vec::new();
+    let mut result: Vec<u16> = Vec::new();
     for i in 2..n {
-        if !hasfactors[i - 2] {
+        if !hasfactors[i as usize - 2] {
             result.push(i);
         }
     }
