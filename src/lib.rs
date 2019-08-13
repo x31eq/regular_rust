@@ -29,17 +29,22 @@ fn primes_below(n: u16) -> Vec<u16> {
     result
 }
 
-#[test]
-fn octave_cents() {
-    assert_eq!(cents(2.0), 1200.0);
-    assert_eq!(cents(4.0), 2400.0);
-}
+#[cfg(test)]
+mod tests {
+    use super::{cents,prime_limit};
 
-#[test]
-fn seven_limit() {
-    let primes: Vec<u16> =
-            prime_limit(7).iter()
-            .map(|(p, _size)| *p)
-            .collect();
-    assert_eq!(primes, vec![2, 3, 5, 7]);
+    #[test]
+    fn octave_cents() {
+        assert_eq!(cents(2.0), 1200.0);
+        assert_eq!(cents(4.0), 2400.0);
+    }
+
+    #[test]
+    fn seven_limit() {
+        let primes: Vec<u16> =
+                prime_limit(7).iter()
+                .map(|(p, _size)| *p)
+                .collect();
+        assert_eq!(primes, vec![2, 3, 5, 7]);
+    }
 }
