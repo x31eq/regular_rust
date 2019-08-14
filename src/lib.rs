@@ -15,10 +15,7 @@ fn primes_below(n: u16) -> Vec<u16> {
         let i = *i as usize;
         if !hasfactors[i - 2] {
             let mut j = i;
-            while {
-                j += i;
-                j < top
-            } {
+            while { j += i; j < top } {
                 hasfactors[j - 2] = true;
             }
         }
