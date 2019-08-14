@@ -13,10 +13,7 @@ fn primes_below(n: u16) -> Vec<u16> {
     let mut hasfactors = vec![false; top - 2];
     (2..n).filter(|i| {
         let i = *i as usize;
-        if hasfactors[i - 2] {
-            false
-        }
-        else {
+        if !hasfactors[i - 2] {
             let mut j = i;
             while {
                 j += i;
@@ -24,8 +21,8 @@ fn primes_below(n: u16) -> Vec<u16> {
             } {
                 hasfactors[j - 2] = true;
             }
-            true
         }
+        !hasfactors[i - 2]
     })
     .collect()
 }
