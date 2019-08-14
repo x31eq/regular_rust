@@ -18,11 +18,9 @@ pub fn prime_limit(n: u16) -> Vec<(u16, f64)> {
         result
     };
 
-    let mut result: Vec<(u16, f64)> = Vec::new();
-    for p in primes_below(n + 1) {
-        result.push((p, cents(p as f64)));
-    }
-    result
+    primes_below(n + 1).iter()
+        .map(|p| (*p, cents(*p as f64)))
+        .collect()
 }
 
 pub fn cents(ratio: f64) -> f64 {
