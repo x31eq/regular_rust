@@ -8,10 +8,7 @@ fn octave_cents() {
 
 #[test]
 fn seven_limit() {
-    let primes: Vec<u16> =
-            prime_limit(7).iter()
-            .map(|(p, _size)| *p)
-            .collect();
+    let (_, primes) = prime_limit(7);
     assert_eq!(primes, vec![2, 3, 5, 7]);
 }
 

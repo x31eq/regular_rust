@@ -1,5 +1,6 @@
 fn main() {
-    for (n, x) in regular::prime_limit(50) {
+    let (plimit, nums) = regular::prime_limit(50);
+    for (n, x) in nums.iter().zip(plimit) {
         println!("{}: {}", n, x);
     }
 }
