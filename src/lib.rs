@@ -1,6 +1,6 @@
 pub fn prime_limit(n: u16) -> Vec<(u16, f64)> {
-    primes_below(n + 1).iter()
-        .map(|p| (*p, cents(*p as f64)))
+    primes_below(n + 1).into_iter()
+        .map(|p| (p, cents(p as f64)))
         .collect()
 }
 
