@@ -1,8 +1,16 @@
-pub fn prime_limit(n: u16) -> (Vec<f64>, Vec<u16>) {
-    let prime_numbers = primes_below(n + 1);
-    (prime_numbers.iter()
-                    .map(|p| cents(*p as f64))
-                    .collect(), prime_numbers)
+pub struct PrimeLimit {
+    pub numbers: Vec<u16>,
+    pub pitches: Vec<f64>,
+}
+
+impl PrimeLimit {
+    pub fn new(n: u16) -> PrimeLimit {
+        let prime_numbers = primes_below(n + 1);
+        let plimit = prime_numbers.iter()
+                        .map(|p| cents(*p as f64))
+                        .collect();
+        PrimeLimit{ numbers: prime_numbers, pitches: plimit }
+    }
 }
 
 pub fn cents(ratio: f64) -> f64 {

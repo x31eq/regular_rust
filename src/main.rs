@@ -1,6 +1,7 @@
 fn main() {
-    let (plimit, nums) = regular::prime_limit(50);
-    for (n, x) in nums.iter().zip(plimit) {
+    let limit = regular::PrimeLimit::new(50);
+    let partials = limit.numbers.iter().zip(limit.pitches);
+    for (n, x) in partials {
         println!("{}: {}", n, x);
     }
 }
