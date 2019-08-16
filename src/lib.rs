@@ -13,9 +13,8 @@ impl PrimeLimit {
     }
 
     pub fn partials(&self) -> Vec<(u16, f64)> {
-        self.numbers.iter()
-            .zip(&self.pitches)
-            .map(|(n, p)| (*n, *p))
+        self.numbers.iter().cloned()
+            .zip(self.pitches.iter().cloned())
             .collect()
     }
 }
