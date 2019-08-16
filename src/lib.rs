@@ -1,16 +1,27 @@
-type Cents = f64;
-// Irrational ratio
-type Irratio = f64;
+//! # Regular Temperament Utilities
+//!
+//! Utilties for dealing with regular temperaments
+
+pub type Cents = f64;
+/// Frequency ratio as an irrational number
+pub type Irratio = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits.
-type Harmonic = u16;
+/// Integer partial
+pub type Harmonic = u16;
 
 pub struct PrimeLimit {
+    /// Numbers representing partials
     pub numbers: Vec<Harmonic>,
+
+    /// Pitch of each partial in cents above the root
     pub pitches: Vec<Cents>,
 }
 
 impl PrimeLimit {
+    /// Constructor for consecutive prime limits
+    /// given the highest prime
+    /// (or a slightly higher composite)
     pub fn new(n: Harmonic) -> PrimeLimit {
         let prime_numbers = primes_below(n + 1);
         let plimit = prime_numbers.iter()
@@ -26,10 +37,12 @@ impl PrimeLimit {
     }
 }
 
+/// Convert a frequency ratio to cents
 pub fn cents(ratio: Irratio) -> Cents {
     ratio.log2() * 12e2
 }
 
+/// Eratosthenes sieve
 fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     let top = n as usize;
     let mut hasfactors = vec![false; top - 2];
