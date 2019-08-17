@@ -3,8 +3,6 @@
 //! Utilties for dealing with regular temperaments
 
 pub type Cents = f64;
-/// Frequency ratio as an irrational number
-pub type Irratio = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits.
 /// Integer partial
@@ -25,7 +23,7 @@ impl PrimeLimit {
     pub fn new(n: Harmonic) -> PrimeLimit {
         let prime_numbers = primes_below(n + 1);
         let plimit = prime_numbers.iter().cloned()
-                        .map(|p| cents(p as Irratio))
+                        .map(|p| cents(p as f64))
                         .collect();
         PrimeLimit{ numbers: prime_numbers, pitches: plimit }
     }
@@ -38,7 +36,7 @@ impl PrimeLimit {
 }
 
 /// Convert a frequency ratio to cents
-pub fn cents(ratio: Irratio) -> Cents {
+pub fn cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }
 
