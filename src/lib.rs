@@ -7,6 +7,8 @@ pub type Cents = f64;
 // which means 11 bits (assuming the root is 1).
 /// Integer partial
 pub type Harmonic = u16;
+/// Member of a "val" or ratio-lattice vector
+pub type FactorElement = i32;
 
 pub struct PrimeLimit {
     /// Numbers representing partials
@@ -56,6 +58,8 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     })
     .collect()
 }
+
+pub mod cangwu;
 
 #[cfg(test)]
 mod tests;
