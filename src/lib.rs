@@ -4,7 +4,7 @@
 
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
-// which means 11 bits.
+// which means 11 bits (assuming the root is 1).
 /// Integer partial
 pub type Harmonic = u16;
 
