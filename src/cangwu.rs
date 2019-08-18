@@ -25,7 +25,6 @@ pub fn limited_mappings(n_notes: FactorElement,
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
-    let plimit: Vec<Cents> = plimit.iter().cloned().map(|x| x/12e2).collect();
     let cap = bmax.powi(2) * (plimit.len() as Cents) / (plimit[0].powi(2));
     let epsilon2 = ek.powi(2) / (1.0 + ek.powi(2));
 
