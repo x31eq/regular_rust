@@ -14,13 +14,12 @@ pub fn limited_mappings(n_notes: FactorElement,
                     bmax: Cents,
                     plimit: &Vec<Cents>,
                     ) -> Vec<Vec<FactorElement>> {
-    // Call things Cents but turn them to octaves/dimensinoless
+    // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
     let plimit: Vec<Cents> = plimit.iter().cloned().map(|x| x/12e2).collect();
-    let cap = bmax * bmax * (plimit.len() as Cents)
-                            / (plimit[0] * plimit[0]);
-    let epsilon2 = ek * ek / (1.0 + ek * ek);
+    let cap = bmax.powi(2) * (plimit.len() as Cents) / (plimit[0].powi(2));
+    let epsilon2 = ek.powi(2) / (1.0 + ek.powi(2));
 
     /// mapping: the ET mapping with a new entry
     /// tot: running total of w
@@ -36,7 +35,7 @@ pub fn limited_mappings(n_notes: FactorElement,
         let i = mapping.len();
         let weighted_size = (mapping[i - 1] as Cents) / plimit[i - 1];
         let tot = tot + weighted_size;
-        let tot2 = tot2 + weighted_size * weighted_size;
+        let tot2 = tot2 + weighted_size.powi(2);
         let lambda = 1.0 - epsilon2;
         if i == plimit.len() {
             // recursion stops here
