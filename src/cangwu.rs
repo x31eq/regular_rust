@@ -50,7 +50,6 @@ pub fn get_equal_temperaments(
     // Low initial guess
     let size = plimit.len() as f64;
     let mut bmax = (ek * size).min(12.0);
-    println!("bmax guess: {}", bmax);
     let mut results = Vec::new();
     // Stop search getting out of control
     for _ in 0..100 {
@@ -65,17 +64,44 @@ pub fn get_equal_temperaments(
         // This should be sorted by badness but
         // we don't have that calculation yet
         if results.len() >= n_results {
-            println!("bmax used: {}", bmax);
-            results.sort_by(
-                |map1, map2| {
-                    let bad1 = equal_temperament_badness(
-                                    &plimit, ek, &map1);
-                    let bad2 = equal_temperament_badness(
-                                    &plimit, ek, &map2);
-                    bad1.partial_cmp(&bad2).unwrap()
-                });
-            println!("sorted");
-            return results.iter().take(n_results).cloned().collect();
+            let mut dec_results = Vec::new();
+            let mut cap = 0.0;
+            let mut full = false;
+            for map in results {
+                let bad = equal_temperament_badness(&plimit, ek, &map);
+                if full {
+                    if bad < cap {
+                        dec_results.push((bad, map));
+                        dec_results.sort_by(
+                            |(bad1 ,_), (bad2, _)|
+                            bad1.partial_cmp(&bad2).unwrap()
+                        );
+                        dec_results.pop();
+                        let worst = dec_results.pop();
+                        match worst {
+                            Some((bad, map)) => {
+                                cap = bad;
+                                dec_results.push((bad, map));
+                            },
+                            None => panic!("Vector inconsistently empty"),
+                        }
+                    }
+                }
+                else {
+                    dec_results.push((bad, map));
+                    cap = cap.max(bad);
+                    full = dec_results.len() == n_results;
+                    if full {
+                        dec_results.sort_by(
+                            |(bad1 ,_), (bad2, _)|
+                            bad1.partial_cmp(&bad2).unwrap()
+                        );
+                    }
+                }
+            }
+            return dec_results.iter()
+                .map(|(_, map)| map.clone())
+                .collect();
         }
         bmax *= 1.5;
     }
