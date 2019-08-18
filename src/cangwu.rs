@@ -92,7 +92,7 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
                             ) -> Vec<Vec<FactorElement>> {
     let mut result = Vec::new();
     let i = mapping.len();
-    let weighted_size = (mapping[i - 1] as Cents) / plimit[i - 1];
+    let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + weighted_size.powi(2);
     let lambda = 1.0 - epsilon2;
@@ -105,10 +105,9 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
         let error2 = tot2 - tot * toti;
         if error2 < cap {
             let target = plimit[i];
-            let deficit: Cents = ((
-                (i + 1) as Cents * (cap - error2)
-                / (i as Cents + epsilon2)
-                ) as Cents).sqrt();
+            let deficit: f64 = (
+                (i + 1) as f64 * (cap - error2) / (i as f64 + epsilon2)
+                ).sqrt();
             let xmin = target * (toti - deficit);
             let xmax = target * (toti + deficit);
             for guess in intrange(xmin, xmax) {
@@ -127,6 +126,6 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
 }
 
 /// Range of integers between x and y
-fn intrange(x: Cents, y: Cents) -> std::ops::RangeInclusive<FactorElement> {
+fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<FactorElement> {
     ((x.ceil() as FactorElement) ..= (y.floor() as FactorElement))
 }
