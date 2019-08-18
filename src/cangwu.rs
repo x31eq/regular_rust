@@ -74,13 +74,9 @@ pub fn get_equal_temperaments(
                             bad1.partial_cmp(&bad2).unwrap()
                         );
                         dec_results.pop();
-                        let worst = dec_results.pop();
-                        match worst {
-                            Some((bad, map)) => {
-                                cap = bad;
-                                dec_results.push((bad, map));
-                            },
-                            None => panic!("Vector inconsistently empty"),
+                        if let Some((bad, map)) = dec_results.pop() {
+                            cap = bad;
+                            dec_results.push((bad, map));
                         }
                     }
                 }
