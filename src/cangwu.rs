@@ -2,6 +2,42 @@
 
 use super::{Cents, FactorElement};
 
+pub fn get_equal_temperaments(
+        plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        -> Vec<Vec<FactorElement>> {
+    // Stop weird things happening for non-standard units
+    let plimit: Vec<Cents> = plimit.iter().cloned()
+        .map(|p| 12e2 * (p / plimit[0]))
+        .collect();
+
+    // Low initial guess
+    let mut bmax = ek * plimit.len() as f64;
+    // the trait `std::cmp::Ord` is not implemented for `f64`
+    if bmax > 12.0 {
+        bmax = 12.0;
+    }
+    let mut results = Vec::new();
+    // Stop search getting out of control
+    for _ in 0..100 {
+        results.truncate(0);
+        let mut n_notes = 1;
+        while (n_notes as f64) < bmax / ek {
+            for mapping in limited_mappings(n_notes, ek, bmax, &plimit) {
+                results.push(mapping);
+            }
+            n_notes += 1;
+        }
+        // This should be sorted by badness but
+        // we don't have that calculation yet
+        if results.len() >= n_results {
+            return results;
+        }
+        bmax *= 1.5;
+    }
+    // Couldn't find enough, return whatever we have
+    results
+}
+
 /// All mappings for a given division of the octave (or generalization)
 /// within the given badness cutoff.
 ///
