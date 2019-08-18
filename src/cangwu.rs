@@ -49,7 +49,8 @@ pub fn get_equal_temperaments(
 
     // Low initial guess
     let size = plimit.len() as f64;
-    let mut bmax = (ek * size.sqrt()).min(12.0);
+    let mut bmax = (ek * size).min(12.0);
+    println!("bmax guess: {}", bmax);
     let mut results = Vec::new();
     // Stop search getting out of control
     for _ in 0..100 {
@@ -64,6 +65,7 @@ pub fn get_equal_temperaments(
         // This should be sorted by badness but
         // we don't have that calculation yet
         if results.len() >= n_results {
+            println!("bmax used: {}", bmax);
             results.sort_by(
                 |map1, map2| {
                     let bad1 = equal_temperament_badness(
@@ -72,6 +74,7 @@ pub fn get_equal_temperaments(
                                     &plimit, ek, &map2);
                     bad1.partial_cmp(&bad2).unwrap()
                 });
+            println!("sorted");
             return results.iter().take(n_results).cloned().collect();
         }
         bmax *= 1.5;
