@@ -63,7 +63,15 @@ pub fn get_equal_temperaments(
         // This should be sorted by badness but
         // we don't have that calculation yet
         if results.len() >= n_results {
-            return results;
+            results.sort_by(
+                |map1, map2| {
+                    let bad1 = equal_temperament_badness(
+                                    &plimit, ek, &map1);
+                    let bad2 = equal_temperament_badness(
+                                    &plimit, ek, &map2);
+                    bad1.partial_cmp(&bad2).unwrap()
+                });
+            return results.iter().take(n_results).cloned().collect();
         }
         bmax *= 1.5;
     }
