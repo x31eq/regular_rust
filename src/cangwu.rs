@@ -7,7 +7,7 @@ pub fn equal_temperament_badness(
         -> Cents {
     // Get a dimensionless ek
     let ek = ek / 12e2;
-    let epsilon = ek / (1.0 + ek.powi(2)).sqrt();
+    let epsilon = ek / (1.0 + square(ek)).sqrt();
     let weighted_mapping: Vec<f64> = mapping.iter()
         .zip(plimit.into_iter())
         .map(|(m, p)| (*m as f64) / p)
@@ -23,7 +23,7 @@ pub fn equal_temperament_badness(
     let translation = (1.0 - epsilon) * mean_w;
     let bad2 = mean(&weighted_mapping.into_iter()
         .map(|x| x - translation)
-        .map(|x| x.powi(2))
+        .map(square)
         .collect());
     bad2.sqrt() * 12e2
 }
@@ -90,8 +90,8 @@ pub fn limited_mappings(n_notes: FactorElement,
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
-    let cap = bmax.powi(2) * (plimit.len() as Cents) / (plimit[0].powi(2));
-    let epsilon2 = ek.powi(2) / (1.0 + ek.powi(2));
+    let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
+    let epsilon2 = square(ek) / (1.0 + square(ek));
 
     more_limited_mappings(vec![n_notes], 0.0, 0.0, cap, epsilon2, &plimit)
 }
@@ -116,7 +116,7 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
     let i = mapping.len();
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
-    let tot2 = tot2 + weighted_size.powi(2);
+    let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;
     if i == plimit.len() {
         // recursion stops here
@@ -145,6 +145,10 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
         }
     }
     result
+}
+
+fn square(x: f64) -> f64 {
+    x.powi(2)
 }
 
 /// Range of integers between x and y
