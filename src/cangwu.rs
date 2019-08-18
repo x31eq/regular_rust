@@ -2,6 +2,13 @@
 
 use super::{Cents, FactorElement};
 
+/// Get the best equal temperament mappings for the given prime limit
+///
+/// plimit: Sizes of prime harmonics in cents
+///
+/// ek: The Cangwu parameter in cents/octave
+///
+/// n_results: How many to return
 pub fn get_equal_temperaments(
         plimit: &Vec<Cents>, ek: Cents, n_results: usize)
         -> Vec<Vec<FactorElement>> {
