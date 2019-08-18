@@ -61,8 +61,6 @@ pub fn get_equal_temperaments(
             }
             n_notes += 1;
         }
-        // This should be sorted by badness but
-        // we don't have that calculation yet
         if results.len() >= n_results {
             let mut dec_results = Vec::new();
             let mut cap = 0.0;
