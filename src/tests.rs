@@ -46,6 +46,15 @@ fn small_primes() {
     assert_eq!(primes_below(100), from_pari);
 }
 
+#[test]
+fn expected_limited_mappings() {
+    let limit7 = PrimeLimit::new(7).pitches;
+    let map19 = super::cangwu::limited_mappings(
+            19, 1.0, 1e2, &limit7);
+    assert_eq!(map19.len(), 1);
+    assert_eq!(map19[0], vec![19, 30, 44, 53]);
+}
+
 fn near_enough_equal(x: f64, y: f64) -> bool {
     (x/y - 1.0).abs() < 1e-15
 }
