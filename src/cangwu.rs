@@ -12,7 +12,6 @@ pub fn equal_temperament_badness(
         .zip(plimit.into_iter())
         .map(|(m, p)| (*m as f64) / p)
         .collect();
-    // let dimension = plimit.len() as f64;
     let mean = |items: &Vec<f64>| {
         let mut sum = 0.0;
         for item in items.into_iter() {
@@ -21,8 +20,6 @@ pub fn equal_temperament_badness(
         sum / (items.len() as f64)
     };
     let mean_w = mean(&weighted_mapping);
-    // This doesn't work:
-    // let mean: f64 = weighted_mapping.into_iter().sum() / dimension;
     let translation = (1.0 - epsilon) * mean_w;
     let bad2 = mean(&weighted_mapping.into_iter()
         .map(|x| x - translation)
