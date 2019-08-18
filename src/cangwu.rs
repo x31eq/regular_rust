@@ -66,10 +66,9 @@ pub fn get_equal_temperaments(
         if results.len() >= n_results {
             let mut dec_results = Vec::new();
             let mut cap = 0.0;
-            let mut full = false;
             for map in results {
                 let bad = equal_temperament_badness(&plimit, ek, &map);
-                if full {
+                if dec_results.len() == n_results {
                     if bad < cap {
                         dec_results.push((bad, map));
                         dec_results.sort_by(
@@ -90,8 +89,7 @@ pub fn get_equal_temperaments(
                 else {
                     dec_results.push((bad, map));
                     cap = cap.max(bad);
-                    full = dec_results.len() == n_results;
-                    if full {
+                    if dec_results.len() == n_results {
                         dec_results.sort_by(
                             |(bad1 ,_), (bad2, _)|
                             bad1.partial_cmp(&bad2).unwrap()
