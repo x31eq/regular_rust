@@ -5,6 +5,10 @@ use super::{Cents, FactorElement};
 pub fn equal_temperament_badness(
         plimit: &Vec<Cents>, ek: Cents, mapping: &Vec<FactorElement>)
         -> Cents {
+    // Put the primes in terms of octaves
+    let plimit: Vec<f64> = plimit.into_iter()
+        .map(|p| p / 12e2)
+        .collect();
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
