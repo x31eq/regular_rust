@@ -105,7 +105,7 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
         let error2 = tot2 - tot * toti;
         if error2 < cap {
             let target = plimit[i];
-            let deficit: f64 = (
+            let deficit = (
                 (i + 1) as f64 * (cap - error2) / (i as f64 + epsilon2)
                 ).sqrt();
             let xmin = target * (toti - deficit);
