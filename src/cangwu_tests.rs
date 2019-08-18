@@ -21,4 +21,3 @@ fn expected_limited_mappings() {
     assert_eq!(examples[0], vec![31, 49, 72, 87, 107, 114]);
     assert_eq!(examples[1], vec![31, 49, 72, 87, 107, 115]);
 }
-
