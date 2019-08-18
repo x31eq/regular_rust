@@ -32,8 +32,8 @@ fn cents50() {
         6665.506622013165,
     ];
     let rust_generated = PrimeLimit::new(50).pitches;
-    for (r, p) in rust_generated.iter().cloned()
-                    .zip(python_generated.iter().cloned()) {
+    for (r, p) in rust_generated.into_iter()
+                    .zip(python_generated.into_iter()) {
         assert!(near_enough_equal(r, p));
     }
 }

@@ -42,7 +42,7 @@ pub fn get_equal_temperaments(
         plimit: &Vec<Cents>, ek: Cents, n_results: usize)
         -> Vec<Vec<FactorElement>> {
     // Stop weird things happening for non-standard units
-    let plimit: Vec<Cents> = plimit.iter().cloned()
+    let plimit: Vec<Cents> = plimit.into_iter()
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
