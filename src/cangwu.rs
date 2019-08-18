@@ -47,11 +47,7 @@ pub fn get_equal_temperaments(
         .collect();
 
     // Low initial guess
-    let mut bmax = ek * plimit.len() as f64;
-    // the trait `std::cmp::Ord` is not implemented for `f64`
-    if bmax > 12.0 {
-        bmax = 12.0;
-    }
+    let mut bmax = f64::min(12.0, ek * plimit.len() as f64);
     let mut results = Vec::new();
     // Stop search getting out of control
     for _ in 0..100 {
