@@ -10,7 +10,7 @@ fn main() {
     }
     println!("{:}", regular::cangwu::equal_temperament_badness(
             &limit11, 1.0, &vec![31, 49, 72, 87, 107]));
-    let big_limit = regular::PrimeLimit::new(60).pitches;
+    let big_limit = regular::PrimeLimit::new(80).pitches;
     let mappings = regular::cangwu::get_equal_temperaments(
             &big_limit, 0.3, 10);
     println!("{:?}", mappings.iter()

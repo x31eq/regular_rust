@@ -49,7 +49,7 @@ pub fn get_equal_temperaments(
 
     // Low initial guess
     let size = plimit.len() as f64;
-    let mut bmax = (ek * size / size.ln()).min(12.0);
+    let mut bmax = (ek * size.sqrt()).min(12.0);
     let mut results = Vec::new();
     // Stop search getting out of control
     for _ in 0..100 {
