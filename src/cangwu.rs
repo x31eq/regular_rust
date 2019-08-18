@@ -26,7 +26,7 @@ pub fn equal_temperament_badness(
     let translation = (1.0 - epsilon) * mean_w;
     let bad2 = mean(&weighted_mapping.into_iter()
         .map(|x| x - translation)
-        .map(|x: f64| x.powi(2))
+        .map(|x| x.powi(2))
         .collect());
     bad2.sqrt() * 12e2
 }
