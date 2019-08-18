@@ -1,5 +1,14 @@
+//! Temperament finding with Cangwu badness
+
 use super::{Cents, FactorElement};
 
+/// All mappings for a given division of the octave (or generalization)
+/// within the given badness cutoff.
+///
+/// # Panics
+///
+/// Probably won't panic but will attempt to generate
+/// a huge vector of mappings if "bmax" is set too high.
 pub fn limited_mappings(n_notes: FactorElement,
                     ek: Cents,
                     bmax: Cents,
@@ -13,9 +22,9 @@ pub fn limited_mappings(n_notes: FactorElement,
                             / (plimit[0] * plimit[0]);
     let epsilon2 = ek * ek / (1.0 + ek * ek);
 
-    // mapping: the ET mapping with a new entry
-    // tot: running total of w
-    // tot2: running total of w squared
+    /// mapping: the ET mapping with a new entry
+    /// tot: running total of w
+    /// tot2: running total of w squared
     fn more_limited_mappings(mapping: Vec<FactorElement>,
                              tot: Cents,
                              tot2: Cents,
