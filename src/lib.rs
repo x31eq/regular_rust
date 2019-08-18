@@ -1,6 +1,6 @@
 //! # Regular Temperament Utilities
 //!
-//! Utilties for dealing with regular temperaments
+//! Utilties for regular temperament finding
 
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
