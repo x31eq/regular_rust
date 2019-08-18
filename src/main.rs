@@ -16,4 +16,7 @@ fn main() {
     println!("{:?}", mappings.iter()
                         .map(|m| m[0])
                         .collect::<Vec<_>>());
+    println!("Badness of worst in the list {:?}",
+             regular::cangwu::equal_temperament_badness(
+                &big_limit, 0.3, &mappings[mappings.len() - 1]));
 }
