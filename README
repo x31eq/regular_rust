@@ -1,0 +1,6 @@
+Rust regular temperament library
+================================
+
+This is a re-implementation of some of my Python temperament finding
+code in Rust.  It's mostly an exercise in learning Rust, but might
+be useful one day.  Expect newbie errors for a while.
