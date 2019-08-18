@@ -63,3 +63,6 @@ pub mod cangwu;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod cangwu_tests;
