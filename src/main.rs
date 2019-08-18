@@ -9,5 +9,5 @@ fn main() {
         println!("{:?}", mapping);
     }
     println!("{:}", regular::cangwu::equal_temperament_badness(
-            limit11, 1.0, vec![31, 49, 72, 87, 107]));
+            limit11, 1.0, &vec![31, 49, 72, 87, 107]));
 }

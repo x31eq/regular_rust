@@ -3,14 +3,14 @@
 use super::{Cents, FactorElement};
 
 pub fn equal_temperament_badness(
-        plimit: &Vec<Cents>, ek: Cents, mapping: Vec<FactorElement>)
+        plimit: &Vec<Cents>, ek: Cents, mapping: &Vec<FactorElement>)
         -> Cents {
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + ek.powi(2)).sqrt();
-    let weighted_mapping: Vec<f64> = mapping.into_iter()
+    let weighted_mapping: Vec<f64> = mapping.iter()
         .zip(plimit.into_iter())
-        .map(|(m, p)| (m as f64) / p)
+        .map(|(m, p)| (*m as f64) / p)
         .collect();
     // let dimension = plimit.len() as f64;
     let mean = |items: &Vec<f64>| {
