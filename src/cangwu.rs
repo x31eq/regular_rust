@@ -2,6 +2,35 @@
 
 use super::{Cents, FactorElement};
 
+pub fn equal_temperament_badness(
+        plimit: &Vec<Cents>, ek: Cents, mapping: Vec<FactorElement>)
+        -> Cents {
+    // Get a dimensionless ek
+    let ek = ek / 12e2;
+    let epsilon = ek / (1.0 + ek.powi(2)).sqrt();
+    let weighted_mapping: Vec<f64> = mapping.into_iter()
+        .zip(plimit.into_iter())
+        .map(|(m, p)| (m as f64) / p)
+        .collect();
+    // let dimension = plimit.len() as f64;
+    let mean = |items: &Vec<f64>| {
+        let mut sum = 0.0;
+        for item in items.into_iter() {
+            sum += item;
+        }
+        sum / (items.len() as f64)
+    };
+    let mean_w = mean(&weighted_mapping);
+    // This doesn't work:
+    // let mean: f64 = weighted_mapping.into_iter().sum() / dimension;
+    let translation = (1.0 - epsilon) * mean_w;
+    let bad2 = mean(&weighted_mapping.into_iter()
+        .map(|x| x - translation)
+        .map(|x: f64| x.powi(2))
+        .collect());
+    bad2.sqrt() * 12e2
+}
+
 /// Get the best equal temperament mappings for the given prime limit
 ///
 /// plimit: Sizes of prime harmonics in cents
