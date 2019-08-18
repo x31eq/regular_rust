@@ -49,10 +49,22 @@ fn small_primes() {
 #[test]
 fn expected_limited_mappings() {
     let limit7 = PrimeLimit::new(7).pitches;
-    let map19 = super::cangwu::limited_mappings(
+    let examples = super::cangwu::limited_mappings(
             19, 1.0, 1e2, &limit7);
-    assert_eq!(map19.len(), 1);
-    assert_eq!(map19[0], vec![19, 30, 44, 53]);
+    assert_eq!(examples.len(), 1);
+    assert_eq!(examples[0], vec![19, 30, 44, 53]);
+
+    let limit13 = PrimeLimit::new(13).pitches;
+    let examples = super::cangwu::limited_mappings(
+            41, 1.0, 1e2, &limit13);
+    assert_eq!(examples.len(), 1);
+    assert_eq!(examples[0], vec![41, 65, 95, 115, 142, 152]);
+    let examples = super::cangwu::limited_mappings(
+            31, 1.0, 1e2, &limit13);
+    assert_eq!(examples.len(), 2);
+    // Sorting is arbitrary but deterministic
+    assert_eq!(examples[0], vec![31, 49, 72, 87, 107, 114]);
+    assert_eq!(examples[1], vec![31, 49, 72, 87, 107, 115]);
 }
 
 fn near_enough_equal(x: f64, y: f64) -> bool {
