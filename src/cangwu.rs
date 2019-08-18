@@ -70,7 +70,7 @@ pub fn get_equal_temperaments(
                     if bad < cap {
                         dec_results.push((bad, map));
                         dec_results.sort_by(
-                            |(bad1 ,_), (bad2, _)|
+                            |(bad1, _), (bad2, _)|
                             bad1.partial_cmp(&bad2).unwrap()
                         );
                         dec_results.pop();
