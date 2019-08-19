@@ -47,15 +47,15 @@ pub fn get_equal_temperaments(
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
-    // Low initial guess
+    // Guess a badness cap
     let size = plimit.len() as f64;
-    let mut bmax = (ek * size).min(12.0);
+    let mut bmax = ek * size;
     let mut results = PriorityQueue::new(n_results);
     // Stop search getting out of control
-    for _ in 0..100 {
+    for _ in 0..10 {
         let mut n_notes = 1;
         let cap = bmax.min(results.cap);
-        while (n_notes as f64) < bmax / ek {
+        while (n_notes as f64) < cap / ek {
             for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
                 let bad = equal_temperament_badness(&plimit, ek, &mapping);
                 results.push(bad, mapping);
@@ -65,7 +65,7 @@ pub fn get_equal_temperaments(
         if results.len() >= n_results {
             return results.extract();
         }
-        bmax *= 1.5;
+        bmax *= 10.0;
     }
     // Couldn't find enough, return whatever we have
     results.extract()
