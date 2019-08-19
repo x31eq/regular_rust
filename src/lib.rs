@@ -59,6 +59,59 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     .collect()
 }
 
+/// Container to keep results ordered by badness
+/// and throw away the bad ones.
+/// Prioritized by badness: low values are preferred.
+struct PriorityQueue<T> {
+    pub cap: f64,
+    size: usize,
+    items: Vec<(f64, T)>,
+}
+
+impl <T> PriorityQueue<T> {
+    pub fn new(size: usize) -> PriorityQueue<T> {
+        PriorityQueue{ cap: 0.0, size: size, items: Vec::new() }
+    }
+
+    pub fn push(&mut self, badness: f64, item: T) {
+        if self.items.len() == self.size {
+            if badness < self.cap {
+                self.items.push((badness, item));
+                self.sort();
+                self.items.pop();
+                // There must be a better way than pushing and popping
+                // but this works.
+                if let Some((bad, item)) = self.items.pop() {
+                    self.cap = bad;
+                    self.items.push((bad, item));
+                }
+            }
+        }
+        else {
+            self.items.push((badness, item));
+            self.cap = self.cap.max(badness);
+            self.sort();
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.items.len()
+    }
+
+    fn extract(mut self) -> Vec<T> {
+        // Could return the iterator but that's
+        // harder to get the type of
+        self.items.drain(..).map(|(_, item)| item).collect()
+    }
+
+    fn sort(&mut self) {
+        self.items.sort_by(
+            |(bad1, _), (bad2, _)|
+            bad1.partial_cmp(&bad2).unwrap()
+        );
+    }
+}
+
 pub mod cangwu;
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 //! Temperament finding with Cangwu badness
 
-use super::{Cents, FactorElement};
+use super::{Cents, FactorElement, PriorityQueue};
 
 pub fn equal_temperament_badness(
         plimit: &Vec<Cents>, ek: Cents, mapping: &Vec<FactorElement>)
@@ -50,55 +50,24 @@ pub fn get_equal_temperaments(
     // Low initial guess
     let size = plimit.len() as f64;
     let mut bmax = (ek * size).min(12.0);
-    let mut results = Vec::new();
+    let mut results = PriorityQueue::new(n_results);
     // Stop search getting out of control
     for _ in 0..100 {
-        results.truncate(0);
         let mut n_notes = 1;
         while (n_notes as f64) < bmax / ek {
             for mapping in limited_mappings(n_notes, ek, bmax, &plimit) {
-                results.push(mapping);
+                let bad = equal_temperament_badness(&plimit, ek, &mapping);
+                results.push(bad, mapping);
             }
             n_notes += 1;
         }
         if results.len() >= n_results {
-            let mut dec_results = Vec::new();
-            let mut cap = 0.0;
-            for map in results {
-                let bad = equal_temperament_badness(&plimit, ek, &map);
-                if dec_results.len() == n_results {
-                    if bad < cap {
-                        dec_results.push((bad, map));
-                        dec_results.sort_by(
-                            |(bad1, _), (bad2, _)|
-                            bad1.partial_cmp(&bad2).unwrap()
-                        );
-                        dec_results.pop();
-                        if let Some((bad, map)) = dec_results.pop() {
-                            cap = bad;
-                            dec_results.push((bad, map));
-                        }
-                    }
-                }
-                else {
-                    dec_results.push((bad, map));
-                    cap = cap.max(bad);
-                    if dec_results.len() == n_results {
-                        dec_results.sort_by(
-                            |(bad1 ,_), (bad2, _)|
-                            bad1.partial_cmp(&bad2).unwrap()
-                        );
-                    }
-                }
-            }
-            return dec_results.iter()
-                .map(|(_, map)| map.clone())
-                .collect();
+            return results.extract();
         }
         bmax *= 1.5;
     }
     // Couldn't find enough, return whatever we have
-    results
+    results.extract()
 }
 
 /// All mappings for a given division of the octave (or generalization)
