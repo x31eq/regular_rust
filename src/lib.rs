@@ -94,11 +94,11 @@ impl <T> PriorityQueue<T> {
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.items.len()
     }
 
-    fn extract(mut self) -> Vec<T> {
+    pub fn extract(mut self) -> Vec<T> {
         // Could return the iterator but that's
         // harder to get the type of
         self.items.drain(..).map(|(_, item)| item).collect()
