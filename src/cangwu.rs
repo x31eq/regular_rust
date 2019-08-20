@@ -54,7 +54,7 @@ pub fn get_equal_temperaments(
     // Stop search getting out of control
     for _ in 0..10 {
         let mut n_notes = 1;
-        let mut cap = bmax.min(results.cap);
+        let mut cap = bmax;
         while (n_notes as f64) < cap / ek {
             for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
                 let bad = equal_temperament_badness(&plimit, ek, &mapping);
