@@ -67,7 +67,7 @@ pub fn get_equal_temperaments(
             return results.extract();
         }
         results = PriorityQueue::new(n_results);
-        bmax *= 10.0;
+        bmax *= 3.0;
     }
     // Couldn't find enough, return whatever we have
     results.extract()
