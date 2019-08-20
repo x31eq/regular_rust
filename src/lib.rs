@@ -113,11 +113,8 @@ impl <T> PriorityQueue<T> {
     }
 
     fn set_cap(&mut self) {
-        // There must be a better way than pushing and popping
-        // but this works.
-        if let Some((bad, item)) = self.items.pop() {
-            self.cap = bad;
-            self.items.push((bad, item));
+        if let Some((bad, _)) = self.items.last() {
+            self.cap = *bad;
         }
     }
 }
