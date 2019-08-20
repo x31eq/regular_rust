@@ -12,7 +12,7 @@ fn main() {
     println!("11-limit 1-cent badness of 31-equal: {}",
              regular::cangwu::equal_temperament_badness(
                 &limit11, 1.0, &vec![31, 49, 72, 87, 107]));
-    let big_limit = regular::PrimeLimit::new(100);
+    let big_limit = regular::PrimeLimit::new(130);
     let mappings = regular::cangwu::get_equal_temperaments(
             &big_limit.pitches, 0.3, 10);
     println!("{}-limit",
