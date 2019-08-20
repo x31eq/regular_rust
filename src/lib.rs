@@ -24,8 +24,8 @@ impl PrimeLimit {
     /// (or a slightly higher composite)
     pub fn new(n: Harmonic) -> PrimeLimit {
         let prime_numbers = primes_below(n + 1);
-        let plimit = prime_numbers.iter().cloned()
-                        .map(|p| cents(p as f64))
+        let plimit = prime_numbers.iter()
+                        .map(|p| cents(*p as f64))
                         .collect();
         PrimeLimit{ numbers: prime_numbers, pitches: plimit }
     }
