@@ -14,7 +14,7 @@ fn seven_limit() {
 
 #[test]
 fn cents50() {
-    let python_generated = vec![
+    let mut python_generated = vec![
         1200.0,
         1901.9550008653875,
         2786.3137138648344,
@@ -31,9 +31,9 @@ fn cents50() {
         6511.517705642517,
         6665.506622013165,
     ];
-    let rust_generated = PrimeLimit::new(50).pitches;
-    for (r, p) in rust_generated.into_iter()
-                    .zip(python_generated.into_iter()) {
+    let mut rust_generated = PrimeLimit::new(50).pitches;
+    for (r, p) in rust_generated.drain(..)
+                    .zip(python_generated.drain(..)) {
         assert!(near_enough_equal(r, p));
     }
 }
