@@ -70,6 +70,7 @@ pub fn get_equal_temperaments(
         bmax *= 3.0;
     }
     // Couldn't find enough, return whatever we have
+    // which I think will be an empty vector...
     results.extract()
 }
 
