@@ -63,6 +63,7 @@ pub fn get_equal_temperaments(
         if results.len() >= n_results {
             return results.extract();
         }
+        results = PriorityQueue::new(n_results);
         bmax *= 10.0;
     }
     // Couldn't find enough, return whatever we have
