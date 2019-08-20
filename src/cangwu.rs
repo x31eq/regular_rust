@@ -53,12 +53,14 @@ pub fn get_equal_temperaments(
     let mut results = PriorityQueue::new(n_results);
     // Stop search getting out of control
     for _ in 0..10 {
+        let mut n_notes = 1;
         let cap = bmax.min(results.cap);
-        for n_notes in 1 ..= ((cap / ek).floor() as FactorElement) {
+        while (n_notes as f64) < cap / ek {
             for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
                 let bad = equal_temperament_badness(&plimit, ek, &mapping);
                 results.push(bad, mapping);
             }
+            n_notes += 1;
         }
         if results.len() >= n_results {
             return results.extract();
