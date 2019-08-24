@@ -49,7 +49,7 @@ pub fn get_equal_temperaments(
 
     // Find a large enough badness cap
     let mut bmax: Cents = 0.0;
-    for size in 10..(n_results + 10) {
+    for size in 1..=n_results {
         let pmap = super::prime_mapping(
             &cent_plimit, size as FactorElement);
         let badness = equal_temperament_badness(&plimit, ek, &pmap);
