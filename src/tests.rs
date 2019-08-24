@@ -39,6 +39,13 @@ fn cents50() {
 }
 
 #[test]
+fn suboptimal_prime_mapping() {
+    let limit13 = PrimeLimit::new(13).pitches;
+    let p12 = prime_mapping(&limit13, 12);
+    assert_eq!(p12, vec![12, 19, 28, 34, 42, 44]);
+}
+
+#[test]
 fn small_primes() {
     let from_pari = vec![
         2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,

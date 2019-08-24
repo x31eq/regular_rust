@@ -37,6 +37,16 @@ impl PrimeLimit {
     }
 }
 
+/// Equal temperament mapping with each prime rounded
+/// to the nearest division
+pub fn prime_mapping(plimit: &Vec<Cents>, n_notes: FactorElement)
+        -> Vec<FactorElement> {
+    let multiplier = n_notes as Cents / 12e2;
+    plimit.iter()
+        .map(|x| (*x * multiplier).round() as FactorElement)
+        .collect()
+}
+
 /// Convert a frequency ratio to cents
 pub fn cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
