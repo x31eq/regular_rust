@@ -50,9 +50,9 @@ pub fn get_equal_temperaments(
     // Guess a badness cap
     let size = plimit.len() as f64;
     let mut bmax = ek * size;
-    let mut results = PriorityQueue::new(n_results);
     // Stop search getting out of control
     for _ in 0..10 {
+        let mut results = PriorityQueue::new(n_results);
         let mut n_notes = 1;
         let mut cap = bmax;
         while (n_notes as f64) < cap / ek {
@@ -66,12 +66,10 @@ pub fn get_equal_temperaments(
         if results.len() >= n_results {
             return results.extract();
         }
-        results = PriorityQueue::new(n_results);
         bmax *= 3.0;
     }
-    // Couldn't find enough, return whatever we have
-    // which I think will be an empty vector...
-    results.extract()
+    // Cheat the error checker and return an empty result on failure
+    Vec::new()
 }
 
 /// All mappings for a given division of the octave (or generalization)
