@@ -47,28 +47,19 @@ pub fn get_equal_temperaments(
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
-    let mut bmax = preliminary_badness(&plimit, ek, n_results);
-
-    // Stop search getting out of control
-    for _ in 0..10 {
-        let mut results = PriorityQueue::new(n_results);
-        let mut n_notes = 1;
-        let mut cap = bmax;
-        while (n_notes as f64) < cap / ek {
-            for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
-                let bad = equal_temperament_badness(&plimit, ek, &mapping);
-                results.push(bad, mapping);
-            }
-            n_notes += 1;
-            cap = cap.min(results.cap);
+    let mut results = PriorityQueue::new(n_results);
+    let mut n_notes = 1;
+    let mut cap = preliminary_badness(&plimit, ek, n_results);
+    while (n_notes as f64) < cap / ek {
+        for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
+            let bad = equal_temperament_badness(&plimit, ek, &mapping);
+            results.push(bad, mapping);
         }
-        if results.len() >= n_results {
-            return results.extract();
-        }
-        bmax *= 3.0;
+        n_notes += 1;
+        cap = cap.min(results.cap);
     }
-    // Cheat the error checker and return an empty result on failure
-    Vec::new()
+    debug_assert!(results.len() >= n_results);
+    results.extract()
 }
 
 /// High guess for the worst badness of a search.
