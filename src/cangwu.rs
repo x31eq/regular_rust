@@ -47,15 +47,7 @@ pub fn get_equal_temperaments(
         .map(|p| 12e2 * (p / cent_plimit[0]))
         .collect();
 
-    // Find a large enough badness cap
-    let mut results = PriorityQueue::new(n_results);
-    for size in 1..=(plimit.len() + n_results) {
-        let pmap = super::prime_mapping(
-            &cent_plimit, size as FactorElement);
-        let badness = equal_temperament_badness(&plimit, ek, &pmap);
-        results.push(badness, pmap);
-    }
-    let mut bmax = results.cap;
+    let mut bmax = preliminary_badness(&plimit, ek, n_results);
 
     // Stop search getting out of control
     for _ in 0..10 {
@@ -77,6 +69,28 @@ pub fn get_equal_temperaments(
     }
     // Cheat the error checker and return an empty result on failure
     Vec::new()
+}
+
+/// High guess for the worst badness of a search.
+/// Must be a reasonable cap, and at least as high
+/// as the worst result we want to keep in the real search.
+fn preliminary_badness(
+        cent_plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        -> Cents {
+    // Fixme: refactor this out
+    let plimit: Vec<Cents> = cent_plimit.into_iter()
+        .map(|p| 12e2 * (p / cent_plimit[0]))
+        .collect();
+
+    // Find a large enough badness cap
+    let mut results = PriorityQueue::new(n_results);
+    for size in 1..=(plimit.len() + n_results) {
+        let pmap = super::prime_mapping(
+            &cent_plimit, size as FactorElement);
+        let badness = equal_temperament_badness(&plimit, ek, &pmap);
+        results.push(badness, pmap);
+    }
+    results.cap
 }
 
 /// All mappings for a given division of the octave (or generalization)
