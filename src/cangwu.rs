@@ -48,13 +48,14 @@ pub fn get_equal_temperaments(
         .collect();
 
     // Find a large enough badness cap
-    let mut bmax: Cents = 0.0;
-    for size in 1..=n_results {
+    let mut results = PriorityQueue::new(n_results);
+    for size in 1..=(plimit.len() + n_results) {
         let pmap = super::prime_mapping(
             &cent_plimit, size as FactorElement);
         let badness = equal_temperament_badness(&plimit, ek, &pmap);
-        bmax = bmax.max(badness);
+        results.push(badness, pmap);
     }
+    let mut bmax = results.cap;
 
     // Stop search getting out of control
     for _ in 0..10 {
