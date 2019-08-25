@@ -40,11 +40,11 @@ pub fn equal_temperament_badness(
 ///
 /// n_results: How many to return
 pub fn get_equal_temperaments(
-        cent_plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        plimit: &Vec<Cents>, ek: Cents, n_results: usize)
         -> Vec<Vec<FactorElement>> {
     // Stop weird things happening for non-standard units
-    let plimit: Vec<Cents> = cent_plimit.into_iter()
-        .map(|p| 12e2 * (p / cent_plimit[0]))
+    let plimit: Vec<Cents> = plimit.into_iter()
+        .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
     let mut bmax = preliminary_badness(&plimit, ek, n_results);
@@ -75,18 +75,12 @@ pub fn get_equal_temperaments(
 /// Must be a reasonable cap, and at least as high
 /// as the worst result we want to keep in the real search.
 fn preliminary_badness(
-        cent_plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        plimit: &Vec<Cents>, ek: Cents, n_results: usize)
         -> Cents {
-    // Fixme: refactor this out
-    let plimit: Vec<Cents> = cent_plimit.into_iter()
-        .map(|p| 12e2 * (p / cent_plimit[0]))
-        .collect();
-
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
     for size in 1..=(plimit.len() + n_results) {
-        let pmap = super::prime_mapping(
-            &cent_plimit, size as FactorElement);
+        let pmap = super::prime_mapping(&plimit, size as FactorElement);
         let badness = equal_temperament_badness(&plimit, ek, &pmap);
         results.push(badness, pmap);
     }

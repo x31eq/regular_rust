@@ -38,10 +38,10 @@ impl PrimeLimit {
 }
 
 /// Equal temperament mapping with each prime rounded
-/// to the nearest division
+/// to the nearest division of the equivalence interval
 pub fn prime_mapping(plimit: &Vec<Cents>, n_notes: FactorElement)
         -> Vec<FactorElement> {
-    let multiplier = n_notes as Cents / 12e2;
+    let multiplier = n_notes as Cents / plimit[0];
     plimit.iter()
         .map(|x| (*x * multiplier).round() as FactorElement)
         .collect()
