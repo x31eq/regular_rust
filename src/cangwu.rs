@@ -5,6 +5,7 @@ use super::{Cents, FactorElement, PriorityQueue};
 pub fn equal_temperament_badness(
         plimit: &Vec<Cents>, ek: Cents, mapping: &Vec<FactorElement>)
         -> Cents {
+    assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
     let plimit: Vec<f64> = plimit.into_iter()
         .map(|p| p / 12e2)
@@ -129,6 +130,7 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;
+    debug_assert!(tot2 <= lambda*square(tot)/(i as f64) + cap);
     if i == plimit.len() {
         // recursion stops here
         result.push(mapping);
