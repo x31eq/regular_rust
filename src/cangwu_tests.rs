@@ -17,7 +17,15 @@ fn expected_limited_mappings() {
     let examples = cangwu::limited_mappings(
             31, 1.0, 1e2, &limit13);
     assert_eq!(examples.len(), 2);
-    // Sorting is arbitrary but deterministic
     assert_eq!(examples[0], vec![31, 49, 72, 87, 107, 114]);
     assert_eq!(examples[1], vec![31, 49, 72, 87, 107, 115]);
+
+    let sbyte = PrimeLimit::new(127).pitches;
+    let mappings = cangwu::get_equal_temperaments(
+            &sbyte, 0.3, 10);
+    let octaves = mappings.iter()
+                        .map(|m| m[0])
+                        .collect::<Vec<_>>();
+    assert_eq!(octaves,
+               vec![62, 62, 31, 50, 50, 34, 31, 46, 60, 60]);
 }
