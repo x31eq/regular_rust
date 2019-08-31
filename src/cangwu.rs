@@ -138,6 +138,7 @@ fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
                             plimit: &Vec<Cents>,
                             mut results: &mut Vec<Vec<FactorElement>>,
                             ) {
+    assert!(mapping.len() == plimit.len());
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
