@@ -105,9 +105,11 @@ pub fn limited_mappings(n_notes: FactorElement,
     let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
     let epsilon2 = square(ek) / (1.0 + square(ek));
     let mut mapping = vec![n_notes; plimit.len()];
+    let mut results = Vec::new();
 
     more_limited_mappings(&mut mapping, 1,
-                          0.0, 0.0, cap, epsilon2, &plimit)
+                          0.0, 0.0, cap, epsilon2, &plimit, &mut results);
+    results
 }
 
 /// Helper function for limited_mappings that can't be a closure
@@ -134,8 +136,8 @@ fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
                             cap: Cents,
                             epsilon2: Cents,
                             plimit: &Vec<Cents>,
-                            ) -> Vec<Vec<FactorElement>> {
-    let mut result = Vec::new();
+                            mut results: &mut Vec<Vec<FactorElement>>,
+                            ) {
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
@@ -145,7 +147,7 @@ fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
         // Recursion stops here.
         // Clone the object to save as the one being worked on
         // keeps changing
-        result.push(mapping.clone());
+        results.push(mapping.clone());
     }
     else {
         let toti = tot * lambda / ((i as Cents) + epsilon2);
@@ -159,16 +161,12 @@ fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
             let xmax = target * (toti + deficit);
             for guess in intrange(xmin, xmax) {
                 mapping[i] = guess;
-                let results = more_limited_mappings(
+                more_limited_mappings(
                     &mut mapping, i + 1, tot, tot2,
-                    cap, epsilon2, &plimit);
-                for new_result in results {
-                    result.push(new_result.clone());
-                }
+                    cap, epsilon2, &plimit, &mut results);
             }
         }
     }
-    result
 }
 
 fn square(x: f64) -> f64 {
