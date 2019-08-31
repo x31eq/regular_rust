@@ -9,6 +9,8 @@ pub type Cents = f64;
 pub type Harmonic = u16;
 /// Member of a "val" or ratio-lattice vector
 pub type FactorElement = i32;
+/// Simplify type declarations, like types are intended for
+pub type ETMap = Vec<FactorElement>;
 
 pub struct PrimeLimit {
     /// Numbers representing partials

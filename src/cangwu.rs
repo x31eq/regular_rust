@@ -1,9 +1,9 @@
 //! Temperament finding with Cangwu badness
 
-use super::{Cents, FactorElement, PriorityQueue};
+use super::{Cents, FactorElement, ETMap, PriorityQueue};
 
 pub fn equal_temperament_badness(
-        plimit: &Vec<Cents>, ek: Cents, mapping: &Vec<FactorElement>)
+        plimit: &Vec<Cents>, ek: Cents, mapping: &ETMap)
         -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
@@ -42,7 +42,7 @@ pub fn equal_temperament_badness(
 /// n_results: How many to return
 pub fn get_equal_temperaments(
         plimit: &Vec<Cents>, ek: Cents, n_results: usize)
-        -> Vec<Vec<FactorElement>> {
+        -> Vec<ETMap> {
     // Stop weird things happening for non-standard units
     let plimit: Vec<Cents> = plimit.into_iter()
         .map(|p| 12e2 * (p / plimit[0]))
@@ -98,7 +98,7 @@ pub fn limited_mappings(n_notes: FactorElement,
                     ek: Cents,
                     bmax: Cents,
                     plimit: &Vec<Cents>,
-                    ) -> Vec<Vec<FactorElement>> {
+                    ) -> Vec<ETMap> {
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
@@ -131,14 +131,14 @@ pub fn limited_mappings(n_notes: FactorElement,
 /// plimit: sizes of prime intervals in cents
 ///
 /// results: vector to store found mappings in
-fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
+fn more_limited_mappings(mut mapping: &mut ETMap,
                             i: usize,
                             tot: Cents,
                             tot2: Cents,
                             cap: Cents,
                             epsilon2: Cents,
                             plimit: &Vec<Cents>,
-                            mut results: &mut Vec<Vec<FactorElement>>,
+                            mut results: &mut Vec<ETMap>,
                             ) {
     assert!(mapping.len() == plimit.len());
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
