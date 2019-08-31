@@ -129,6 +129,8 @@ pub fn limited_mappings(n_notes: FactorElement,
 /// epsilon2: badness parameter
 ///
 /// plimit: sizes of prime intervals in cents
+///
+/// results: vector to store found mappings in
 fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
                             i: usize,
                             tot: Cents,
