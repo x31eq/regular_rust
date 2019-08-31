@@ -104,20 +104,31 @@ pub fn limited_mappings(n_notes: FactorElement,
     let bmax = bmax / 12e2;
     let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
     let epsilon2 = square(ek) / (1.0 + square(ek));
+    let mut mapping = vec![n_notes; plimit.len()];
 
-    more_limited_mappings(vec![n_notes], 0.0, 0.0, cap, epsilon2, &plimit)
+    more_limited_mappings(&mut mapping, 1,
+                          0.0, 0.0, cap, epsilon2, &plimit)
 }
 
 /// Helper function for limited_mappings that can't be a closure
 /// because it's recursive and can't use a nested scope because
 /// functions don't do that, so may as well be at top level.
 ///
-/// mapping: the ET mapping with a new entry
+/// mapping: the ET mapping with entries found so far
+///
+/// i: the element to choose next
 ///
 /// tot: running total of w
 ///
 /// tot2: running total of w squared
-fn more_limited_mappings(mapping: Vec<FactorElement>,
+///
+/// cap: the highest badness(squared) to keep
+///
+/// epsilon2: badness parameter
+///
+/// plimit: sizes of prime intervals in cents
+fn more_limited_mappings(mut mapping: &mut Vec<FactorElement>,
+                            i: usize,
                             tot: Cents,
                             tot2: Cents,
                             cap: Cents,
@@ -125,15 +136,16 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
                             plimit: &Vec<Cents>,
                             ) -> Vec<Vec<FactorElement>> {
     let mut result = Vec::new();
-    let i = mapping.len();
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;
     debug_assert!(tot2 <= lambda*square(tot)/(i as f64) + cap);
     if i == plimit.len() {
-        // recursion stops here
-        result.push(mapping);
+        // Recursion stops here.
+        // Clone the object to save as the one being worked on
+        // keeps changing
+        result.push(mapping.clone());
     }
     else {
         let toti = tot * lambda / ((i as Cents) + epsilon2);
@@ -146,13 +158,12 @@ fn more_limited_mappings(mapping: Vec<FactorElement>,
             let xmin = target * (toti - deficit);
             let xmax = target * (toti + deficit);
             for guess in intrange(xmin, xmax) {
-                let mut next_mapping = mapping.clone();
-                next_mapping.push(guess);
+                mapping[i] = guess;
                 let results = more_limited_mappings(
-                    next_mapping, tot, tot2,
+                    &mut mapping, i + 1, tot, tot2,
                     cap, epsilon2, &plimit);
                 for new_result in results {
-                    result.push(new_result);
+                    result.push(new_result.clone());
                 }
             }
         }
