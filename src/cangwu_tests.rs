@@ -19,7 +19,10 @@ fn expected_limited_mappings() {
     assert_eq!(examples.len(), 2);
     assert_eq!(examples[0], vec![31, 49, 72, 87, 107, 114]);
     assert_eq!(examples[1], vec![31, 49, 72, 87, 107, 115]);
+}
 
+#[test]
+fn big_limit() {
     let sbyte = PrimeLimit::new(127).pitches;
     let mappings = cangwu::get_equal_temperaments(
             &sbyte, 0.3, 10);
