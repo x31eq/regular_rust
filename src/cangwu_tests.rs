@@ -34,6 +34,17 @@ fn big_limit() {
 }
 
 #[test]
+fn nonoctave() {
+    let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
+    let mappings = cangwu::get_equal_temperaments(
+        &limit.pitches, 10.0, 5);
+    let octaves = mappings.iter()
+                        .map(|m| m[0])
+                        .collect::<Vec<_>>();
+    assert_eq!(octaves, vec![7, 4, 6, 2, 9]);
+}
+
+#[test]
 fn nofives() {
     let limit = PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = cangwu::get_equal_temperaments(
