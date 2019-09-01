@@ -32,6 +32,15 @@ impl PrimeLimit {
         PrimeLimit{ numbers: prime_numbers, pitches: plimit }
     }
 
+    /// Explicit specification for non-consecutive prime limits
+    /// (with no check for numbers being prime).
+    pub fn explicit(prime_numbers: Vec<Harmonic>) -> PrimeLimit {
+        let plimit = prime_numbers.iter()
+                        .map(|p| cents(*p as f64))
+                        .collect();
+        PrimeLimit{ numbers: prime_numbers, pitches: plimit }
+    }
+
     pub fn partials(&self) -> Vec<(Harmonic, Cents)> {
         self.numbers.iter().cloned()
             .zip(self.pitches.iter().cloned())

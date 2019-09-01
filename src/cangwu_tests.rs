@@ -29,3 +29,14 @@ fn expected_limited_mappings() {
     assert_eq!(octaves,
                vec![62, 62, 31, 50, 50, 34, 31, 46, 60, 60]);
 }
+
+#[test]
+fn nofives() {
+    let limit = PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
+    let mappings = cangwu::get_equal_temperaments(
+        &limit.pitches, 1.0, 5);
+    let octaves = mappings.iter()
+                        .map(|m| m[0])
+                        .collect::<Vec<_>>();
+    assert_eq!(octaves, vec![17, 41, 9, 46, 10]);
+}
