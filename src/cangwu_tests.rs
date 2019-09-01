@@ -26,10 +26,7 @@ fn big_limit() {
     let sbyte = PrimeLimit::new(127).pitches;
     let mappings = cangwu::get_equal_temperaments(
             &sbyte, 0.3, 10);
-    let octaves = mappings.iter()
-                        .map(|m| m[0])
-                        .collect::<Vec<_>>();
-    assert_eq!(octaves,
+    assert_eq!(octaves(&mappings),
                vec![62, 62, 31, 50, 50, 34, 31, 46, 60, 60]);
 }
 
@@ -38,10 +35,7 @@ fn nonoctave() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let mappings = cangwu::get_equal_temperaments(
         &limit.pitches, 10.0, 5);
-    let octaves = mappings.iter()
-                        .map(|m| m[0])
-                        .collect::<Vec<_>>();
-    assert_eq!(octaves, vec![7, 4, 6, 2, 9]);
+    assert_eq!(octaves(&mappings), vec![7, 4, 6, 2, 9]);
 }
 
 #[test]
@@ -49,8 +43,9 @@ fn nofives() {
     let limit = PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = cangwu::get_equal_temperaments(
         &limit.pitches, 1.0, 5);
-    let octaves = mappings.iter()
-                        .map(|m| m[0])
-                        .collect::<Vec<_>>();
-    assert_eq!(octaves, vec![17, 41, 9, 46, 10]);
+    assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
+}
+
+fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
+    mappings.iter().map(|m| m[0]).collect()
 }
