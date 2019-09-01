@@ -25,11 +25,7 @@ impl PrimeLimit {
     /// given the highest prime
     /// (or a slightly higher composite)
     pub fn new(n: Harmonic) -> PrimeLimit {
-        let prime_numbers = primes_below(n + 1);
-        let plimit = prime_numbers.iter()
-                        .map(|p| cents(*p as f64))
-                        .collect();
-        PrimeLimit{ numbers: prime_numbers, pitches: plimit }
+        PrimeLimit::explicit(primes_below(n + 1))
     }
 
     /// Explicit specification for non-consecutive prime limits
