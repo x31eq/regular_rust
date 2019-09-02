@@ -153,7 +153,7 @@ fn more_limited_mappings(mut mapping: &mut ETMap,
         results.push(mapping.clone());
     }
     else {
-        let toti = tot * lambda / ((i as Cents) + epsilon2);
+        let toti = tot * lambda / ((i as f64) + epsilon2);
         let error2 = tot2 - tot * toti;
         if error2 < cap {
             let target = plimit[i];
