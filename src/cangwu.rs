@@ -36,7 +36,7 @@ pub fn equal_temperament_badness(
     bad2.sqrt() * 12e2
 }
 
-static NTHREADS: i32 = 3;
+static N_THREADS: i32 = 3;
 
 /// Get the best equal temperament mappings for the given prime limit
 ///
@@ -58,7 +58,7 @@ pub fn get_equal_temperaments(
                    = mpsc::channel();
     let mut children = Vec::new();
     let bmax = preliminary_badness(&plimit, ek, n_results);
-    for thread_id in 0..NTHREADS {
+    for thread_id in 0..N_THREADS {
         let thread_tx = tx.clone();
         // Each thread needs its one copy of this
         let plimit = plimit.clone();
@@ -75,7 +75,7 @@ pub fn get_equal_temperaments(
                     thread_results.push(bad, mapping.clone());
                     thread_tx.send(mapping).expect("Couldn't send");
                 }
-                n_notes += thread_id;
+                n_notes += N_THREADS;
                 cap = cap.min(thread_results.cap);
             }
         });
