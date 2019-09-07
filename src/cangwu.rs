@@ -1,7 +1,6 @@
 //! Temperament finding with Cangwu badness
 
-use std::sync::mpsc::{Sender, Receiver};
-use std::sync::mpsc;
+use std::sync::{RwLock, Arc};
 use std::thread;
 use super::{Cents, FactorElement, ETMap, PriorityQueue};
 
@@ -53,50 +52,35 @@ pub fn get_equal_temperaments(
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
-    let mut results = PriorityQueue::new(n_results);
-    let (tx, rx) : (Sender<ETMap>, Receiver<ETMap>)
-                   = mpsc::channel();
+    let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
     let mut children = Vec::new();
     let bmax = preliminary_badness(&plimit, ek, n_results);
     for thread_id in 0..N_THREADS {
-        let thread_tx = tx.clone();
-        // Each thread needs its one copy of this
+        let results = Arc::clone(&results);
+        // Each thread needs its own copy of this
         let plimit = plimit.clone();
         let child = thread::spawn(move || {
             let mut n_notes = 1 + thread_id;
             let mut cap = bmax;
-            // Keep a local queue to control the cap
-            let mut thread_results = PriorityQueue::new(n_results);
             while (n_notes as f64) < cap / ek {
                 for mapping in limited_mappings(
                         n_notes, ek, cap, &plimit) {
+                    let mut results = results.write().unwrap();
                     let bad = equal_temperament_badness(
                         &plimit, ek, &mapping);
-                    thread_results.push(bad, mapping.clone());
-                    thread_tx.send(mapping).expect(
-                        &format!("Couldn't send in thread {}",
-                                thread_id));
+                    results.push(bad, mapping.clone());
                 }
                 n_notes += N_THREADS;
-                cap = cap.min(thread_results.cap);
+                cap = cap.min(results.read().unwrap().cap);
             }
         });
         children.push(child);
     }
-    drop(tx);
-
-    for mapping in rx {
-        let bad = equal_temperament_badness(&plimit, ek, &mapping);
-        results.push(bad, mapping);
-        if results.len() == n_results {
-            break;
-        }
-    }
-
     for child in children {
         child.join().expect("Threading error");
     }
 
+    let mut results = results.write().expect("Couldn't extract results");
     debug_assert!(results.len() == n_results);
     results.extract()
 }
