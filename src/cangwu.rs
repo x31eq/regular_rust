@@ -35,7 +35,7 @@ pub fn equal_temperament_badness(
     bad2.sqrt() * 12e2
 }
 
-static N_THREADS: i32 = 3;
+static N_THREADS: i32 = 4;
 
 /// Get the best equal temperament mappings for the given prime limit
 ///
