@@ -73,7 +73,9 @@ pub fn get_equal_temperaments(
                     let bad = equal_temperament_badness(
                         &plimit, ek, &mapping);
                     thread_results.push(bad, mapping.clone());
-                    thread_tx.send(mapping).expect("Couldn't send");
+                    thread_tx.send(mapping).expect(
+                        &format!("Couldn't send in thread {}",
+                                thread_id));
                 }
                 n_notes += N_THREADS;
                 cap = cap.min(thread_results.cap);
