@@ -55,10 +55,10 @@ pub fn get_equal_temperaments(
     let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
     let mut children = Vec::new();
     let bmax = preliminary_badness(&plimit, ek, n_results);
+    let plimit = Arc::new(plimit);
     for thread_id in 0..N_THREADS {
         let results = Arc::clone(&results);
-        // Each thread needs its own copy of this
-        let plimit = plimit.clone();
+        let plimit = Arc::clone(&plimit);
         let child = thread::spawn(move || {
             let mut n_notes = 1 + thread_id;
             let mut cap = bmax;
