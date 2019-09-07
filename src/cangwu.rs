@@ -1,5 +1,8 @@
 //! Temperament finding with Cangwu badness
 
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
 use super::{Cents, FactorElement, ETMap, PriorityQueue};
 
 pub fn equal_temperament_badness(
@@ -33,6 +36,8 @@ pub fn equal_temperament_badness(
     bad2.sqrt() * 12e2
 }
 
+static NTHREADS: i32 = 3;
+
 /// Get the best equal temperament mappings for the given prime limit
 ///
 /// plimit: Sizes of prime harmonics in cents
@@ -49,16 +54,47 @@ pub fn get_equal_temperaments(
         .collect();
 
     let mut results = PriorityQueue::new(n_results);
-    let mut n_notes = 1;
-    let mut cap = preliminary_badness(&plimit, ek, n_results);
-    while (n_notes as f64) < cap / ek {
-        for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
-            let bad = equal_temperament_badness(&plimit, ek, &mapping);
-            results.push(bad, mapping);
-        }
-        n_notes += 1;
-        cap = cap.min(results.cap);
+    let (tx, rx) : (Sender<ETMap>, Receiver<ETMap>)
+                   = mpsc::channel();
+    let mut children = Vec::new();
+    let bmax = preliminary_badness(&plimit, ek, n_results);
+    for thread_id in 0..NTHREADS {
+        let thread_tx = tx.clone();
+        // Each thread needs its one copy of this
+        let plimit = plimit.clone();
+        let child = thread::spawn(move || {
+            let mut n_notes = 1 + thread_id;
+            let mut cap = bmax;
+            // Keep a local queue to control the cap
+            let mut thread_results = PriorityQueue::new(n_results);
+            while (n_notes as f64) < cap / ek {
+                for mapping in limited_mappings(
+                        n_notes, ek, cap, &plimit) {
+                    let bad = equal_temperament_badness(
+                        &plimit, ek, &mapping);
+                    thread_results.push(bad, mapping.clone());
+                    thread_tx.send(mapping).expect("Couldn't send");
+                }
+                n_notes += thread_id;
+                cap = cap.min(thread_results.cap);
+            }
+            drop(thread_tx);
+        });
+        children.push(child);
     }
+
+    for mapping in rx {
+        let bad = equal_temperament_badness(&plimit, ek, &mapping);
+        results.push(bad, mapping);
+        if results.len() == n_results {
+            break;
+        }
+    }
+
+    for child in children {
+        child.join().expect("Threading error");
+    }
+
     debug_assert!(results.len() == n_results);
     results.extract()
 }
