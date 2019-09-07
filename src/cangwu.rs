@@ -1,5 +1,7 @@
 //! Temperament finding with Cangwu badness
 
+use std::sync::{RwLock, Arc};
+use std::thread;
 use super::{Cents, FactorElement, ETMap, PriorityQueue};
 
 pub fn equal_temperament_badness(
@@ -33,6 +35,8 @@ pub fn equal_temperament_badness(
     bad2.sqrt() * 12e2
 }
 
+static N_THREADS: i32 = 4;
+
 /// Get the best equal temperament mappings for the given prime limit
 ///
 /// plimit: Sizes of prime harmonics in cents
@@ -48,17 +52,35 @@ pub fn get_equal_temperaments(
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
-    let mut results = PriorityQueue::new(n_results);
-    let mut n_notes = 1;
-    let mut cap = preliminary_badness(&plimit, ek, n_results);
-    while (n_notes as f64) < cap / ek {
-        for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
-            let bad = equal_temperament_badness(&plimit, ek, &mapping);
-            results.push(bad, mapping);
-        }
-        n_notes += 1;
-        cap = cap.min(results.cap);
+    let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
+    let mut children = Vec::new();
+    let bmax = preliminary_badness(&plimit, ek, n_results);
+    let plimit = Arc::new(plimit);
+    for thread_id in 0..N_THREADS {
+        let results = Arc::clone(&results);
+        let plimit = Arc::clone(&plimit);
+        let child = thread::spawn(move || {
+            let mut n_notes = 1 + thread_id;
+            let mut cap = bmax;
+            while (n_notes as f64) < cap / ek {
+                for mapping in limited_mappings(
+                        n_notes, ek, cap, &plimit) {
+                    let mut results = results.write().unwrap();
+                    let bad = equal_temperament_badness(
+                        &plimit, ek, &mapping);
+                    results.push(bad, mapping.clone());
+                }
+                n_notes += N_THREADS;
+                cap = cap.min(results.read().unwrap().cap);
+            }
+        });
+        children.push(child);
     }
+    for child in children {
+        child.join().expect("Threading error");
+    }
+
+    let mut results = results.write().expect("Couldn't extract results");
     debug_assert!(results.len() == n_results);
     results.extract()
 }
