@@ -59,7 +59,7 @@ pub fn get_equal_temperaments(
         n_notes += 1;
         cap = cap.min(results.cap);
     }
-    debug_assert!(results.len() >= n_results);
+    debug_assert!(results.len() == n_results);
     results.extract()
 }
 
