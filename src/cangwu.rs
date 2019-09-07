@@ -78,10 +78,10 @@ pub fn get_equal_temperaments(
                 n_notes += thread_id;
                 cap = cap.min(thread_results.cap);
             }
-            drop(thread_tx);
         });
         children.push(child);
     }
+    drop(tx);
 
     for mapping in rx {
         let bad = equal_temperament_badness(&plimit, ek, &mapping);
