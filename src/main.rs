@@ -1,3 +1,6 @@
+use std::io::{self, BufRead};
+use regular::PrimeLimit;
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let limit = match args.len() {
@@ -5,8 +8,13 @@ fn main() {
             format!("{} {}",
                 "Supply the number of results, badness parameter,",
                 "and prime limit as command line arguments")),
-        4 => regular::PrimeLimit::new(args[3].parse().unwrap()),
-        _ => regular::PrimeLimit::explicit(
+        4 => if args[3] == "primes".to_string() {
+                read_cents()
+            }
+            else {
+                PrimeLimit::new(args[3].parse().unwrap())
+            },
+        _ => PrimeLimit::explicit(
             args.iter().skip(3)
             .map(|m| m.parse().unwrap())
             .collect()),
@@ -16,8 +24,7 @@ fn main() {
 
     let mappings = regular::cangwu::get_equal_temperaments(
             &limit.pitches, ek, n_results);
-    println!("{}-limit",
-             limit.numbers[limit.numbers.len() - 1]);
+    println!("{}", limit.label);
     let badness = regular::cangwu::equal_temperament_badness(
                 &limit.pitches,
                 ek,
@@ -26,4 +33,12 @@ fn main() {
         println!("{:?}", et);
     }
     println!("Badness of worst in the list {:?}", badness);
+}
+
+fn read_cents() -> PrimeLimit {
+    let mut result: Vec<regular::Cents> = Vec::new();
+    for line in io::stdin().lock().lines() {
+        result.push(line.unwrap().parse().unwrap());
+    }
+    PrimeLimit::inharmonic(result)
 }

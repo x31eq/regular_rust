@@ -8,8 +8,7 @@ fn octave_cents() {
 
 #[test]
 fn seven_limit() {
-    assert_eq!(PrimeLimit::new(7).numbers,
-                vec![2, 3, 5, 7]);
+    assert_eq!(PrimeLimit::new(7).label, String::from("7-limit"));
 }
 
 #[test]

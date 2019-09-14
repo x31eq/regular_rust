@@ -13,8 +13,8 @@ pub type FactorElement = i32;
 pub type ETMap = Vec<FactorElement>;
 
 pub struct PrimeLimit {
-    /// Numbers representing partials
-    pub numbers: Vec<Harmonic>,
+    /// Something used for printing
+    pub label: String,
 
     /// Pitch of each partial in cents above the root
     pub pitches: Vec<Cents>,
@@ -34,13 +34,19 @@ impl PrimeLimit {
         let plimit = prime_numbers.iter()
                         .map(|p| cents(*p as f64))
                         .collect();
-        PrimeLimit{ numbers: prime_numbers, pitches: plimit }
+        PrimeLimit{
+            label: format!("{}-limit",
+                           prime_numbers[prime_numbers.len() - 1]),
+            pitches: plimit,
+        }
     }
 
-    pub fn partials(&self) -> Vec<(Harmonic, Cents)> {
-        self.numbers.iter().cloned()
-            .zip(self.pitches.iter().cloned())
-            .collect()
+    /// Partials specified in cents
+    pub fn inharmonic(partials: Vec<Cents>) -> PrimeLimit {
+        PrimeLimit{
+            label: String::from("inharmonic"),
+            pitches: partials,
+        }
     }
 }
 
