@@ -37,7 +37,7 @@ fn main() {
 
 fn read_cents() -> PrimeLimit {
     println!("List your partials in cents, one to a line");
-    let mut result: Vec<regular::Cents> = Vec::new();
+    let mut result = Vec::new();
     for line in io::stdin().lock().lines() {
         let text = line.unwrap();
         match text.parse() {
