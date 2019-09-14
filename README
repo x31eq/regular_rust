@@ -2,5 +2,25 @@ Rust regular temperament library
 ================================
 
 This is a re-implementation of some of my Python temperament finding
-code in Rust.  It's mostly an exercise in learning Rust, but might
-be useful one day.  Expect newbie errors for a while.
+code in Rust.  It finds equal temperaments now.  Supply the number of
+equal temperaments, the cangwu parameter (cents/octave), and the prime limit.
+
+7-limit:
+
+cargo run 5 1 7
+
+
+2.3.7-limit:
+
+cargo run 5 1 2 3 7
+
+
+11-limit as inharmonic timbre:
+
+cargo run 5 1 cents <<FIN
+1200.0
+1901.9550008653875
+2786.3137138648344
+3368.825906469125
+4151.317942364757
+FIN
