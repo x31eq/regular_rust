@@ -24,3 +24,8 @@ cargo run 5 1 cents <<FIN
 3368.825906469125
 4151.317942364757
 FIN
+
+
+Faster calculation for a big limit:
+
+cargo build --release && target/release/regular 5 0.1 257
