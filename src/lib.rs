@@ -25,7 +25,9 @@ impl PrimeLimit {
     /// given the highest prime
     /// (or a slightly higher composite)
     pub fn new(n: Harmonic) -> PrimeLimit {
-        PrimeLimit::explicit(primes_below(n + 1))
+        let mut result = PrimeLimit::explicit(primes_below(n + 1));
+        result.label = format!("{}-limit", n.to_string());
+        result
     }
 
     /// Explicit specification for non-consecutive prime limits
@@ -34,9 +36,14 @@ impl PrimeLimit {
         let plimit = prime_numbers.iter()
                         .map(|p| cents(*p as f64))
                         .collect();
+        let mut numbers = prime_numbers.iter();
+        let seed = numbers.next().unwrap().to_string();
+        let label = numbers.fold(
+            seed,
+            |result, &number| format!("{}.{}", result, number)
+        );
         PrimeLimit{
-            label: format!("{}-limit",
-                           prime_numbers[prime_numbers.len() - 1]),
+            label: format!("{}-limit", label),
             pitches: plimit,
         }
     }
@@ -44,7 +51,7 @@ impl PrimeLimit {
     /// Partials specified in cents
     pub fn inharmonic(partials: Vec<Cents>) -> PrimeLimit {
         PrimeLimit{
-            label: String::from("inharmonic"),
+            label: "inharmonic".to_string(),
             pitches: partials,
         }
     }
