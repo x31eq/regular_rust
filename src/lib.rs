@@ -90,7 +90,8 @@ impl <T> PriorityQueue<T> {
         PriorityQueue{
             cap: std::f64::INFINITY,
             size: size,
-            items: Vec::new(),
+            // over-allocate because we push before we pop
+            items: Vec::with_capacity(size + 1),
         }
     }
 

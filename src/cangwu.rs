@@ -53,7 +53,7 @@ pub fn get_equal_temperaments(
         .collect();
 
     let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
-    let mut children = Vec::new();
+    let mut children = Vec::with_capacity(N_THREADS as usize);
     let bmax = preliminary_badness(&plimit, ek, n_results);
     let plimit = Arc::new(plimit);
     for thread_id in 0..N_THREADS {
