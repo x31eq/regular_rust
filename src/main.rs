@@ -8,7 +8,7 @@ fn main() {
             format!("{} {}",
                 "Supply the number of results, badness parameter,",
                 "and prime limit as command line arguments")),
-        4 => if args[3] == "primes".to_string() {
+        4 => if args[3] == "cents".to_string() {
                 read_cents()
             }
             else {
@@ -36,9 +36,14 @@ fn main() {
 }
 
 fn read_cents() -> PrimeLimit {
+    println!("List your partials in cents, one to a line");
     let mut result: Vec<regular::Cents> = Vec::new();
     for line in io::stdin().lock().lines() {
-        result.push(line.unwrap().parse().unwrap());
+        let text = line.unwrap();
+        match text.parse() {
+            Ok(partial) => result.push(partial),
+            Err(_) => println!("Failed to parse {}", text),
+        };
     }
     PrimeLimit::inharmonic(result)
 }
