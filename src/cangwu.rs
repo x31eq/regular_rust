@@ -31,6 +31,14 @@ impl TemperamentClass {
     }
 
     pub fn complexity(&self) -> f64 {
+        let dimension = self.plimit.len();
+        let wmap = self.weighted_mapping();
+        let gram = wmap.transpose().clone() * wmap;
+        (gram.determinant() / dimension as f64).sqrt()
+            / dimension as f64
+    }
+
+    fn weighted_mapping(&self) -> DMatrix<f64> {
         let (dimension, rank) = self.melody.shape();
         assert!(dimension == self.plimit.len());
         let weighting_vec: Vec<f64> =
@@ -41,12 +49,7 @@ impl TemperamentClass {
         for _ in 1 .. rank {
             weighting.extend(weighting_vec.clone());
         }
-        let weighted_mapping = self.melody.map(|n| n as f64)
-                                .component_mul(&weighting);
-        let gram = weighted_mapping.transpose().clone()
-                    * weighted_mapping;
-        (gram.determinant() / self.plimit.len() as f64).sqrt()
-            / dimension as f64
+        self.melody.map(|n| n as f64).component_mul(&weighting)
     }
 }
 
