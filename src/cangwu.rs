@@ -30,6 +30,22 @@ impl TemperamentClass {
         TemperamentClass{ plimit, melody }
     }
 
+    pub fn badness(&self, ek: Cents) -> Cents {
+        let (dimension, rank) = self.melody.shape();
+        let ek = ek / 1200.0;
+        let epsilon = ek / (1.0 + square(ek)).sqrt();
+        let scaling = 1.0 - epsilon;
+        let m = self.weighted_mapping();
+        let offset = scaling * m.row_mean();
+        let offset_vec: Vec<f64> = offset.iter().cloned().collect();
+        let mut translation = DMatrix::from_vec(
+            rank, 1, offset_vec.clone());
+        for _ in 1 .. dimension {
+            translation.extend(offset_vec.clone());
+        }
+        rms_of_matrix(&(m - translation.transpose())) * 1200.0
+    }
+
     pub fn complexity(&self) -> f64 {
         rms_of_matrix(&self.weighted_mapping())
     }

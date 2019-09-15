@@ -2,6 +2,21 @@ use super::PrimeLimit;
 use super::cangwu;
 
 #[test]
+fn badness() {
+    let marvel_vector = vec![
+        vec![22, 35, 51, 62, 76],
+        vec![31, 49, 72, 87, 107],
+        vec![41, 65, 95, 115, 142],
+    ];
+    let limit11 = PrimeLimit::new(11);
+    let marvel = cangwu::TemperamentClass::new(
+        &limit11.pitches, &marvel_vector);
+    let badness = marvel.badness(1.0);
+    assert!(0.16948 < badness);
+    assert!(badness < 0.16949);
+}
+
+#[test]
 fn complexity() {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
@@ -14,6 +29,18 @@ fn complexity() {
     let complexity = marvel.complexity();
     assert!(0.155663 < complexity);
     assert!(complexity < 0.155664);
+}
+
+#[test]
+fn tuning() {
+    let marvel_vector = vec![
+        vec![22, 35, 51, 62, 76],
+        vec![31, 49, 72, 87, 107],
+        vec![41, 65, 95, 115, 142],
+    ];
+    let limit11 = PrimeLimit::new(11);
+    let marvel = cangwu::TemperamentClass::new(
+        &limit11.pitches, &marvel_vector);
     let expected_tuning = vec![3.96487, 17.32226, 14.05909];
     for (expected, calculated) in
             expected_tuning.iter().zip(
