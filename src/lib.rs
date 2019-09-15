@@ -41,11 +41,8 @@ impl PrimeLimit {
     }
 
     /// Partials specified in cents
-    pub fn inharmonic(partials: Vec<Cents>) -> PrimeLimit {
-        PrimeLimit{
-            label: "inharmonic".to_string(),
-            pitches: partials,
-        }
+    pub fn inharmonic(pitches: Vec<Cents>) -> PrimeLimit {
+        PrimeLimit{ label: "inharmonic".to_string(), pitches }
     }
 }
 
