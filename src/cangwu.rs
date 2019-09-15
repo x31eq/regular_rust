@@ -40,6 +40,7 @@ impl TemperamentClass {
         let offset_vec: Vec<f64> = offset.iter().cloned().collect();
         let mut translation = DMatrix::from_vec(
             rank, 1, offset_vec.clone());
+        assert!(dimension > 0);
         for _ in 1 .. dimension {
             translation.extend(offset_vec.clone());
         }
