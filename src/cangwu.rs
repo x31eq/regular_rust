@@ -1,11 +1,58 @@
 //! Temperament finding with Cangwu badness
 
+extern crate nalgebra as na;
+use na::{DMatrix, DVector};
+
 use std::sync::{RwLock, Arc};
 use std::thread;
-use super::{Cents, FactorElement, ETMap, PriorityQueue};
+use super::{Cents, FactorElement, ETMap, Tuning, PriorityQueue};
+
+
+pub struct TemperamentClass {
+    plimit: DVector<Cents>,
+    melody: DMatrix<FactorElement>,
+}
+
+impl TemperamentClass {
+    /// Upgrade vectors into a struct of nalgebra objects
+    pub fn new(plimit: &Tuning, melody: &Vec<ETMap>)
+            -> TemperamentClass {
+        let rank = melody.len();
+        let dimension = plimit.len();
+        let plimit = DVector::from_vec(plimit.clone());
+        let mut flattened = Vec::with_capacity(rank * dimension);
+        for mapping in melody.iter() {
+            for element in mapping.iter() {
+                flattened.push(*element);
+            }
+        }
+        let melody = DMatrix::from_vec(dimension, rank, flattened);
+        TemperamentClass{ plimit, melody }
+    }
+
+    pub fn complexity(&self) -> f64 {
+        let (dimension, rank) = self.melody.shape();
+        assert!(dimension == self.plimit.len());
+        let weighting_vec: Vec<f64> =
+            self.plimit.iter().map(|x| 1200.0/x).collect();
+        let mut weighting = DMatrix::from_vec(
+            dimension, 1, weighting_vec.clone());
+        assert!(rank > 0);
+        for _ in 1 .. rank {
+            weighting.extend(weighting_vec.clone());
+        }
+        let weighted_mapping = self.melody.map(|n| n as f64)
+                                .component_mul(&weighting);
+        let gram = weighted_mapping.transpose().clone()
+                    * weighted_mapping;
+        (gram.determinant() / self.plimit.len() as f64).sqrt()
+            / dimension as f64
+    }
+}
+
 
 pub fn equal_temperament_badness(
-        plimit: &Vec<Cents>, ek: Cents, mapping: &ETMap)
+        plimit: &Tuning, ek: Cents, mapping: &ETMap)
         -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
@@ -45,10 +92,10 @@ static N_THREADS: i32 = 4;
 ///
 /// n_results: How many to return
 pub fn get_equal_temperaments(
-        plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        plimit: &Tuning, ek: Cents, n_results: usize)
         -> Vec<ETMap> {
     // Stop weird things happening for non-standard units
-    let plimit: Vec<Cents> = plimit.into_iter()
+    let plimit: Tuning = plimit.into_iter()
         .map(|p| 12e2 * (p / plimit[0]))
         .collect();
 
@@ -89,7 +136,7 @@ pub fn get_equal_temperaments(
 /// Must be a reasonable cap, and at least as high
 /// as the worst result we want to keep in the real search.
 fn preliminary_badness(
-        plimit: &Vec<Cents>, ek: Cents, n_results: usize)
+        plimit: &Tuning, ek: Cents, n_results: usize)
         -> Cents {
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
@@ -119,7 +166,7 @@ fn preliminary_badness(
 pub fn limited_mappings(n_notes: FactorElement,
                     ek: Cents,
                     bmax: Cents,
-                    plimit: &Vec<Cents>,
+                    plimit: &Tuning,
                     ) -> Vec<ETMap> {
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
@@ -159,7 +206,7 @@ fn more_limited_mappings(mut mapping: &mut ETMap,
                             tot2: Cents,
                             cap: Cents,
                             epsilon2: Cents,
-                            plimit: &Vec<Cents>,
+                            plimit: &Tuning,
                             mut results: &mut Vec<ETMap>,
                             ) {
     assert!(mapping.len() == plimit.len());

@@ -2,6 +2,21 @@ use super::PrimeLimit;
 use super::cangwu;
 
 #[test]
+fn complexity() {
+    let marvel_vector = vec![
+        vec![22, 35, 51, 62, 76],
+        vec![31, 49, 72, 87, 107],
+        vec![41, 65, 95, 115, 142],
+    ];
+    let limit11 = PrimeLimit::new(11);
+    let marvel = cangwu::TemperamentClass::new(
+        &limit11.pitches, &marvel_vector);
+    let complexity = marvel.complexity();
+    assert!(0.155663 < complexity);
+    assert!(complexity < 0.155664);
+}
+
+#[test]
 fn expected_limited_mappings() {
     let limit7 = PrimeLimit::new(7).pitches;
     let examples = cangwu::limited_mappings(

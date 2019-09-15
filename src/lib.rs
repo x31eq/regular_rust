@@ -11,13 +11,14 @@ pub type Harmonic = u16;
 pub type FactorElement = i32;
 /// Simplify type declarations, like types are intended for
 pub type ETMap = Vec<FactorElement>;
+pub type Tuning = Vec<Cents>;
 
 pub struct PrimeLimit {
     /// Something used for printing
     pub label: String,
 
     /// Pitch of each partial in cents above the root
-    pub pitches: Vec<Cents>,
+    pub pitches: Tuning,
 }
 
 impl PrimeLimit {
@@ -41,7 +42,7 @@ impl PrimeLimit {
     }
 
     /// Partials specified in cents
-    pub fn inharmonic(pitches: Vec<Cents>) -> PrimeLimit {
+    pub fn inharmonic(pitches: Tuning) -> PrimeLimit {
         PrimeLimit{ label: "inharmonic".to_string(), pitches }
     }
 }
@@ -61,7 +62,7 @@ fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
-pub fn prime_mapping(plimit: &Vec<Cents>, n_notes: FactorElement)
+pub fn prime_mapping(plimit: &Tuning, n_notes: FactorElement)
         -> Vec<FactorElement> {
     let multiplier = n_notes as Cents / plimit[0];
     plimit.iter()
