@@ -49,16 +49,14 @@ impl PrimeLimit {
     }
 }
 
-fn join<T: ToString + std::fmt::Display + Copy>
-        (joiner: &str, items: &Vec<T>)
-        -> String
-{
+fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
     let joiner = joiner.to_string();
     let mut tokens = items.iter();
     let seed = tokens.next().unwrap().to_string();
     tokens.fold(
         seed,
-        |result, &item| format!("{}{}{}", result, joiner, item)
+        |result, &item|
+            format!("{}{}{}", result, joiner, item.to_string()),
     )
 }
 
