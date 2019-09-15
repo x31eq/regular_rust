@@ -50,14 +50,13 @@ impl PrimeLimit {
 }
 
 fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
-    let joiner = joiner.to_string();
-    let mut tokens = items.iter();
-    let seed = tokens.next().unwrap().to_string();
-    tokens.fold(
-        seed,
-        |result, &item|
-            format!("{}{}{}", result, joiner, item.to_string()),
-    )
+    let mut items = items.iter();
+    let mut result = items.next().unwrap().to_string();
+    for item in items {
+        result.push_str(joiner);
+        result.push_str(&item.to_string());
+    }
+    result
 }
 
 /// Equal temperament mapping with each prime rounded
