@@ -33,19 +33,11 @@ impl PrimeLimit {
     /// Explicit specification for non-consecutive prime limits
     /// (with no check for numbers being prime).
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> PrimeLimit {
-        let plimit = prime_numbers.iter()
+        let pitches = prime_numbers.iter()
                         .map(|p| cents(*p as f64))
                         .collect();
-        let mut numbers = prime_numbers.iter();
-        let seed = numbers.next().unwrap().to_string();
-        let label = numbers.fold(
-            seed,
-            |result, &number| format!("{}.{}", result, number)
-        );
-        PrimeLimit{
-            label: format!("{}-limit", label),
-            pitches: plimit,
-        }
+        let label = format!("{}-limit", join(".", &prime_numbers));
+        PrimeLimit{ label, pitches }
     }
 
     /// Partials specified in cents
@@ -55,6 +47,19 @@ impl PrimeLimit {
             pitches: partials,
         }
     }
+}
+
+fn join<T: ToString + std::fmt::Display + Copy>
+        (joiner: &str, items: &Vec<T>)
+        -> String
+{
+    let joiner = joiner.to_string();
+    let mut tokens = items.iter();
+    let seed = tokens.next().unwrap().to_string();
+    tokens.fold(
+        seed,
+        |result, &item| format!("{}{}{}", result, joiner, item)
+    )
 }
 
 /// Equal temperament mapping with each prime rounded
