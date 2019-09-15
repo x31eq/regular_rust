@@ -14,6 +14,14 @@ fn complexity() {
     let complexity = marvel.complexity();
     assert!(0.155663 < complexity);
     assert!(complexity < 0.155664);
+    let expected_tuning = vec![3.96487, 17.32226, 14.05909];
+    for (expected, calculated) in
+            expected_tuning.iter().zip(
+                marvel.optimal_tuning().into_iter()) {
+        let discrepancy = (expected - calculated).abs();
+        assert!(discrepancy < 0.00001);
+    }
+    println!("{:?}", marvel.optimal_tuning());
 }
 
 #[test]

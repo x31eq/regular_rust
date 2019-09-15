@@ -38,6 +38,15 @@ impl TemperamentClass {
             / dimension as f64
     }
 
+    /// This shouldn't really be here, but it's easy
+    pub fn optimal_tuning(&self) -> Tuning {
+        let tuning = self.weighted_mapping().pseudo_inverse(0.0)
+                .expect("No pseudoinverse")
+                .column_sum()
+            * 1200.0;
+        tuning.iter().cloned().collect()
+    }
+
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let (dimension, rank) = self.melody.shape();
         assert!(dimension == self.plimit.len());
