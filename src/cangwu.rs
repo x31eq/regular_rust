@@ -36,10 +36,9 @@ impl TemperamentClass {
 
     /// This shouldn't really be here, but it's easy
     pub fn optimal_tuning(&self) -> Tuning {
-        let tuning = self.weighted_mapping().pseudo_inverse(0.0)
-                .expect("No pseudoinverse")
-                .column_sum()
-            * 1200.0;
+        let wmap = self.weighted_mapping();
+        let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
+        let tuning = pinv.column_sum() * 1200.0;
         tuning.iter().cloned().collect()
     }
 
