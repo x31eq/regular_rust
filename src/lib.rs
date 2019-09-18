@@ -2,6 +2,9 @@
 //!
 //! Utilties for regular temperament finding
 
+extern crate nalgebra as na;
+use na::{DMatrix, DVector};
+
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -91,6 +94,102 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     })
     .collect()
 }
+
+
+pub fn hermite_normal_form(ets: &DMatrix<FactorElement>)
+        -> DMatrix<FactorElement> {
+    let mut echelon = echelon_form(ets);
+    // Workaround for borrowing restriction on nested iterators
+    let echelon_copy = echelon.clone();
+    for (col, ncol) in echelon_copy
+                        .column_iter()
+                        .enumerate()
+                        .skip(1) {
+        if let Some((row, n)) = ncol.iter().enumerate().skip(1)
+                                .find(|(_i, n)| **n != 0) {
+            assert!(*n > 0);
+            for mut scol in echelon.column_iter_mut().take(col) {
+                let m = scol[row] / *n;
+                let col_copy = DVector::from_iterator(
+                    ncol.nrows(), ncol.iter().cloned());
+                scol -= m * col_copy.clone();
+                // correct for round-towards-zero
+                if scol[row] < 0 {
+                    scol += col_copy;
+                }
+                assert!(scol[row] >= 0);
+            }
+        }
+    }
+    echelon
+}
+
+fn echelon_form(ets: &DMatrix<FactorElement>)
+        -> DMatrix<FactorElement> {
+    let (nrows, ncols) = ets.shape();
+    if nrows == 0 {
+        return ets.clone();
+    }
+    let mut working = Vec::with_capacity(ncols);
+    for row in ets.column_iter() {
+        working.push(DVector::from_iterator(
+                nrows, row.iter().cloned()));
+    }
+    DMatrix::from_columns(&echelon_rec(working, 0))
+}
+
+fn echelon_rec(mut working: Vec<DVector<FactorElement>>, row: usize)
+        -> Vec<DVector<FactorElement>> {
+    // Normalize so the first nonzero entry in each column is positive
+    for column in working.iter_mut() {
+        if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
+            if *first_non_zero < 0 {
+                *column *= -1;
+            }
+        }
+    }
+
+    if working.len() == 0 {
+        return working;
+    }
+    let nrows = working[0].len();
+
+    if row == nrows {
+        return working;
+    }
+    assert!(row < nrows);
+
+    let mut reduced = Vec::new();
+    loop {
+        for col in working.iter() {
+            if col[row] == 0 {
+                reduced.push(col.clone());
+            }
+        }
+        working.retain(|col| col[row] != 0);
+
+        if working.len() < 2 {
+            working.extend_from_slice(&echelon_rec(reduced, row + 1));
+            return working;
+        }
+
+        working.sort_unstable_by(|a, b|
+                    match a.iter().zip(b.iter())
+                            .find(|(x, y)| **x != 0 || **y != 0) {
+                        Some((p, q)) => p.cmp(q),
+                        None => std::cmp::Ordering::Equal,
+                    });
+        let mut workings = working.iter_mut();
+        let pivot = workings.next().unwrap();
+        let pivot_element = pivot[row];
+        // pivot_element must be non-zero or it would be in reduced
+        for col in workings {
+            let n = col[row] / pivot_element;
+            *col -= pivot.clone() * n;
+        }
+    }
+}
+
 
 /// Container to keep results ordered by badness
 /// and throw away the bad ones.

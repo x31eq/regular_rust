@@ -70,6 +70,20 @@ fn small_primes() {
     assert_eq!(primes_below(100), from_pari);
 }
 
+#[test]
+fn hermite_reduction() {
+    let jove_vector = vec![27, 43, 63, 76, 94,
+                        31, 49, 72, 87, 107,
+                        41, 65, 95, 115, 142];
+    let jove = DMatrix::from_vec(5, 3, jove_vector);
+    let jove_hermite = vec![1, 1, 1, 2, 2,
+                            0, 2, 1, 1, 5,
+                            0, 0, 2, 1, 0];
+    let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
+    assert!(hermite_normal_form(&jove) == jove_hermite);
+}
+
+
 fn near_enough_equal(x: f64, y: f64) -> bool {
     (x/y - 1.0).abs() < 1e-15
 }
