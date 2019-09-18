@@ -96,6 +96,10 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 }
 
 
+/// Convert the matrix to a unique column echelon form
+/// with everything as simple as possible,
+/// things positive when they can't be zero,
+/// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &DMatrix<FactorElement>)
         -> DMatrix<FactorElement> {
     let mut echelon = echelon_form(ets);
