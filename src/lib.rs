@@ -15,6 +15,7 @@ pub type FactorElement = i32;
 /// Simplify type declarations, like types are intended for
 pub type ETMap = Vec<FactorElement>;
 pub type Tuning = Vec<Cents>;
+pub type Mapping = DMatrix<FactorElement>;
 
 pub struct PrimeLimit {
     /// Something used for printing
@@ -100,8 +101,7 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// with everything as simple as possible,
 /// things positive when they can't be zero,
 /// and within the same lattice (determinant conserved)
-pub fn hermite_normal_form(ets: &DMatrix<FactorElement>)
-        -> DMatrix<FactorElement> {
+pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
     let mut echelon = echelon_form(ets);
     // Workaround for borrowing restriction on nested iterators
     let echelon_copy = echelon.clone();
@@ -128,8 +128,7 @@ pub fn hermite_normal_form(ets: &DMatrix<FactorElement>)
     echelon
 }
 
-fn echelon_form(ets: &DMatrix<FactorElement>)
-        -> DMatrix<FactorElement> {
+fn echelon_form(ets: &Mapping) -> Mapping {
     let (nrows, ncols) = ets.shape();
     if nrows == 0 {
         return ets.clone();

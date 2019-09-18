@@ -5,12 +5,12 @@ use na::{DMatrix, DVector};
 
 use std::sync::{RwLock, Arc};
 use std::thread;
-use super::{Cents, FactorElement, ETMap, Tuning, PriorityQueue};
+use super::{Cents, FactorElement, ETMap, Tuning, PriorityQueue, Mapping};
 
 
 pub struct TemperamentClass {
     plimit: DVector<Cents>,
-    melody: DMatrix<FactorElement>,
+    melody: Mapping,
 }
 
 impl TemperamentClass {
