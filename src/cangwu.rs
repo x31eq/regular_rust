@@ -15,8 +15,7 @@ pub struct TemperamentClass {
 
 impl TemperamentClass {
     /// Upgrade vectors into a struct of nalgebra objects
-    pub fn new(plimit: &Tuning, melody: &Vec<ETMap>)
-            -> TemperamentClass {
+    pub fn new(plimit: &Tuning, melody: &Vec<ETMap>) -> Self {
         let rank = melody.len();
         let dimension = plimit.len();
         let plimit = DVector::from_vec(plimit.clone());

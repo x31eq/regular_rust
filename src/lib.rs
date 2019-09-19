@@ -29,7 +29,7 @@ impl PrimeLimit {
     /// Constructor for consecutive prime limits
     /// given the highest prime
     /// (or a slightly higher composite)
-    pub fn new(n: Harmonic) -> PrimeLimit {
+    pub fn new(n: Harmonic) -> Self {
         let mut result = PrimeLimit::explicit(primes_below(n + 1));
         result.label = format!("{}-limit", n.to_string());
         result
@@ -37,7 +37,7 @@ impl PrimeLimit {
 
     /// Explicit specification for non-consecutive prime limits
     /// (with no check for numbers being prime).
-    pub fn explicit(prime_numbers: Vec<Harmonic>) -> PrimeLimit {
+    pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
         let pitches = prime_numbers.iter()
                         .map(|p| cents(*p as f64))
                         .collect();
@@ -46,7 +46,7 @@ impl PrimeLimit {
     }
 
     /// Partials specified in cents
-    pub fn inharmonic(pitches: Tuning) -> PrimeLimit {
+    pub fn inharmonic(pitches: Tuning) -> Self {
         PrimeLimit{ label: "inharmonic".to_string(), pitches }
     }
 }
