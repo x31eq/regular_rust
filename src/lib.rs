@@ -119,7 +119,7 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
                     continue;
                 }
                 // emulate flooring division
-                let m = if s < 0 { s / n } else { -((n - 1 - s) / n) };
+                let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
                 let col_copy = DVector::from_iterator(
                     ncol.nrows(), ncol.iter().cloned());
                 scol -= m * col_copy;
