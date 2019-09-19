@@ -19,12 +19,9 @@ impl TemperamentClass {
         let rank = melody.len();
         let dimension = plimit.len();
         let plimit = DVector::from_vec(plimit.clone());
-        let mut flattened = Vec::with_capacity(rank * dimension);
-        for mapping in melody.iter() {
-            for element in mapping.iter() {
-                flattened.push(*element);
-            }
-        }
+        let flattened = melody.iter()
+                            .map(|mapping| mapping.iter())
+                            .flatten().cloned().collect();
         let melody = DMatrix::from_vec(dimension, rank, flattened);
         TemperamentClass{ plimit, melody }
     }
