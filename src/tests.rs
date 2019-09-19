@@ -81,7 +81,7 @@ fn hermite_reduction() {
                             0, 0, 2, 1, 0];
     let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
     assert!(hermite_normal_form(&jove) == jove_hermite);
-    let jove_neg_hermite = vec![1, -1, 2, 2, -3,
+    let jove_neg_hermite = vec![1, -1, 0, 1, -3,
                                 0, 2, -1, 0, 5,
                                 0, 0, 2, 1, 0];
     let jove_neg_hermite = DMatrix::from_vec(
