@@ -1,6 +1,9 @@
 use super::PrimeLimit;
 use super::cangwu;
 
+extern crate nalgebra as na;
+use na::DMatrix;
+
 fn make_marvel() -> cangwu::TemperamentClass {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
@@ -26,6 +29,18 @@ fn complexity() {
     let complexity = marvel.complexity();
     assert!(0.155663 < complexity);
     assert!(complexity < 0.155664);
+}
+
+#[test]
+fn hermite() {
+    let marvel = make_marvel();
+    let marvel_hermite = vec![
+        1, 0, 0, -5, 12,
+        0, 1, 0, 2, -1,
+        0, 0, 1, 2, -3,
+    ];
+    let marvel_hermite = DMatrix::from_vec(5, 3, marvel_hermite);
+    assert!(marvel.reduced_mapping() == marvel_hermite);
 }
 
 #[test]

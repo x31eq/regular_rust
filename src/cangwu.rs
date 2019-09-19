@@ -26,6 +26,10 @@ impl TemperamentClass {
         TemperamentClass{ plimit, melody }
     }
 
+    pub fn reduced_mapping(&self) -> Mapping {
+        super::hermite_normal_form(&self.melody)
+    }
+
     pub fn badness(&self, ek: Cents) -> Cents {
         let (dimension, rank) = self.melody.shape();
         let ek = ek / 1200.0;
