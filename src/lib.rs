@@ -103,12 +103,13 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
     let mut echelon = echelon_form(ets);
-    // Workaround for borrowing restriction on nested iterators
-    let echelon_copy = echelon.clone();
-    for (col, ncol) in echelon_copy
-                        .column_iter()
-                        .enumerate()
-                        .skip(1) {
+    for col in 1 .. echelon.ncols() {
+        // The iterator can't be over echelon, because that
+        // borrows it and means the mutable iterator later
+        // won't work.  This is the only way I can work out
+        // to copy a row without borrowing it.
+        let ncol = DVector::from_iterator(
+            echelon.nrows(), echelon.column(col).iter().cloned());
         if let Some((row, n)) = ncol.iter().enumerate().skip(1)
                                 .find(|(_i, n)| **n != 0) {
             assert!(*n > 0);
