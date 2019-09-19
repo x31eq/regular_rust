@@ -110,19 +110,21 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
         // to copy a row without borrowing it.
         let ncol = DVector::from_iterator(
             echelon.nrows(), echelon.column(col).iter().cloned());
-        if let Some((row, n)) = ncol.iter().enumerate().skip(1)
-                                .find(|(_i, n)| **n != 0) {
-            assert!(*n > 0);
+        if let Some((row, &n)) = ncol.iter().enumerate().skip(1)
+                                .find(|(_i, &n)| n != 0) {
+            assert!(n > 0);
             for mut scol in echelon.column_iter_mut().take(col) {
-                let m = scol[row] / *n;
+                let s = scol[row];
+                if s == 0 {
+                    continue;
+                }
+                // emulate flooring division
+                let m = if s < 0 { s / n } else { -((n - 1 - s) / n) };
                 let col_copy = DVector::from_iterator(
                     ncol.nrows(), ncol.iter().cloned());
-                scol -= m * col_copy.clone();
-                // correct for round-towards-zero
-                if scol[row] < 0 {
-                    scol += col_copy;
-                }
+                scol -= m * col_copy;
                 assert!(scol[row] >= 0);
+                assert!(scol[row] < n);
             }
         }
     }
