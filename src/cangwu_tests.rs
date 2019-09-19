@@ -15,6 +15,17 @@ fn make_marvel() -> cangwu::TemperamentClass {
         &limit11.pitches, &marvel_vector)
 }
 
+fn make_jove() -> cangwu::TemperamentClass {
+    let jove_vector = vec![
+        vec![27, 43, 63, 76, 94],
+        vec![31, 49, 72, 87, 107],
+        vec![41, 65, 95, 115, 142],
+    ];
+    let limit11 = PrimeLimit::new(11);
+    cangwu::TemperamentClass::new(
+        &limit11.pitches, &jove_vector)
+}
+
 #[test]
 fn badness() {
     let marvel = make_marvel();
@@ -41,6 +52,13 @@ fn hermite() {
     ];
     let marvel_hermite = DMatrix::from_vec(5, 3, marvel_hermite);
     assert!(marvel.reduced_mapping() == marvel_hermite);
+
+    let jove = make_jove();
+    let jove_hermite = vec![1, 1, 1, 2, 2,
+                            0, 2, 1, 1, 5,
+                            0, 0, 2, 1, 0];
+    let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
+    assert!(jove.reduced_mapping() == jove_hermite);
 }
 
 #[test]
