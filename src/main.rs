@@ -28,12 +28,15 @@ fn main() {
     for mapping in mappings.iter() {
         rts.push(vec![mapping.clone()]);
     }
-    println!("{:?}", rts[..n_results].to_vec());
     for _rank in 2 .. limit.pitches.len() {
-        rts = regular::cangwu::higher_rank_search(
+        let new_rts = regular::cangwu::higher_rank_search(
             &limit.pitches, &mappings, &rts, ek, n_results + 10);
-        println!("{:?}", rts[..n_results].to_vec());
+        rts.split_off(n_results);
+        println!("{:?}", rts);
+        rts = new_rts;
     }
+    rts.split_off(n_results);
+    println!("{:?}", rts);
 }
 
 fn read_cents() -> PrimeLimit {
