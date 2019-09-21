@@ -29,6 +29,6 @@ cargo run 5 1 cents <<FIN
 FIN
 
 
-Faster calculation for a big limit (currently only up to rank 11 or something):
+Faster calculation for a big limit (currently incomplete results):
 
 cargo build --release && target/release/regular 5 0.1 257

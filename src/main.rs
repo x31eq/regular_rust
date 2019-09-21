@@ -34,7 +34,9 @@ fn main() {
             + if rank == dimension - 1 { 0 } else { 10 };
         let new_rts = regular::cangwu::higher_rank_search(
             &limit.pitches, &mappings, &rts, ek, eff_n_results);
-        rts.split_off(n_results);
+        if rts.len() > n_results {
+            rts.split_off(n_results);
+        }
         println!("{:?}", rts);
         rts = new_rts;
     }
