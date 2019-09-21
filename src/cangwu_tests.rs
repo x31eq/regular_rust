@@ -62,6 +62,15 @@ fn hermite() {
 }
 
 #[test]
+fn key() {
+    assert!(make_marvel().key()
+        == vec![1, 0, 0, -5, 12, 1, 0, 2, -1, 1, 2, -3]);
+
+    assert!(make_jove().key()
+        == vec![1, 1, 1, 2, 2, 2, 1, 1, 5 ,2, 1, 0]);
+}
+
+#[test]
 fn tuning() {
     let marvel = make_marvel();
     let expected_tuning = vec![3.96487, 17.32226, 14.05909];

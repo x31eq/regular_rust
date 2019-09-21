@@ -26,6 +26,25 @@ impl TemperamentClass {
         TemperamentClass{ plimit, melody }
     }
 
+    /// Unique identifier for the mapping
+    /// (hermite normal form flattened and
+    /// with always-zero entries removed)
+    pub fn key(&self) -> ETMap {
+        let hermite = self.reduced_mapping();
+        // I can't find a simpler way to iterate over
+        // the columns of a matrix and build a std::Vec
+        let (rows, cols) = hermite.shape();
+        let expected_size = rows * cols - cols * (cols - 1) / 2;
+        let mut result: ETMap = Vec::with_capacity(expected_size);
+        for (i, col) in hermite.column_iter().enumerate() {
+            for &n in col.iter().skip(i) {
+                result.push(n);
+            }
+        }
+        assert!(result.len() == expected_size);
+        result
+    }
+
     pub fn reduced_mapping(&self) -> Mapping {
         super::hermite_normal_form(&self.melody)
     }
