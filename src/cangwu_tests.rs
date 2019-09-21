@@ -63,23 +63,23 @@ fn hermite() {
         0, 0, 1, 2, -3,
     ];
     let marvel_hermite = DMatrix::from_vec(5, 3, marvel_hermite);
-    assert!(marvel.reduced_mapping() == marvel_hermite);
+    assert_eq!(marvel.reduced_mapping(), marvel_hermite);
 
     let jove = make_jove();
     let jove_hermite = vec![1, 1, 1, 2, 2,
                             0, 2, 1, 1, 5,
                             0, 0, 2, 1, 0];
     let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
-    assert!(jove.reduced_mapping() == jove_hermite);
+    assert_eq!(jove.reduced_mapping(), jove_hermite);
 }
 
 #[test]
 fn key() {
-    assert!(make_marvel().key()
-        == vec![1, 0, 0, -5, 12, 1, 0, 2, -1, 1, 2, -3]);
+    assert_eq!(make_marvel().key(),
+        vec![1, 0, 0, -5, 12, 1, 0, 2, -1, 1, 2, -3]);
 
-    assert!(make_jove().key()
-        == vec![1, 1, 1, 2, 2, 2, 1, 1, 5 ,2, 1, 0]);
+    assert_eq!(make_jove().key(),
+        vec![1, 1, 1, 2, 2, 2, 1, 1, 5 ,2, 1, 0]);
 }
 
 #[test]
@@ -97,8 +97,9 @@ fn mystery() {
     let limit13 = PrimeLimit::new(13);
     let mystery = cangwu::TemperamentClass::new(
         &limit13.pitches, &mystery_vector);
-    assert!(mystery.key()
-            == vec![29, 46, 0, 14, 33, 40, 0, 1, 1, 1, 1]);
+    assert_eq!(mystery.key(),
+            vec![29, 46, 0, 14, 33, 40, 0, 1, 1, 1, 1]);
+    assert_eq!(mystery.rank(), 2);
     assert!(4.83894 < mystery.complexity());
     assert!(mystery.complexity() < 4.83895);
     assert!(5.43717 < mystery.badness(1.0));
