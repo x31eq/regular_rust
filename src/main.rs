@@ -28,14 +28,10 @@ fn main() {
     for mapping in mappings.iter() {
         ets.push(vec![mapping.clone()]);
     }
-    let limited: Vec<Vec<regular::ETMap>> =
-             ets.iter().take(n_results).cloned().collect();
-    println!("{:?}", limited);
+    println!("{:?}", ets[..n_results].to_vec());
     let rts = regular::cangwu::higher_rank_search(
         &limit.pitches, &mappings, &ets, ek, n_results + 10);
-    let limited: Vec<Vec<regular::ETMap>> =
-             rts.iter().take(n_results).cloned().collect();
-    println!("{:?}", limited);
+    println!("{:?}", rts[..n_results].to_vec());
 }
 
 fn read_cents() -> PrimeLimit {
