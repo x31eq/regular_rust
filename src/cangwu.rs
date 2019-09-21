@@ -96,7 +96,7 @@ impl TemperamentClass {
 fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
     let gram = a.transpose().clone() * a;
-    (gram.determinant() / dimension).sqrt() / dimension
+    ((gram / dimension).determinant()).sqrt()
 }
 
 
