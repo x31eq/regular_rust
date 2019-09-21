@@ -24,14 +24,16 @@ fn main() {
 
     let mappings = regular::cangwu::get_equal_temperaments(
             &limit.pitches, ek, n_results + 10);
-    let mut ets = Vec::with_capacity(mappings.len());
+    let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
-        ets.push(vec![mapping.clone()]);
+        rts.push(vec![mapping.clone()]);
     }
-    println!("{:?}", ets[..n_results].to_vec());
-    let rts = regular::cangwu::higher_rank_search(
-        &limit.pitches, &mappings, &ets, ek, n_results + 10);
     println!("{:?}", rts[..n_results].to_vec());
+    for _rank in 2 .. limit.pitches.len() {
+        rts = regular::cangwu::higher_rank_search(
+            &limit.pitches, &mappings, &rts, ek, n_results + 10);
+        println!("{:?}", rts[..n_results].to_vec());
+    }
 }
 
 fn read_cents() -> PrimeLimit {
