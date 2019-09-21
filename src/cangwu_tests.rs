@@ -83,6 +83,12 @@ fn key() {
 }
 
 #[test]
+fn rank() {
+    assert_eq!(make_marvel().rank(), 3);
+    assert_eq!(make_jove().rank(), 3);
+}
+
+#[test]
 fn mystery() {
     let mystery_vector = vec![
         vec![29, 46, 67, 81, 100, 107],
