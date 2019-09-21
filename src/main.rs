@@ -23,15 +23,19 @@ fn main() {
     let ek: regular::Cents = args[2].parse().unwrap();
 
     let mappings = regular::cangwu::get_equal_temperaments(
-            &limit.pitches, ek, n_results);
+            &limit.pitches, ek, n_results + 10);
     let mut ets = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
         ets.push(vec![mapping.clone()]);
     }
-    println!("{:?}", ets);
+    let limited: Vec<Vec<regular::ETMap>> =
+             ets.iter().take(n_results).cloned().collect();
+    println!("{:?}", limited);
     let rts = regular::cangwu::higher_rank_search(
-        &limit.pitches, &mappings, &ets, ek, n_results);
-    println!("{:?}", rts);
+        &limit.pitches, &mappings, &ets, ek, n_results + 10);
+    let limited: Vec<Vec<regular::ETMap>> =
+             rts.iter().take(n_results).cloned().collect();
+    println!("{:?}", limited);
 }
 
 fn read_cents() -> PrimeLimit {
