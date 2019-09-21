@@ -29,17 +29,29 @@ fn make_jove() -> cangwu::TemperamentClass {
 #[test]
 fn badness() {
     let marvel = make_marvel();
-    let badness = marvel.badness(1.0);
-    assert!(0.16948 < badness);
-    assert!(badness < 0.16949);
+    assert!(0.16948 < marvel.badness(1.0));
+    assert!(marvel.badness(1.0)< 0.16949);
+    assert!(0.06882 < marvel.badness(0.1));
+    assert!(marvel.badness(0.1)< 0.06883);
+
+    let jove = make_jove();
+    assert!(0.18269 < jove.badness(1.0));
+    assert!(jove.badness(1.0) < 0.18270);
+    assert!(0.05606 < jove.badness(0.1));
+    assert!(jove.badness(0.1) < 0.05607);
 }
 
 #[test]
 fn complexity() {
     let marvel = make_marvel();
-    let complexity = marvel.complexity();
-    assert!(0.155663 < complexity);
-    assert!(complexity < 0.155664);
+    assert!(0.155663 < marvel.complexity());
+    assert!(marvel.complexity() < 0.155664);
+
+    let jove = make_jove();
+    println!("Jove complexity: {}", jove.complexity());
+    // Less precision here because it disagrees with Python.
+    assert!(0.17475 < jove.complexity());
+    assert!(jove.complexity() < 0.174755);
 }
 
 #[test]
