@@ -2,8 +2,11 @@ Rust regular temperament library
 ================================
 
 This is a re-implementation of some of my Python temperament finding
-code in Rust.  It finds equal temperaments now.  Supply the number of
-equal temperaments, the cangwu parameter (cents/octave), and the prime limit.
+code in Rust.  It finds regular temperaments and shows the results
+in a machine-readable format awaiting a machine to read it.
+Supply the number of results for each rank, the cangwu parameter
+(cents/octave), and the prime limit.
+
 
 7-limit:
 
@@ -26,6 +29,6 @@ cargo run 5 1 cents <<FIN
 FIN
 
 
-Faster calculation for a big limit:
+Faster calculation for a big limit (currently only up to rank 11 or something):
 
 cargo build --release && target/release/regular 5 0.1 257
