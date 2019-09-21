@@ -28,14 +28,16 @@ fn main() {
     for mapping in mappings.iter() {
         rts.push(vec![mapping.clone()]);
     }
-    for _rank in 2 .. limit.pitches.len() {
+    let dimension = limit.pitches.len();
+    for rank in 2 .. dimension {
+        let eff_n_results = n_results
+            + if rank == dimension - 1 { 0 } else { 10 };
         let new_rts = regular::cangwu::higher_rank_search(
-            &limit.pitches, &mappings, &rts, ek, n_results + 10);
+            &limit.pitches, &mappings, &rts, ek, eff_n_results);
         rts.split_off(n_results);
         println!("{:?}", rts);
         rts = new_rts;
     }
-    rts.split_off(n_results);
     println!("{:?}", rts);
 }
 
