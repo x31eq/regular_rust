@@ -71,6 +71,22 @@ fn key() {
 }
 
 #[test]
+fn mystery() {
+    let mystery_vector = vec![
+        vec![29, 46, 67, 81, 100, 107],
+        vec![58, 92, 135, 163, 201, 215],
+    ];
+    let limit13 = PrimeLimit::new(13);
+    let mystery = cangwu::TemperamentClass::new(
+        &limit13.pitches, &mystery_vector);
+    assert!(mystery.key()
+            == vec![29, 46, 0, 14, 33, 40, 0, 1, 1, 1, 1]);
+    println!("Actual badness: {}", mystery.badness(1.0));
+    assert!(5.43717 < mystery.badness(1.0));
+    assert!(mystery.badness(1.0) < 5.43718);
+}
+
+#[test]
 fn tuning() {
     let marvel = make_marvel();
     let expected_tuning = vec![3.96487, 17.32226, 14.05909];
