@@ -29,10 +29,19 @@ fn main() {
                 &limit.pitches,
                 ek,
                 &mappings[mappings.len() - 1]);
-    for et in mappings {
+    for et in mappings.iter() {
         println!("{:?}", et);
     }
     println!("Badness of worst in the list {:?}", badness);
+    let mut ets = Vec::with_capacity(mappings.len());
+    for mapping in mappings.iter() {
+        ets.push(vec![mapping.clone()]);
+    }
+    let rts = regular::cangwu::higher_rank_search(
+        &limit.pitches, &mappings, &ets, ek, n_results);
+    for rt in rts {
+        println!("{:?}", rt);
+    }
 }
 
 fn read_cents() -> PrimeLimit {

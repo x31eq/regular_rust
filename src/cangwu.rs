@@ -3,10 +3,12 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
+use std::collections::HashSet;
 use std::sync::{RwLock, Arc};
 use std::thread;
 use super::{Cents, FactorElement, ETMap, Tuning, PriorityQueue, Mapping};
 
+static N_THREADS: i32 = 4;
 
 pub struct TemperamentClass {
     plimit: DVector<Cents>,
@@ -24,6 +26,17 @@ impl TemperamentClass {
                             .flatten().cloned().collect();
         let melody = DMatrix::from_vec(dimension, rank, flattened);
         TemperamentClass{ plimit, melody }
+    }
+
+    /// Actual rank of the mapping matrix
+    pub fn rank(&self) -> usize {
+        let mut result = 0;
+        for col in self.reduced_mapping().column_iter() {
+            if col.iter().any(|&x| x != 0) {
+                result += 1;
+            }
+        }
+        result
     }
 
     /// Unique identifier for the mapping
@@ -93,45 +106,42 @@ impl TemperamentClass {
     }
 }
 
+pub fn higher_rank_search(
+            plimit: &Tuning,
+            ets: &Vec<ETMap>,
+            rts: &Vec<Vec<ETMap>>,
+            ek: Cents,
+            n_results: usize)
+        -> Vec<Vec<ETMap>> {
+    let mut results = PriorityQueue::new(n_results);
+    let mut cache = HashSet::new();
+    for rt in rts {
+        let rank = rt.len() + 1;
+        for et in ets {
+            let mut new_rt = rt.clone();
+            new_rt.push(et.clone());
+            let rt_obj = TemperamentClass::new(&plimit, &new_rt);
+            if rt_obj.rank() == rank {
+                let badness = rt_obj.badness(ek);
+                if badness < results.cap {
+                    let key = rt_obj.key();
+                    if !cache.contains(&key) {
+                        cache.insert(key);
+                        results.push(badness, new_rt);
+                    }
+                }
+            }
+        }
+    }
+    results.extract()
+}
+
 fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
     let gram = a.transpose().clone() * a;
     ((gram / dimension).determinant()).sqrt()
 }
 
-
-pub fn equal_temperament_badness(
-        plimit: &Tuning, ek: Cents, mapping: &ETMap)
-        -> Cents {
-    assert_eq!(plimit.len(), mapping.len());
-    // Put the primes in terms of octaves
-    let plimit: Vec<f64> = plimit.into_iter()
-        .map(|p| p / 12e2)
-        .collect();
-    // Get a dimensionless ek
-    let ek = ek / 12e2;
-    let epsilon = ek / (1.0 + square(ek)).sqrt();
-    let weighted_mapping: Vec<f64> = mapping.iter()
-        .zip(plimit.into_iter())
-        .map(|(m, p)| (*m as f64) / p)
-        .collect();
-    let mean = |items: &Vec<f64>| {
-        let mut sum = 0.0;
-        for item in items.into_iter() {
-            sum += item;
-        }
-        sum / (items.len() as f64)
-    };
-    let mean_w = mean(&weighted_mapping);
-    let translation = (1.0 - epsilon) * mean_w;
-    let bad2 = mean(&weighted_mapping.into_iter()
-        .map(|x| x - translation)
-        .map(square)
-        .collect());
-    bad2.sqrt() * 12e2
-}
-
-static N_THREADS: i32 = 4;
 
 /// Get the best equal temperament mappings for the given prime limit
 ///
@@ -179,6 +189,37 @@ pub fn get_equal_temperaments(
     let mut results = results.write().expect("Couldn't extract results");
     debug_assert!(results.len() == n_results);
     results.extract()
+}
+
+pub fn equal_temperament_badness(
+        plimit: &Tuning, ek: Cents, mapping: &ETMap)
+        -> Cents {
+    assert_eq!(plimit.len(), mapping.len());
+    // Put the primes in terms of octaves
+    let plimit: Vec<f64> = plimit.into_iter()
+        .map(|p| p / 12e2)
+        .collect();
+    // Get a dimensionless ek
+    let ek = ek / 12e2;
+    let epsilon = ek / (1.0 + square(ek)).sqrt();
+    let weighted_mapping: Vec<f64> = mapping.iter()
+        .zip(plimit.into_iter())
+        .map(|(m, p)| (*m as f64) / p)
+        .collect();
+    let mean = |items: &Vec<f64>| {
+        let mut sum = 0.0;
+        for item in items.into_iter() {
+            sum += item;
+        }
+        sum / (items.len() as f64)
+    };
+    let mean_w = mean(&weighted_mapping);
+    let translation = (1.0 - epsilon) * mean_w;
+    let bad2 = mean(&weighted_mapping.into_iter()
+        .map(|x| x - translation)
+        .map(square)
+        .collect());
+    bad2.sqrt() * 12e2
 }
 
 /// High guess for the worst badness of a search.
