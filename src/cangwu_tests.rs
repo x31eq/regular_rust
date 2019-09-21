@@ -81,9 +81,12 @@ fn mystery() {
         &limit13.pitches, &mystery_vector);
     assert!(mystery.key()
             == vec![29, 46, 0, 14, 33, 40, 0, 1, 1, 1, 1]);
-    println!("Actual badness: {}", mystery.badness(1.0));
+    assert!(4.83894 < mystery.complexity());
+    assert!(mystery.complexity() < 4.83895);
     assert!(5.43717 < mystery.badness(1.0));
     assert!(mystery.badness(1.0) < 5.43718);
+    assert!(2.52619 < mystery.badness(0.1));
+    assert!(mystery.badness(0.1) < 2.52620);
 }
 
 #[test]
