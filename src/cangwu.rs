@@ -107,32 +107,60 @@ impl TemperamentClass {
 }
 
 pub fn higher_rank_search(
-            plimit: &Tuning,
-            ets: &Vec<ETMap>,
-            rts: &Vec<Vec<ETMap>>,
+            plimit: &'static Tuning,
+            ets: &'static Vec<ETMap>,
+            rts: &'static Vec<Vec<ETMap>>,
             ek: Cents,
             n_results: usize)
         -> Vec<Vec<ETMap>> {
-    let mut results = PriorityQueue::new(n_results);
-    let mut cache = HashSet::new();
-    for rt in rts {
-        let rank = rt.len() + 1;
-        for et in ets {
-            let mut new_rt = rt.clone();
-            new_rt.push(et.clone());
-            let rt_obj = TemperamentClass::new(&plimit, &new_rt);
-            if rt_obj.rank() == rank {
-                let badness = rt_obj.badness(ek);
-                if badness < results.cap {
-                    let key = rt_obj.key();
-                    if !cache.contains(&key) {
-                        cache.insert(key);
-                        results.push(badness, new_rt);
+    let results = PriorityQueue::new(n_results);
+    let cache = HashSet::new();
+    // I can't work out a shared lock, so enforce the order!
+    let results = Arc::new(RwLock::new(results));
+    let cache = Arc::new(RwLock::new(cache));
+    let mut children = Vec::with_capacity(N_THREADS as usize);
+    let plimit = Arc::new(plimit);
+    let ets = Arc::new(ets);
+    let rts = Arc::new(rts);
+    for thread_id in 0..N_THREADS {
+        let results_rw = Arc::clone(&results);
+        let cache_rw = Arc::clone(&cache);
+        let plimit = Arc::clone(&plimit);
+        let ets = Arc::clone(&ets);
+        let rts = Arc::clone(&rts);
+        let child = thread::spawn(move || {
+            for rt in rts.iter()
+                    .skip(thread_id as usize)
+                    .step_by(N_THREADS as usize) {
+                let rank = rt.len() + 1;
+                for et in ets.iter() {
+                    let mut new_rt = rt.clone();
+                    new_rt.push(et.clone());
+                    let rt_obj = TemperamentClass::new(&plimit, &new_rt);
+                    if rt_obj.rank() == rank {
+                        let badness = rt_obj.badness(ek);
+                        let results = results_rw.write().unwrap();
+                        let cache = cache_rw.write().unwrap();
+                        if badness < results.cap {
+                            let key = rt_obj.key();
+                            if !cache.contains(&key) {
+                                let mut results = results_rw.write().unwrap();
+                                let mut cache = cache_rw.write().unwrap();
+                                cache.insert(key);
+                                results.push(badness, new_rt);
+                            }
+                        }
                     }
                 }
             }
-        }
+        });
+        children.push(child);
     }
+    for child in children {
+        child.join().expect("Threading error");
+    }
+
+    let mut results = results.write().expect("Couldn't extract results");
     results.extract()
 }
 
