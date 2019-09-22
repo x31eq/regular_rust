@@ -304,7 +304,8 @@ fn more_limited_mappings(mut mapping: &mut ETMap,
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;
-    debug_assert!(tot2 <= lambda*square(tot)/(i as f64) + cap + 1e-10);
+    debug_assert!(tot2 * (1.0 - 1e-10)
+                    <= lambda*square(tot)/(i as f64) + cap);
     if i == plimit.len() {
         // Recursion stops here.
         // Clone the object to save as the one being worked on
