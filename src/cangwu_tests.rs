@@ -48,7 +48,6 @@ fn complexity() {
     assert!(marvel.complexity() < 0.155664);
 
     let jove = make_jove();
-    println!("Jove complexity: {}", jove.complexity());
     // Less precision here because it disagrees with Python.
     assert!(0.17475 < jove.complexity());
     assert!(jove.complexity() < 0.174755);
@@ -118,7 +117,6 @@ fn tuning() {
         let discrepancy = (expected - calculated).abs();
         assert!(discrepancy < 0.00001);
     }
-    println!("{:?}", marvel.optimal_tuning());
 }
 
 #[test]
