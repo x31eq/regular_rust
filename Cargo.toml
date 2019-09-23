@@ -8,5 +8,5 @@ edition = "2018"
 nalgebra = "0.18.1"
 
 [profile.release]
-opt-level = 's'
+opt-level = 3
 lto = true
