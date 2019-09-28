@@ -17,10 +17,10 @@ pub struct TemperamentClass {
 
 impl TemperamentClass {
     /// Upgrade vectors into a struct of nalgebra objects
-    pub fn new(plimit: &Tuning, melody: &Vec<ETMap>) -> Self {
+    pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
         let rank = melody.len();
         let dimension = plimit.len();
-        let plimit = DVector::from_vec(plimit.clone());
+        let plimit = DVector::from_vec(plimit.to_vec());
         let flattened = melody
             .iter()
             .map(|mapping| mapping.iter())
@@ -104,14 +104,14 @@ impl TemperamentClass {
         for _ in 1..rank {
             weighting.extend(weighting_vec.clone());
         }
-        self.melody.map(|n| n as f64).component_mul(&weighting)
+        self.melody.map(f64::from).component_mul(&weighting)
     }
 }
 
 pub fn higher_rank_search(
-    plimit: &Tuning,
-    ets: &Vec<ETMap>,
-    rts: &Vec<Vec<ETMap>>,
+    plimit: &[Cents],
+    ets: &[ETMap],
+    rts: &[Vec<ETMap>],
     ek: Cents,
     n_results: usize,
 ) -> Vec<Vec<ETMap>> {
@@ -152,13 +152,13 @@ fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
 ///
 /// n_results: How many to return
 pub fn get_equal_temperaments(
-    plimit: &Tuning,
+    plimit: &[Cents],
     ek: Cents,
     n_results: usize,
 ) -> Vec<ETMap> {
     // Stop weird things happening for non-standard units
     let plimit: Tuning =
-        plimit.into_iter().map(|p| 12e2 * (p / plimit[0])).collect();
+        plimit.iter().map(|p| 12e2 * (p / plimit[0])).collect();
 
     let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
     let mut children = Vec::with_capacity(N_THREADS as usize);
@@ -170,7 +170,7 @@ pub fn get_equal_temperaments(
         let child = thread::spawn(move || {
             let mut n_notes = 1 + thread_id;
             let mut cap = bmax;
-            while (n_notes as f64) < cap / ek {
+            while (f64::from(n_notes)) < cap / ek {
                 for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
                     let mut results = results.write().unwrap();
                     let bad =
@@ -193,24 +193,24 @@ pub fn get_equal_temperaments(
 }
 
 pub fn equal_temperament_badness(
-    plimit: &Tuning,
+    plimit: &[Cents],
     ek: Cents,
-    mapping: &ETMap,
+    mapping: &[FactorElement],
 ) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
-    let plimit: Vec<f64> = plimit.into_iter().map(|p| p / 12e2).collect();
+    let plimit: Vec<f64> = plimit.iter().map(|p| p / 12e2).collect();
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
     let weighted_mapping: Vec<f64> = mapping
         .iter()
         .zip(plimit.into_iter())
-        .map(|(m, p)| (*m as f64) / p)
+        .map(|(&m, p)| f64::from(m) / p)
         .collect();
     let mean = |items: &Vec<f64>| {
         let mut sum = 0.0;
-        for item in items.into_iter() {
+        for item in items.iter() {
             sum += item;
         }
         sum / (items.len() as f64)
@@ -231,7 +231,7 @@ pub fn equal_temperament_badness(
 /// Must be a reasonable cap, and at least as high
 /// as the worst result we want to keep in the real search.
 fn preliminary_badness(
-    plimit: &Tuning,
+    plimit: &[Cents],
     ek: Cents,
     n_results: usize,
 ) -> Cents {
@@ -264,7 +264,7 @@ pub fn limited_mappings(
     n_notes: FactorElement,
     ek: Cents,
     bmax: Cents,
-    plimit: &Tuning,
+    plimit: &[Cents],
 ) -> Vec<ETMap> {
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
@@ -313,11 +313,11 @@ fn more_limited_mappings(
     tot2: Cents,
     cap: Cents,
     epsilon2: Cents,
-    plimit: &Tuning,
+    plimit: &[Cents],
     mut results: &mut Vec<ETMap>,
 ) {
     assert!(mapping.len() == plimit.len());
-    let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
+    let weighted_size = f64::from(mapping[i - 1]) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;

@@ -10,7 +10,7 @@ fn main() {
             "and prime limit as command line arguments"
         )),
         4 => {
-            if args[3] == "cents".to_string() {
+            if args[3] == "cents" {
                 read_cents()
             } else {
                 PrimeLimit::new(args[3].parse().unwrap())

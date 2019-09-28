@@ -39,7 +39,7 @@ impl PrimeLimit {
     /// (with no check for numbers being prime).
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
         let pitches =
-            prime_numbers.iter().map(|p| cents(*p as f64)).collect();
+            prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
         PrimeLimit { label, pitches }
     }
@@ -53,7 +53,7 @@ impl PrimeLimit {
     }
 }
 
-fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
+fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
     let mut items = items.iter();
     let mut result = match items.next() {
         Some(item) => item.to_string(),
@@ -69,10 +69,10 @@ fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
 pub fn prime_mapping(
-    plimit: &Tuning,
+    plimit: &[Cents],
     n_notes: FactorElement,
 ) -> Vec<FactorElement> {
-    let multiplier = n_notes as Cents / plimit[0];
+    let multiplier = Cents::from(n_notes) / plimit[0];
     plimit
         .iter()
         .map(|x| (*x * multiplier).round() as FactorElement)
@@ -169,7 +169,7 @@ fn echelon_rec(
         }
     }
 
-    if working.len() == 0 {
+    if working.is_empty() {
         return working;
     }
     let nrows = working[0].len();
@@ -223,7 +223,7 @@ impl<T> PriorityQueue<T> {
     pub fn new(size: usize) -> PriorityQueue<T> {
         PriorityQueue {
             cap: std::f64::INFINITY,
-            size: size,
+            size,
             // over-allocate because we push before we pop
             items: Vec::with_capacity(size + 1),
         }
