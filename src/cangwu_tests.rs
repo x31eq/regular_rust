@@ -54,7 +54,8 @@ fn complexity() {
 #[test]
 fn hermite() {
     let marvel = make_marvel();
-    let marvel_hermite = vec![1, 0, 0, -5, 12, 0, 1, 0, 2, -1, 0, 0, 1, 2, -3];
+    let marvel_hermite =
+        vec![1, 0, 0, -5, 12, 0, 1, 0, 2, -1, 0, 0, 1, 2, -3];
     let marvel_hermite = DMatrix::from_vec(5, 3, marvel_hermite);
     assert_eq!(marvel.reduced_mapping(), marvel_hermite);
 
@@ -87,7 +88,8 @@ fn mystery() {
         vec![58, 92, 135, 163, 201, 215],
     ];
     let limit13 = PrimeLimit::new(13);
-    let mystery = cangwu::TemperamentClass::new(&limit13.pitches, &mystery_vector);
+    let mystery =
+        cangwu::TemperamentClass::new(&limit13.pitches, &mystery_vector);
     assert_eq!(mystery.key(), vec![29, 46, 0, 14, 33, 40, 0, 1, 1, 1, 1]);
     assert_eq!(mystery.rank(), 2);
     assert!(4.83894 < mystery.complexity());

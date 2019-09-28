@@ -38,7 +38,8 @@ impl PrimeLimit {
     /// Explicit specification for non-consecutive prime limits
     /// (with no check for numbers being prime).
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
-        let pitches = prime_numbers.iter().map(|p| cents(*p as f64)).collect();
+        let pitches =
+            prime_numbers.iter().map(|p| cents(*p as f64)).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
         PrimeLimit { label, pitches }
     }
@@ -67,7 +68,10 @@ fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
-pub fn prime_mapping(plimit: &Tuning, n_notes: FactorElement) -> Vec<FactorElement> {
+pub fn prime_mapping(
+    plimit: &Tuning,
+    n_notes: FactorElement,
+) -> Vec<FactorElement> {
     let multiplier = n_notes as Cents / plimit[0];
     plimit
         .iter()
@@ -112,8 +116,13 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
         // borrows it and means the mutable iterator later
         // won't work.  This is the only way I can work out
         // to copy a row without borrowing it.
-        let ncol = DVector::from_iterator(echelon.nrows(), echelon.column(col).iter().cloned());
-        if let Some((row, &n)) = ncol.iter().enumerate().find(|(_i, &n)| n != 0) {
+        let ncol = DVector::from_iterator(
+            echelon.nrows(),
+            echelon.column(col).iter().cloned(),
+        );
+        if let Some((row, &n)) =
+            ncol.iter().enumerate().find(|(_i, &n)| n != 0)
+        {
             assert!(n > 0);
             for mut scol in echelon.column_iter_mut().take(col) {
                 let s = scol[row];
@@ -122,7 +131,10 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
                 }
                 // emulate flooring division
                 let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
-                let col_copy = DVector::from_iterator(ncol.nrows(), ncol.iter().cloned());
+                let col_copy = DVector::from_iterator(
+                    ncol.nrows(),
+                    ncol.iter().cloned(),
+                );
                 scol -= m * col_copy;
                 assert!(scol[row] >= 0);
                 assert!(scol[row] < n);
@@ -245,8 +257,9 @@ impl<T> PriorityQueue<T> {
     }
 
     fn sort(&mut self) {
-        self.items
-            .sort_unstable_by(|(bad1, _), (bad2, _)| bad1.partial_cmp(&bad2).unwrap());
+        self.items.sort_unstable_by(|(bad1, _), (bad2, _)| {
+            bad1.partial_cmp(&bad2).unwrap()
+        });
     }
 
     fn set_cap(&mut self) {

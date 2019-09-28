@@ -64,8 +64,8 @@ fn suboptimal_prime_mapping() {
 #[test]
 fn small_primes() {
     let from_pari = vec![
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-        97,
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+        67, 71, 73, 79, 83, 89, 97,
     ];
     assert_eq!(primes_below(100), from_pari);
 }
@@ -79,7 +79,8 @@ fn hermite_reduction() {
     let jove_hermite = vec![1, 1, 1, 2, 2, 0, 2, 1, 1, 5, 0, 0, 2, 1, 0];
     let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
     assert!(hermite_normal_form(&jove) == jove_hermite);
-    let jove_neg_hermite = vec![1, -1, 0, 1, -3, 0, 2, -1, 0, 5, 0, 0, 2, 1, 0];
+    let jove_neg_hermite =
+        vec![1, -1, 0, 1, -3, 0, 2, -1, 0, 5, 0, 0, 2, 1, 0];
     let jove_neg_hermite = DMatrix::from_vec(5, 3, jove_neg_hermite);
     assert!(hermite_normal_form(&jove_neg_hermite) == jove_hermite);
 }
