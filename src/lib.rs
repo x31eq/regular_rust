@@ -38,16 +38,17 @@ impl PrimeLimit {
     /// Explicit specification for non-consecutive prime limits
     /// (with no check for numbers being prime).
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
-        let pitches = prime_numbers.iter()
-                        .map(|p| cents(*p as f64))
-                        .collect();
+        let pitches = prime_numbers.iter().map(|p| cents(*p as f64)).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
-        PrimeLimit{ label, pitches }
+        PrimeLimit { label, pitches }
     }
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
-        PrimeLimit{ label: "inharmonic".to_string(), pitches }
+        PrimeLimit {
+            label: "inharmonic".to_string(),
+            pitches,
+        }
     }
 }
 
@@ -66,10 +67,10 @@ fn join<T: ToString + Copy>(joiner: &str, items: &Vec<T>) -> String {
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
-pub fn prime_mapping(plimit: &Tuning, n_notes: FactorElement)
-        -> Vec<FactorElement> {
+pub fn prime_mapping(plimit: &Tuning, n_notes: FactorElement) -> Vec<FactorElement> {
     let multiplier = n_notes as Cents / plimit[0];
-    plimit.iter()
+    plimit
+        .iter()
         .map(|x| (*x * multiplier).round() as FactorElement)
         .collect()
 }
@@ -83,19 +84,22 @@ pub fn cents(ratio: f64) -> Cents {
 fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     let top = n as usize;
     let mut hasfactors = vec![false; top - 2];
-    (2..n).filter(|i| {
-        let i = *i as usize;
-        if !hasfactors[i - 2] {
-            let mut j = i;
-            while { j += i; j < top } {
-                hasfactors[j - 2] = true;
+    (2..n)
+        .filter(|i| {
+            let i = *i as usize;
+            if !hasfactors[i - 2] {
+                let mut j = i;
+                while {
+                    j += i;
+                    j < top
+                } {
+                    hasfactors[j - 2] = true;
+                }
             }
-        }
-        !hasfactors[i - 2]
-    })
-    .collect()
+            !hasfactors[i - 2]
+        })
+        .collect()
 }
-
 
 /// Convert the matrix to a unique column echelon form
 /// with everything as simple as possible,
@@ -103,15 +107,13 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
     let mut echelon = echelon_form(ets);
-    for col in 1 .. echelon.ncols() {
+    for col in 1..echelon.ncols() {
         // The iterator can't be over echelon, because that
         // borrows it and means the mutable iterator later
         // won't work.  This is the only way I can work out
         // to copy a row without borrowing it.
-        let ncol = DVector::from_iterator(
-            echelon.nrows(), echelon.column(col).iter().cloned());
-        if let Some((row, &n)) = ncol.iter().enumerate()
-                                .find(|(_i, &n)| n != 0) {
+        let ncol = DVector::from_iterator(echelon.nrows(), echelon.column(col).iter().cloned());
+        if let Some((row, &n)) = ncol.iter().enumerate().find(|(_i, &n)| n != 0) {
             assert!(n > 0);
             for mut scol in echelon.column_iter_mut().take(col) {
                 let s = scol[row];
@@ -120,8 +122,7 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
                 }
                 // emulate flooring division
                 let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
-                let col_copy = DVector::from_iterator(
-                    ncol.nrows(), ncol.iter().cloned());
+                let col_copy = DVector::from_iterator(ncol.nrows(), ncol.iter().cloned());
                 scol -= m * col_copy;
                 assert!(scol[row] >= 0);
                 assert!(scol[row] < n);
@@ -138,14 +139,15 @@ fn echelon_form(ets: &Mapping) -> Mapping {
     }
     let mut working = Vec::with_capacity(ncols);
     for row in ets.column_iter() {
-        working.push(DVector::from_iterator(
-                nrows, row.iter().cloned()));
+        working.push(DVector::from_iterator(nrows, row.iter().cloned()));
     }
     DMatrix::from_columns(&echelon_rec(working, 0))
 }
 
-fn echelon_rec(mut working: Vec<DVector<FactorElement>>, row: usize)
-        -> Vec<DVector<FactorElement>> {
+fn echelon_rec(
+    mut working: Vec<DVector<FactorElement>>,
+    row: usize,
+) -> Vec<DVector<FactorElement>> {
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
@@ -179,12 +181,12 @@ fn echelon_rec(mut working: Vec<DVector<FactorElement>>, row: usize)
             return working;
         }
 
-        working.sort_unstable_by(|a, b|
-                    match a.iter().zip(b.iter())
-                            .find(|(x, y)| **x != 0 || **y != 0) {
-                        Some((p, q)) => p.cmp(q),
-                        None => std::cmp::Ordering::Equal,
-                    });
+        working.sort_unstable_by(|a, b| {
+            match a.iter().zip(b.iter()).find(|(x, y)| **x != 0 || **y != 0) {
+                Some((p, q)) => p.cmp(q),
+                None => std::cmp::Ordering::Equal,
+            }
+        });
         let mut workings = working.iter_mut();
         let pivot = workings.next().unwrap();
         let pivot_element = pivot[row];
@@ -196,7 +198,6 @@ fn echelon_rec(mut working: Vec<DVector<FactorElement>>, row: usize)
     }
 }
 
-
 /// Container to keep results ordered by badness
 /// and throw away the bad ones.
 /// Prioritized by badness: low values are preferred.
@@ -206,9 +207,9 @@ struct PriorityQueue<T> {
     items: Vec<(f64, T)>,
 }
 
-impl <T> PriorityQueue<T> {
+impl<T> PriorityQueue<T> {
     pub fn new(size: usize) -> PriorityQueue<T> {
-        PriorityQueue{
+        PriorityQueue {
             cap: std::f64::INFINITY,
             size: size,
             // over-allocate because we push before we pop
@@ -224,8 +225,7 @@ impl <T> PriorityQueue<T> {
                 self.items.pop();
                 self.set_cap();
             }
-        }
-        else {
+        } else {
             self.items.push((badness, item));
             self.sort();
             if self.len() == self.size {
@@ -245,10 +245,8 @@ impl <T> PriorityQueue<T> {
     }
 
     fn sort(&mut self) {
-        self.items.sort_unstable_by(
-            |(bad1, _), (bad2, _)|
-            bad1.partial_cmp(&bad2).unwrap()
-        );
+        self.items
+            .sort_unstable_by(|(bad1, _), (bad2, _)| bad1.partial_cmp(&bad2).unwrap());
     }
 
     fn set_cap(&mut self) {

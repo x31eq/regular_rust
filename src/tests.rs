@@ -49,8 +49,7 @@ fn cents50() {
         6665.506622013165,
     ];
     let mut rust_generated = PrimeLimit::new(50).pitches;
-    for (r, p) in rust_generated.drain(..)
-                    .zip(python_generated.drain(..)) {
+    for (r, p) in rust_generated.drain(..).zip(python_generated.drain(..)) {
         assert!(near_enough_equal(r, p));
     }
 }
@@ -65,31 +64,26 @@ fn suboptimal_prime_mapping() {
 #[test]
 fn small_primes() {
     let from_pari = vec![
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,
-        43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+        97,
+    ];
     assert_eq!(primes_below(100), from_pari);
 }
 
 #[test]
 fn hermite_reduction() {
-    let jove_vector = vec![27, 43, 63, 76, 94,
-                        31, 49, 72, 87, 107,
-                        41, 65, 95, 115, 142];
+    let jove_vector = vec![
+        27, 43, 63, 76, 94, 31, 49, 72, 87, 107, 41, 65, 95, 115, 142,
+    ];
     let jove = DMatrix::from_vec(5, 3, jove_vector);
-    let jove_hermite = vec![1, 1, 1, 2, 2,
-                            0, 2, 1, 1, 5,
-                            0, 0, 2, 1, 0];
+    let jove_hermite = vec![1, 1, 1, 2, 2, 0, 2, 1, 1, 5, 0, 0, 2, 1, 0];
     let jove_hermite = DMatrix::from_vec(5, 3, jove_hermite);
     assert!(hermite_normal_form(&jove) == jove_hermite);
-    let jove_neg_hermite = vec![1, -1, 0, 1, -3,
-                                0, 2, -1, 0, 5,
-                                0, 0, 2, 1, 0];
-    let jove_neg_hermite = DMatrix::from_vec(
-                            5, 3, jove_neg_hermite);
+    let jove_neg_hermite = vec![1, -1, 0, 1, -3, 0, 2, -1, 0, 5, 0, 0, 2, 1, 0];
+    let jove_neg_hermite = DMatrix::from_vec(5, 3, jove_neg_hermite);
     assert!(hermite_normal_form(&jove_neg_hermite) == jove_hermite);
 }
 
-
 fn near_enough_equal(x: f64, y: f64) -> bool {
-    (x/y - 1.0).abs() < 1e-15
+    (x / y - 1.0).abs() < 1e-15
 }

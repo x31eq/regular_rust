@@ -3,10 +3,10 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
+use super::{Cents, ETMap, FactorElement, Mapping, PriorityQueue, Tuning};
 use std::collections::HashSet;
-use std::sync::{RwLock, Arc};
+use std::sync::{Arc, RwLock};
 use std::thread;
-use super::{Cents, FactorElement, ETMap, Tuning, PriorityQueue, Mapping};
 
 static N_THREADS: i32 = 4;
 
@@ -21,11 +21,14 @@ impl TemperamentClass {
         let rank = melody.len();
         let dimension = plimit.len();
         let plimit = DVector::from_vec(plimit.clone());
-        let flattened = melody.iter()
-                            .map(|mapping| mapping.iter())
-                            .flatten().cloned().collect();
+        let flattened = melody
+            .iter()
+            .map(|mapping| mapping.iter())
+            .flatten()
+            .cloned()
+            .collect();
         let melody = DMatrix::from_vec(dimension, rank, flattened);
-        TemperamentClass{ plimit, melody }
+        TemperamentClass { plimit, melody }
     }
 
     /// Actual rank of the mapping matrix
@@ -70,10 +73,9 @@ impl TemperamentClass {
         let m = self.weighted_mapping();
         let offset = scaling * m.row_mean();
         let offset_vec: Vec<f64> = offset.iter().cloned().collect();
-        let mut translation = DMatrix::from_vec(
-            rank, 1, offset_vec.clone());
+        let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
         assert!(dimension > 0);
-        for _ in 1 .. dimension {
+        for _ in 1..dimension {
             translation.extend(offset_vec.clone());
         }
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
@@ -94,12 +96,10 @@ impl TemperamentClass {
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let (dimension, rank) = self.melody.shape();
         assert!(dimension == self.plimit.len());
-        let weighting_vec: Vec<f64> =
-            self.plimit.iter().map(|x| 1200.0/x).collect();
-        let mut weighting = DMatrix::from_vec(
-            dimension, 1, weighting_vec.clone());
+        let weighting_vec: Vec<f64> = self.plimit.iter().map(|x| 1200.0 / x).collect();
+        let mut weighting = DMatrix::from_vec(dimension, 1, weighting_vec.clone());
         assert!(rank > 0);
-        for _ in 1 .. rank {
+        for _ in 1..rank {
             weighting.extend(weighting_vec.clone());
         }
         self.melody.map(|n| n as f64).component_mul(&weighting)
@@ -107,12 +107,12 @@ impl TemperamentClass {
 }
 
 pub fn higher_rank_search(
-            plimit: &Tuning,
-            ets: &Vec<ETMap>,
-            rts: &Vec<Vec<ETMap>>,
-            ek: Cents,
-            n_results: usize)
-        -> Vec<Vec<ETMap>> {
+    plimit: &Tuning,
+    ets: &Vec<ETMap>,
+    rts: &Vec<Vec<ETMap>>,
+    ek: Cents,
+    n_results: usize,
+) -> Vec<Vec<ETMap>> {
     let mut results = PriorityQueue::new(n_results);
     let mut cache = HashSet::new();
     for rt in rts {
@@ -142,7 +142,6 @@ fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     ((gram / dimension).determinant()).sqrt()
 }
 
-
 /// Get the best equal temperament mappings for the given prime limit
 ///
 /// plimit: Sizes of prime harmonics in cents
@@ -150,13 +149,9 @@ fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
 /// ek: The Cangwu parameter in cents/octave
 ///
 /// n_results: How many to return
-pub fn get_equal_temperaments(
-        plimit: &Tuning, ek: Cents, n_results: usize)
-        -> Vec<ETMap> {
+pub fn get_equal_temperaments(plimit: &Tuning, ek: Cents, n_results: usize) -> Vec<ETMap> {
     // Stop weird things happening for non-standard units
-    let plimit: Tuning = plimit.into_iter()
-        .map(|p| 12e2 * (p / plimit[0]))
-        .collect();
+    let plimit: Tuning = plimit.into_iter().map(|p| 12e2 * (p / plimit[0])).collect();
 
     let results = Arc::new(RwLock::new(PriorityQueue::new(n_results)));
     let mut children = Vec::with_capacity(N_THREADS as usize);
@@ -169,11 +164,9 @@ pub fn get_equal_temperaments(
             let mut n_notes = 1 + thread_id;
             let mut cap = bmax;
             while (n_notes as f64) < cap / ek {
-                for mapping in limited_mappings(
-                        n_notes, ek, cap, &plimit) {
+                for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
                     let mut results = results.write().unwrap();
-                    let bad = equal_temperament_badness(
-                        &plimit, ek, &mapping);
+                    let bad = equal_temperament_badness(&plimit, ek, &mapping);
                     results.push(bad, mapping.clone());
                 }
                 n_notes += N_THREADS;
@@ -191,18 +184,15 @@ pub fn get_equal_temperaments(
     results.extract()
 }
 
-pub fn equal_temperament_badness(
-        plimit: &Tuning, ek: Cents, mapping: &ETMap)
-        -> Cents {
+pub fn equal_temperament_badness(plimit: &Tuning, ek: Cents, mapping: &ETMap) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
-    let plimit: Vec<f64> = plimit.into_iter()
-        .map(|p| p / 12e2)
-        .collect();
+    let plimit: Vec<f64> = plimit.into_iter().map(|p| p / 12e2).collect();
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
-    let weighted_mapping: Vec<f64> = mapping.iter()
+    let weighted_mapping: Vec<f64> = mapping
+        .iter()
         .zip(plimit.into_iter())
         .map(|(m, p)| (*m as f64) / p)
         .collect();
@@ -215,19 +205,20 @@ pub fn equal_temperament_badness(
     };
     let mean_w = mean(&weighted_mapping);
     let translation = (1.0 - epsilon) * mean_w;
-    let bad2 = mean(&weighted_mapping.into_iter()
-        .map(|x| x - translation)
-        .map(square)
-        .collect());
+    let bad2 = mean(
+        &weighted_mapping
+            .into_iter()
+            .map(|x| x - translation)
+            .map(square)
+            .collect(),
+    );
     bad2.sqrt() * 12e2
 }
 
 /// High guess for the worst badness of a search.
 /// Must be a reasonable cap, and at least as high
 /// as the worst result we want to keep in the real search.
-fn preliminary_badness(
-        plimit: &Tuning, ek: Cents, n_results: usize)
-        -> Cents {
+fn preliminary_badness(plimit: &Tuning, ek: Cents, n_results: usize) -> Cents {
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
     for size in 1..=(plimit.len() + n_results) {
@@ -253,11 +244,12 @@ fn preliminary_badness(
 ///
 /// Probably won't panic but will attempt to generate
 /// a huge vector of mappings if "bmax" is set too high.
-pub fn limited_mappings(n_notes: FactorElement,
-                    ek: Cents,
-                    bmax: Cents,
-                    plimit: &Tuning,
-                    ) -> Vec<ETMap> {
+pub fn limited_mappings(
+    n_notes: FactorElement,
+    ek: Cents,
+    bmax: Cents,
+    plimit: &Tuning,
+) -> Vec<ETMap> {
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
@@ -266,8 +258,16 @@ pub fn limited_mappings(n_notes: FactorElement,
     let mut mapping = vec![n_notes; plimit.len()];
     let mut results = Vec::new();
 
-    more_limited_mappings(&mut mapping, 1,
-                          0.0, 0.0, cap, epsilon2, &plimit, &mut results);
+    more_limited_mappings(
+        &mut mapping,
+        1,
+        0.0,
+        0.0,
+        cap,
+        epsilon2,
+        &plimit,
+        &mut results,
+    );
     results
 }
 
@@ -290,43 +290,47 @@ pub fn limited_mappings(n_notes: FactorElement,
 /// plimit: sizes of prime intervals in cents
 ///
 /// results: vector to store found mappings in
-fn more_limited_mappings(mut mapping: &mut ETMap,
-                            i: usize,
-                            tot: Cents,
-                            tot2: Cents,
-                            cap: Cents,
-                            epsilon2: Cents,
-                            plimit: &Tuning,
-                            mut results: &mut Vec<ETMap>,
-                            ) {
+fn more_limited_mappings(
+    mut mapping: &mut ETMap,
+    i: usize,
+    tot: Cents,
+    tot2: Cents,
+    cap: Cents,
+    epsilon2: Cents,
+    plimit: &Tuning,
+    mut results: &mut Vec<ETMap>,
+) {
     assert!(mapping.len() == plimit.len());
     let weighted_size = (mapping[i - 1] as f64) / plimit[i - 1];
     let tot = tot + weighted_size;
     let tot2 = tot2 + square(weighted_size);
     let lambda = 1.0 - epsilon2;
-    debug_assert!(tot2 * (1.0 - 1e-10)
-                    <= lambda*square(tot)/(i as f64) + cap);
+    debug_assert!(tot2 * (1.0 - 1e-10) <= lambda * square(tot) / (i as f64) + cap);
     if i == plimit.len() {
         // Recursion stops here.
         // Clone the object to save as the one being worked on
         // keeps changing
         results.push(mapping.clone());
-    }
-    else {
+    } else {
         let toti = tot * lambda / ((i as f64) + epsilon2);
         let error2 = tot2 - tot * toti;
         if error2 < cap {
             let target = plimit[i];
-            let deficit = (
-                (i + 1) as f64 * (cap - error2) / (i as f64 + epsilon2)
-                ).sqrt();
+            let deficit = ((i + 1) as f64 * (cap - error2) / (i as f64 + epsilon2)).sqrt();
             let xmin = target * (toti - deficit);
             let xmax = target * (toti + deficit);
             for guess in intrange(xmin, xmax) {
                 mapping[i] = guess;
                 more_limited_mappings(
-                    &mut mapping, i + 1, tot, tot2,
-                    cap, epsilon2, &plimit, &mut results);
+                    &mut mapping,
+                    i + 1,
+                    tot,
+                    tot2,
+                    cap,
+                    epsilon2,
+                    &plimit,
+                    &mut results,
+                );
             }
         }
     }
@@ -338,5 +342,5 @@ fn square(x: f64) -> f64 {
 
 /// Range of integers between x and y
 fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<FactorElement> {
-    ((x.ceil() as FactorElement) ..= (y.floor() as FactorElement))
+    ((x.ceil() as FactorElement)..=(y.floor() as FactorElement))
 }
