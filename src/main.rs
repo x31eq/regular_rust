@@ -1,4 +1,4 @@
-use regular::{ETMap, PrimeLimit};
+use regular::{PrimeLimit};
 use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
@@ -47,24 +47,13 @@ fn main() {
         if rts.len() > n_results {
             rts.split_off(n_results);
         }
-        if print_rts_return_closed(&rts) {
+        if print_return_closed(&rts) {
             // Return silently if stdout is closed
             return;
         }
         rts = new_rts;
     }
-    print_rts_return_closed(&rts);
-}
-
-/// Print regular temperaments to stdout
-/// (in JSON format as it happens)
-/// and return true if stdout is closed
-fn print_rts_return_closed(rts: &[Vec<ETMap>]) -> bool {
-    // This is like println! but without the panic
-    match stdout().write_all(&format!("{:?}\n", rts).into_bytes()) {
-        Ok(_) => false,
-        Err(_) => true,
-    }
+    print_return_closed(&rts);
 }
 
 fn read_cents() -> PrimeLimit {
@@ -79,3 +68,13 @@ fn read_cents() -> PrimeLimit {
     }
     PrimeLimit::inharmonic(result)
 }
+
+/// Print debug to stdout or return true if stdout is closed
+fn print_return_closed<T: std::fmt::Debug>(obj: &T) -> bool {
+    // This is like println! but without the panic
+    match stdout().write_all(&format!("{:?}\n", obj).into_bytes()) {
+        Ok(_) => false,
+        Err(_) => true,
+    }
+}
+
