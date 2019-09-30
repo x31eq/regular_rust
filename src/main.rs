@@ -1,5 +1,5 @@
-use regular::PrimeLimit;
-use std::io::{self, BufRead};
+use regular::{ETMap, PrimeLimit};
+use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -47,10 +47,24 @@ fn main() {
         if rts.len() > n_results {
             rts.split_off(n_results);
         }
-        println!("{:?}", rts);
+        if print_rts_return_closed(&rts) {
+            // Return silently if stdout is closed
+            return;
+        }
         rts = new_rts;
     }
-    println!("{:?}", rts);
+    print_rts_return_closed(&rts);
+}
+
+/// Print regular temperaments to stdout
+/// (in JSON format as it happens)
+/// and return true if stdout is closed
+fn print_rts_return_closed(rts: &[Vec<ETMap>]) -> bool {
+    // This is like println! but without the panic
+    match stdout().write_all(&format!("{:?}\n", rts).into_bytes()) {
+        Ok(_) => false,
+        Err(_) => true,
+    }
 }
 
 fn read_cents() -> PrimeLimit {
