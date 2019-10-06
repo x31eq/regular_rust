@@ -83,13 +83,8 @@ pub fn prime_mapping(
 }
 
 /// Convert a frequency ratio to cents
+#[cfg_attr(target_arch="wasm32", wasm_bindgen)]
 pub fn cents(ratio: f64) -> Cents {
-    ratio.log2() * 12e2
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-pub fn wasm_cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }
 

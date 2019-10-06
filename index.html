@@ -5,12 +5,12 @@
   </head>
   <body>
     <script type="module">
-      import init, { wasm_cents } from './pkg/regular.js';
+      import init, {cents } from './pkg/regular.js';
 
       async function run() {
         await init();
 
-        const result = wasm_cents(1.5);
+        const result = cents(1.5);
         console.log(`1.5 is ${result} cents`);
       }
 
