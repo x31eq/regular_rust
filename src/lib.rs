@@ -5,6 +5,9 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -81,6 +84,12 @@ pub fn prime_mapping(
 
 /// Convert a frequency ratio to cents
 pub fn cents(ratio: f64) -> Cents {
+    ratio.log2() * 12e2
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn wasm_cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }
 
