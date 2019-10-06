@@ -4,6 +4,7 @@
         <meta charset="utf-8">
     </head>
     <body>
+        <p id="centsout"></p>
         <script type="module">
             import init, {cents } from './pkg/regular.js';
 
@@ -11,7 +12,8 @@
                 await init();
 
                 const result = cents(1.5);
-                console.log(`1.5 is ${result} cents`);
+                const message = `1.5 is ${result} cents`;
+                document.getElementById('centsout').innerHTML = message;
             }
 
             run();
