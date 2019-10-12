@@ -286,9 +286,9 @@ pub mod cangwu;
 #[wasm_bindgen(start)]
 pub fn wasm_main() -> Result<(), JsValue> {
     // This is based on the wasm-bindgen "without-a-bundler" example
-    let window = web_sys::window().expect("no global `window` exists");
-    let document = window.document().expect("should have a document on window");
-    let body = document.body().expect("document should have a body");
+    let window = web_sys::window().expect("no window");
+    let document = window.document().expect("no document");
+    let body = document.body().expect("no body");
 
     let paragraph = document.create_element("p")?;
     let limit = PrimeLimit::new(53);
