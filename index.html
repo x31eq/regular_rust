@@ -9,22 +9,33 @@
             You'll need to enable scripting for it to work,
             and even then it might not.
         </noscript>
-        <p id="centsout">Wasm placeholder</p>
-        <script type="module">
-            import init, {cents } from './pkg/regular.js';
-
-            async function run() {
-                await init();
-
-                const result = cents(1.5);
-                const message = `1.5 is ${result} cents`;
-                document.getElementById('centsout').innerHTML = message;
-            }
-
-            run();
-        </script>
+        <p>
+            <label>
+                Prime limit
+                <input id="prime-limit" name="limit" value="" size="3">
+            </label>
+        <p>
+        <button id="prime-search">Search</button>
         <table id="equal-temperaments">
             <tr><td>Results will go here</td>
         </table>
+        <script type="module">
+            import init, { consecutive_prime_limit_search }
+                from './pkg/regular.js'
+
+            async function run() {
+                await init()
+            }
+
+            document.getElementById("prime-search").onclick =
+                function() {
+                    var limit = parseInt(
+                        document.getElementById("prime-limit").value,
+                        10)
+                    consecutive_prime_limit_search(limit, 1.0, 10)
+                }
+
+            run()
+        </script>
     </body>
 </html>
