@@ -18,6 +18,7 @@ pub fn wasm_main() -> Result<(), JsValue> {
         document.body().expect("no body").append_child(&table)?;
         table
     });
+    table.set_inner_html("");
     let row = document.create_element("tr")?;
     for heading in limit.headings {
         let cell = document.create_element("th")?;
