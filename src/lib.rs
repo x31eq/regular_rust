@@ -290,15 +290,17 @@ pub fn wasm_main() -> Result<(), JsValue> {
     paragraph.set_inner_html(&message);
     body.append_child(&paragraph)?;
 
-    let ulist = document.create_element("ul")?;
-    let ets = cangwu::get_equal_temperaments(&limit13.pitches, 1.0, 10);
-    for et in ets {
-        let item = document.create_element("li")?;
-        let stringified = format!("{:?}", et);
-        item.set_inner_html(&stringified);
-        ulist.append_child(&item)?;
+    let table = document.create_element("table")?;
+    for et in cangwu::get_equal_temperaments(&limit13.pitches, 1.0, 10) {
+        let row = document.create_element("tr")?;
+        for element in et {
+            let cell = document.create_element("td")?;
+            cell.set_inner_html(&element.to_string());
+            row.append_child(&cell)?;
+        }
+        table.append_child(&row)?;
     }
-    body.append_child(&ulist)?;
+    body.append_child(&table)?;
 
     Ok(())
 }
