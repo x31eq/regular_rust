@@ -6,7 +6,7 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
