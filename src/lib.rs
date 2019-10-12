@@ -47,8 +47,13 @@ impl PrimeLimit {
         let pitches =
             prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
-        let headings = prime_numbers.iter().map(Harmonic::to_string).collect();
-        PrimeLimit { label, pitches, headings }
+        let headings =
+            prime_numbers.iter().map(Harmonic::to_string).collect();
+        PrimeLimit {
+            label,
+            pitches,
+            headings,
+        }
     }
 
     /// Partials specified in cents
@@ -89,7 +94,7 @@ pub fn prime_mapping(
 }
 
 /// Convert a frequency ratio to cents
-#[cfg_attr(target_arch="wasm32", wasm_bindgen)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }

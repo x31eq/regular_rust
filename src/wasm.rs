@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
-use super::PrimeLimit;
 use super::cangwu;
+use super::PrimeLimit;
 
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
@@ -11,8 +11,9 @@ pub fn wasm_main() -> Result<(), JsValue> {
 
     let limit = PrimeLimit::new(53);
     // This is shamelessly coupled to the HTML
-    let table = document.get_element_by_id("equal-temperaments")
-                .expect("no table to put the results");
+    let table = document
+        .get_element_by_id("equal-temperaments")
+        .expect("no table to put the results");
     let row = document.create_element("tr")?;
     for heading in limit.headings {
         let cell = document.create_element("th")?;
