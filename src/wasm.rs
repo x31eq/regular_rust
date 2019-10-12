@@ -1,15 +1,24 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
 use super::cangwu;
-use super::PrimeLimit;
+use super::{Cents, Harmonic, PrimeLimit};
 
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
 pub fn wasm_main() -> Result<(), JsValue> {
+    consecutive_prime_limit_search(53, 1.0, 20)
+}
+
+#[wasm_bindgen]
+pub fn consecutive_prime_limit_search(
+    prime_cap: Harmonic,
+    ek: Cents,
+    n_results: usize,
+) -> Result<(), JsValue> {
     let window = web_sys::window().expect("no window");
     let document = window.document().expect("no document");
 
-    let limit = PrimeLimit::new(53);
+    let limit = PrimeLimit::new(prime_cap);
     // This is shamelessly coupled to the HTML
     let table = document.get_element_by_id("equal-temperaments").unwrap_or({
         // If there's no matching table, let's make one!
@@ -26,7 +35,7 @@ pub fn wasm_main() -> Result<(), JsValue> {
         row.append_child(&cell)?;
     }
     table.append_child(&row)?;
-    for et in cangwu::get_equal_temperaments(&limit.pitches, 1.0, 20) {
+    for et in cangwu::get_equal_temperaments(&limit.pitches, ek, n_results) {
         let row = document.create_element("tr")?;
         for element in et {
             let cell = document.create_element("td")?;
@@ -35,6 +44,5 @@ pub fn wasm_main() -> Result<(), JsValue> {
         }
         table.append_child(&row)?;
     }
-
     Ok(())
 }
