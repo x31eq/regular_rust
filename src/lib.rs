@@ -275,6 +275,25 @@ impl<T> PriorityQueue<T> {
 
 pub mod cangwu;
 
+// Called when the wasm module is instantiated
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen(start)]
+pub fn wasm_main() -> Result<(), JsValue> {
+    // This is based on the wasm-bindgen "without-a-bundler" example
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let body = document.body().expect("document should have a body");
+    let paragraph = document.create_element("p")?;
+
+    let limit13 = PrimeLimit::new(13);
+    let message = format!("{}: {:?} cents", limit13.label, limit13.pitches);
+    paragraph.set_inner_html(&message);
+
+    body.append_child(&paragraph)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests;
 
