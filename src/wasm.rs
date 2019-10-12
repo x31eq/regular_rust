@@ -6,18 +6,13 @@ use super::cangwu;
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
 pub fn wasm_main() -> Result<(), JsValue> {
-    // This is based on the wasm-bindgen "without-a-bundler" example
     let window = web_sys::window().expect("no window");
     let document = window.document().expect("no document");
-    let body = document.body().expect("no body");
 
-    let paragraph = document.create_element("p")?;
     let limit = PrimeLimit::new(53);
-    let message = format!("{}: {:?} cents", limit.label, limit.pitches);
-    paragraph.set_text_content(Some(&message));
-    body.append_child(&paragraph)?;
-
-    let table = document.create_element("table")?;
+    // This is shamelessly coupled to the HTML
+    let table = document.get_element_by_id("equal-temperaments")
+                .expect("no table to put the results");
     let row = document.create_element("tr")?;
     for heading in limit.headings {
         let cell = document.create_element("th")?;
@@ -34,7 +29,6 @@ pub fn wasm_main() -> Result<(), JsValue> {
         }
         table.append_child(&row)?;
     }
-    body.append_child(&table)?;
 
     Ok(())
 }
