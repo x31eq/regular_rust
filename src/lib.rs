@@ -285,13 +285,13 @@ pub fn wasm_main() -> Result<(), JsValue> {
     let body = document.body().expect("document should have a body");
 
     let paragraph = document.create_element("p")?;
-    let limit13 = PrimeLimit::new(13);
-    let message = format!("{}: {:?} cents", limit13.label, limit13.pitches);
+    let limit = PrimeLimit::new(53);
+    let message = format!("{}: {:?} cents", limit.label, limit.pitches);
     paragraph.set_inner_html(&message);
     body.append_child(&paragraph)?;
 
     let table = document.create_element("table")?;
-    for et in cangwu::get_equal_temperaments(&limit13.pitches, 1.0, 10) {
+    for et in cangwu::get_equal_temperaments(&limit.pitches, 1.0, 20) {
         let row = document.create_element("tr")?;
         for element in et {
             let cell = document.create_element("td")?;
