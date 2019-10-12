@@ -283,13 +283,22 @@ pub fn wasm_main() -> Result<(), JsValue> {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
     let body = document.body().expect("document should have a body");
-    let paragraph = document.create_element("p")?;
 
+    let paragraph = document.create_element("p")?;
     let limit13 = PrimeLimit::new(13);
     let message = format!("{}: {:?} cents", limit13.label, limit13.pitches);
     paragraph.set_inner_html(&message);
-
     body.append_child(&paragraph)?;
+
+    let ulist = document.create_element("ul")?;
+    let ets = cangwu::get_equal_temperaments(&limit13.pitches, 1.0, 10);
+    for et in ets {
+        let item = document.create_element("li")?;
+        let stringified = format!("{:?}", et);
+        item.set_inner_html(&stringified);
+        ulist.append_child(&item)?;
+    }
+    body.append_child(&ulist)?;
 
     Ok(())
 }
