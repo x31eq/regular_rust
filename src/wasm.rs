@@ -14,14 +14,14 @@ pub fn wasm_main() -> Result<(), JsValue> {
     let paragraph = document.create_element("p")?;
     let limit = PrimeLimit::new(53);
     let message = format!("{}: {:?} cents", limit.label, limit.pitches);
-    paragraph.set_inner_html(&message);
+    paragraph.set_text_content(Some(&message));
     body.append_child(&paragraph)?;
 
     let table = document.create_element("table")?;
     let row = document.create_element("tr")?;
     for heading in limit.headings {
         let cell = document.create_element("th")?;
-        cell.set_inner_html(&heading);
+        cell.set_text_content(Some(&heading));
         row.append_child(&cell)?;
     }
     table.append_child(&row)?;
@@ -29,7 +29,7 @@ pub fn wasm_main() -> Result<(), JsValue> {
         let row = document.create_element("tr")?;
         for element in et {
             let cell = document.create_element("td")?;
-            cell.set_inner_html(&element.to_string());
+            cell.set_text_content(Some(&element.to_string()));
             row.append_child(&cell)?;
         }
         table.append_child(&row)?;
