@@ -26,6 +26,9 @@ pub struct PrimeLimit {
 
     /// Pitch of each partial in cents above the root
     pub pitches: Tuning,
+
+    /// Something used for printing tables
+    pub headings: Vec<String>,
 }
 
 impl PrimeLimit {
@@ -44,14 +47,17 @@ impl PrimeLimit {
         let pitches =
             prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
-        PrimeLimit { label, pitches }
+        let headings = prime_numbers.iter().map(Harmonic::to_string).collect();
+        PrimeLimit { label, pitches, headings }
     }
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
+        let headings = pitches.iter().map(Cents::to_string).collect();
         PrimeLimit {
             label: "inharmonic".to_string(),
             pitches,
+            headings,
         }
     }
 }
@@ -291,6 +297,13 @@ pub fn wasm_main() -> Result<(), JsValue> {
     body.append_child(&paragraph)?;
 
     let table = document.create_element("table")?;
+    let row = document.create_element("tr")?;
+    for heading in limit.headings {
+        let cell = document.create_element("th")?;
+        cell.set_inner_html(&heading);
+        row.append_child(&cell)?;
+    }
+    table.append_child(&row)?;
     for et in cangwu::get_equal_temperaments(&limit.pitches, 1.0, 20) {
         let row = document.create_element("tr")?;
         for element in et {
