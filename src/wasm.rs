@@ -11,9 +11,13 @@ pub fn wasm_main() -> Result<(), JsValue> {
 
     let limit = PrimeLimit::new(53);
     // This is shamelessly coupled to the HTML
-    let table = document
-        .get_element_by_id("equal-temperaments")
-        .expect("no table to put the results");
+    let table = document.get_element_by_id("equal-temperaments").unwrap_or({
+        // If there's no matching table, let's make one!
+        let table = document.create_element("table")?;
+        table.set_id("equal-temperaments");
+        document.body().expect("no body").append_child(&table)?;
+        table
+    });
     let row = document.create_element("tr")?;
     for heading in limit.headings {
         let cell = document.create_element("th")?;
