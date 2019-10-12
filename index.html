@@ -12,7 +12,14 @@
         <p>
             <label>
                 Prime limit
-                <input id="prime-limit" name="limit" value="" size="3">
+                <input id="prime-limit" value="" size="2">
+            </label>
+        <p>
+        <p>
+            <label>
+                Badness parameter
+                <input id="prime-ek" value="1.0" size="5">
+                cents/octave
             </label>
         <p>
         <button id="prime-search">Search</button>
@@ -32,7 +39,9 @@
                     var limit = parseInt(
                         document.getElementById("prime-limit").value,
                         10)
-                    consecutive_prime_limit_search(limit, 1.0, 10)
+                    var ek = parseFloat(
+                        document.getElementById("prime-ek").value)
+                    consecutive_prime_limit_search(limit, ek, 10)
                 }
 
             run()
