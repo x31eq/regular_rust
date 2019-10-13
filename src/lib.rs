@@ -72,7 +72,7 @@ pub fn prime_mapping(
     let multiplier = Cents::from(n_notes) / plimit[0];
     plimit
         .iter()
-        .map(|x| (*x * multiplier).round() as FactorElement)
+        .map(|&x| (x * multiplier).round() as FactorElement)
         .collect()
 }
 
