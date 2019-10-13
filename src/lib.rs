@@ -106,7 +106,7 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// with everything as simple as possible,
 /// things positive when they can't be zero,
 /// and within the same lattice (determinant conserved)
-pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
+pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
     for col in 1..echelon.len() {
         // The iterator can't be over echelon, because that
@@ -135,10 +135,10 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
     echelon
 }
 
-fn echelon_form(ets: &Mapping) -> Mapping {
+fn echelon_form(ets: &[ETMap]) -> Mapping {
     let ncols = ets.len();
     if ncols == 0 {
-        return ets.clone();
+        return ets.to_owned();
     }
     // This can probably be simplified...
     let mut working = Vec::with_capacity(ets[0].len());
