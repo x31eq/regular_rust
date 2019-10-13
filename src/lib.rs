@@ -148,7 +148,7 @@ fn echelon_form(ets: &[ETMap]) -> Mapping {
     echelon_rec(working, 0)
 }
 
-fn echelon_rec( mut working: Mapping, row: usize) -> Mapping {
+fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {

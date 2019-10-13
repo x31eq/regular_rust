@@ -78,7 +78,8 @@ impl TemperamentClass {
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let flattened = self.melody
+        let flattened = self
+            .melody
             .iter()
             .map(|mapping| mapping.iter())
             .flatten()
