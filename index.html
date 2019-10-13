@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style type="text/css">
+            #equal-temperaments td {
+                text-align: right;
+                padding-right: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <noscript>
+            This page uses JavaScript and WebAssembly.
+            You'll need to enable scripting for it to work,
+            and even then it might not.
+        </noscript>
+        <form>
+            <p>
+                <label>
+                    Prime limit
+                    <input id="prime-limit" value="" size="2">
+                </label>
+            </p>
+            <p>
+                <label>
+                    Badness parameter
+                    <input id="prime-eka" value="1.0" size="5">
+                    cents
+                </label>
+            </p>
+            <button>Search</button>
+        </form>
+        <table id="equal-temperaments">
+            <tr><td>Results will go here</td></tr>
+        </table>
+        <script type="module">
+            import init, { consecutive_prime_limit_search }
+                from './pkg/regular.js'
+
+            async function run() {
+                await init()
+            }
+
+            document.querySelector("form").onsubmit =
+                function(evt) {
+                    evt.preventDefault();
+                    var limit = parseInt(
+                        document.getElementById("prime-limit").value,
+                        10)
+                    var eka = parseFloat(
+                        document.getElementById("prime-eka").value)
+                    consecutive_prime_limit_search(limit, eka, 20)
+                }
+
+            run()
+        </script>
+    </body>
+</html>

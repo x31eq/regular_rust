@@ -2,6 +2,9 @@
 //!
 //! Utilties for regular temperament finding
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::wasm_bindgen;
+
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -20,6 +23,9 @@ pub struct PrimeLimit {
 
     /// Pitch of each partial in cents above the root
     pub pitches: Tuning,
+
+    /// Something used for printing tables
+    pub headings: Vec<String>,
 }
 
 impl PrimeLimit {
@@ -38,14 +44,22 @@ impl PrimeLimit {
         let pitches =
             prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
         let label = format!("{}-limit", join(".", &prime_numbers));
-        PrimeLimit { label, pitches }
+        let headings =
+            prime_numbers.iter().map(Harmonic::to_string).collect();
+        PrimeLimit {
+            label,
+            pitches,
+            headings,
+        }
     }
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
+        let headings = pitches.iter().map(Cents::to_string).collect();
         PrimeLimit {
             label: "inharmonic".to_string(),
             pitches,
+            headings,
         }
     }
 }
@@ -77,6 +91,7 @@ pub fn prime_mapping(
 }
 
 /// Convert a frequency ratio to cents
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }
@@ -254,6 +269,9 @@ impl<T> PriorityQueue<T> {
 }
 
 pub mod cangwu;
+
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
 
 #[cfg(test)]
 mod tests;
