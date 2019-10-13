@@ -124,7 +124,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
                 }
                 // emulate flooring division
                 let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
-                for (i, y) in ncol.iter().cloned().enumerate() {
+                for (i, &y) in ncol.iter().enumerate() {
                     scol[i] -= m * y;
                 }
                 assert!(scol[row] >= 0);
