@@ -136,16 +136,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
 }
 
 fn echelon_form(ets: &[ETMap]) -> Mapping {
-    let ncols = ets.len();
-    if ncols == 0 {
-        return ets.to_owned();
-    }
-    // This can probably be simplified...
-    let mut working = Vec::with_capacity(ets[0].len());
-    for col in ets.iter() {
-        working.push(col.clone());
-    }
-    echelon_rec(working, 0)
+    echelon_rec(ets.to_vec(), 0)
 }
 
 fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
