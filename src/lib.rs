@@ -2,9 +2,6 @@
 //!
 //! Utilties for regular temperament finding
 
-extern crate nalgebra as na;
-use na::{DMatrix, DVector};
-
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -15,7 +12,7 @@ pub type FactorElement = i32;
 /// Simplify type declarations, like types are intended for
 pub type ETMap = Vec<FactorElement>;
 pub type Tuning = Vec<Cents>;
-pub type Mapping = DMatrix<FactorElement>;
+pub type Mapping = Vec<ETMap>;
 
 pub struct PrimeLimit {
     /// Something used for printing
@@ -111,31 +108,25 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
     let mut echelon = echelon_form(ets);
-    for col in 1..echelon.ncols() {
+    for col in 1..echelon.len() {
         // The iterator can't be over echelon, because that
         // borrows it and means the mutable iterator later
-        // won't work.  This is the only way I can work out
-        // to copy a row without borrowing it.
-        let ncol = DVector::from_iterator(
-            echelon.nrows(),
-            echelon.column(col).iter().cloned(),
-        );
+        // won't work.
+        let ncol = echelon[col].clone();
         if let Some((row, &n)) =
             ncol.iter().enumerate().find(|(_i, &n)| n != 0)
         {
             assert!(n > 0);
-            for mut scol in echelon.column_iter_mut().take(col) {
+            for scol in echelon.iter_mut().take(col) {
                 let s = scol[row];
                 if s == 0 {
                     continue;
                 }
                 // emulate flooring division
                 let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
-                let col_copy = DVector::from_iterator(
-                    ncol.nrows(),
-                    ncol.iter().cloned(),
-                );
-                scol -= m * col_copy;
+                for (i, y) in ncol.iter().cloned().enumerate() {
+                    scol[i] -= m * y;
+                }
                 assert!(scol[row] >= 0);
                 assert!(scol[row] < n);
             }
@@ -145,26 +136,26 @@ pub fn hermite_normal_form(ets: &Mapping) -> Mapping {
 }
 
 fn echelon_form(ets: &Mapping) -> Mapping {
-    let (nrows, ncols) = ets.shape();
-    if nrows == 0 {
+    let ncols = ets.len();
+    if ncols == 0 {
         return ets.clone();
     }
-    let mut working = Vec::with_capacity(ncols);
-    for row in ets.column_iter() {
-        working.push(DVector::from_iterator(nrows, row.iter().cloned()));
+    // This can probably be simplified...
+    let mut working = Vec::with_capacity(ets[0].len());
+    for col in ets.iter() {
+        working.push(col.clone());
     }
-    DMatrix::from_columns(&echelon_rec(working, 0))
+    echelon_rec(working, 0)
 }
 
-fn echelon_rec(
-    mut working: Vec<DVector<FactorElement>>,
-    row: usize,
-) -> Vec<DVector<FactorElement>> {
+fn echelon_rec( mut working: Mapping, row: usize) -> Mapping {
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
             if *first_non_zero < 0 {
-                *column *= -1;
+                for x in column.iter_mut() {
+                    *x = -*x;
+                }
             }
         }
     }
@@ -205,7 +196,9 @@ fn echelon_rec(
         // pivot_element must be non-zero or it would be in reduced
         for col in workings {
             let n = col[row] / pivot_element;
-            *col -= pivot.clone() * n;
+            for (i, &x) in pivot.iter().enumerate() {
+                col[i] -= x * n;
+            }
         }
     }
 }
