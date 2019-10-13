@@ -34,19 +34,12 @@ impl TemperamentClass {
     /// (hermite normal form flattened and
     /// with always-zero entries removed)
     pub fn key(&self) -> ETMap {
-        let hermite = self.reduced_mapping();
-        // This might be simplifiable now
-        let cols = hermite.len();
-        let rows = if cols == 0 { 0 } else {hermite[0].len()};
-        let expected_size = rows * cols - cols * (cols - 1) / 2;
-        let mut result: ETMap = Vec::with_capacity(expected_size);
-        for (i, col) in hermite.iter().enumerate() {
-            for &n in col.iter().skip(i) {
-                result.push(n);
-            }
-        }
-        assert!(result.len() == expected_size);
-        result
+        self.reduced_mapping()
+            .iter()
+            .enumerate()
+            .map(|(i, col)| col.iter().skip(i).cloned())
+            .flatten()
+            .collect()
     }
 
     pub fn reduced_mapping(&self) -> Mapping {
