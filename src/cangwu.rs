@@ -14,23 +14,15 @@ pub struct TemperamentClass {
 impl TemperamentClass {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
-        let rank = melody.len();
-        let dimension = plimit.len();
         let plimit = DVector::from_vec(plimit.to_vec());
-        let flattened = melody
-            .iter()
-            .map(|mapping| mapping.iter())
-            .flatten()
-            .cloned()
-            .collect();
-        let melody = DMatrix::from_vec(dimension, rank, flattened);
+        let melody = melody.to_vec();
         TemperamentClass { plimit, melody }
     }
 
     /// Actual rank of the mapping matrix
     pub fn rank(&self) -> usize {
         let mut result = 0;
-        for col in self.reduced_mapping().column_iter() {
+        for col in self.reduced_mapping().iter() {
             if col.iter().any(|&x| x != 0) {
                 result += 1;
             }
@@ -42,19 +34,12 @@ impl TemperamentClass {
     /// (hermite normal form flattened and
     /// with always-zero entries removed)
     pub fn key(&self) -> ETMap {
-        let hermite = self.reduced_mapping();
-        // I can't find a simpler way to iterate over
-        // the columns of a matrix and build a std::Vec
-        let (rows, cols) = hermite.shape();
-        let expected_size = rows * cols - cols * (cols - 1) / 2;
-        let mut result: ETMap = Vec::with_capacity(expected_size);
-        for (i, col) in hermite.column_iter().enumerate() {
-            for &n in col.iter().skip(i) {
-                result.push(n);
-            }
-        }
-        assert!(result.len() == expected_size);
-        result
+        self.reduced_mapping()
+            .iter()
+            .enumerate()
+            .map(|(i, col)| col.iter().skip(i).cloned())
+            .flatten()
+            .collect()
     }
 
     pub fn reduced_mapping(&self) -> Mapping {
@@ -62,7 +47,8 @@ impl TemperamentClass {
     }
 
     pub fn badness(&self, ek: Cents) -> Cents {
-        let (dimension, rank) = self.melody.shape();
+        let rank = self.melody.len();
+        let dimension = self.plimit.len();
         let ek = ek / 1200.0;
         let epsilon = ek / (1.0 + square(ek)).sqrt();
         let scaling = 1.0 - epsilon;
@@ -90,8 +76,15 @@ impl TemperamentClass {
     }
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
-        let (dimension, rank) = self.melody.shape();
-        assert!(dimension == self.plimit.len());
+        let rank = self.melody.len();
+        let dimension = self.plimit.len();
+        let flattened = self
+            .melody
+            .iter()
+            .map(|mapping| mapping.iter())
+            .flatten()
+            .cloned();
+        let melody = DMatrix::from_iterator(dimension, rank, flattened);
         let weighting_vec: Vec<f64> =
             self.plimit.iter().map(|x| 1200.0 / x).collect();
         let mut weighting =
@@ -100,7 +93,7 @@ impl TemperamentClass {
         for _ in 1..rank {
             weighting.extend(weighting_vec.clone());
         }
-        self.melody.map(f64::from).component_mul(&weighting)
+        melody.map(f64::from).component_mul(&weighting)
     }
 }
 

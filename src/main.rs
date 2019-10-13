@@ -1,4 +1,4 @@
-use regular::{PrimeLimit};
+use regular::PrimeLimit;
 use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
@@ -72,6 +72,7 @@ fn read_cents() -> PrimeLimit {
 /// Print debug to stdout or return true if stdout is closed
 fn print_return_closed<T: std::fmt::Debug>(obj: &T) -> bool {
     // This is like println! but without the panic
-    stdout().write_all(&format!("{:?}\n", obj).into_bytes()).is_err()
+    stdout()
+        .write_all(&format!("{:?}\n", obj).into_bytes())
+        .is_err()
 }
-
