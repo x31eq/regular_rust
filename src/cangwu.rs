@@ -89,9 +89,8 @@ impl TemperamentClass {
             .iter()
             .map(|mapping| mapping.iter())
             .flatten()
-            .cloned()
-            .collect();
-        let melody = DMatrix::from_vec(dimension, rank, flattened);
+            .cloned();
+        let melody = DMatrix::from_iterator(dimension, rank, flattened);
         let weighting_vec: Vec<f64> =
             self.plimit.iter().map(|x| 1200.0 / x).collect();
         let mut weighting =
