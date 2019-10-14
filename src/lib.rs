@@ -198,6 +198,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
         let pivot = workings.next().unwrap();
         let pivot_element = pivot[row];
         // pivot_element must be non-zero or it would be in reduced
+        assert!(pivot_element != 0);
         for col in workings {
             let n = col[row] / pivot_element;
             for (i, &x) in pivot.iter().enumerate() {
