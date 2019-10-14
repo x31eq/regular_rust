@@ -164,9 +164,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
             if *first_non_zero < 0 {
-                for x in column.iter_mut() {
-                    *x = -*x;
-                }
+                *column = column.iter().map(|&x| -x).collect();
             }
         }
     }
