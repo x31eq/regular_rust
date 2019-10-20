@@ -2,11 +2,17 @@ Rust regular temperament library
 ================================
 
 This is a re-implementation of some of my Python temperament finding
-code in Rust.  It finds regular temperaments and shows the results
-in a machine-readable format awaiting a machine to read it.
+code in Rust.
+
+
+Native-code application
+-----------------------
+
+The standard targe finds regular temperaments and shows the results
+in a machine-readable format that is JSON-consistent, and works
+with the latest Python library: https://bitbucket.org/x31eq/regular
 Supply the number of results for each rank, the cangwu parameter
 (cents/octave), and the prime limit.
-
 
 7-limit:
 
@@ -32,3 +38,25 @@ FIN
 Faster calculation for a big limit (currently incomplete results):
 
 cargo build --release && target/release/regular 5 0.1 257
+
+
+WebAssembly application
+-----------------------
+
+You can also run the code in a web browser without Python
+or other server-side support.  You need wasm-pack:
+
+https://rustwasm.github.io/wasm-pack/installer/
+
+If you don't have curl, this might work:
+
+wget -O - https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
+
+I can't get it to work at all on 32-bit Linux though.
+If it does work, you can then do
+
+wasm-pack build --target web
+
+and run a web server from the project root.  For example,
+
+python3 -m http.server
