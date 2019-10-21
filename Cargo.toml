@@ -16,6 +16,7 @@ crate-type = ["cdylib", "rlib"]
 [profile.release]
 opt-level = 3
 lto = true
+panic = 'abort'
 
 [dependencies.web-sys]
 version = "0.3.4"
