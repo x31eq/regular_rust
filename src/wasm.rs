@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
 use super::cangwu;
-use super::{Cents, Harmonic, PrimeLimit};
+use super::{Cents, Harmonic, FactorElement, PrimeLimit, join};
 
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
@@ -48,32 +48,40 @@ pub fn consecutive_prime_limit_search(
         table.append_child(&row)?;
     }
 
-    // Now make another table for the next lot of results
-    let table = document.create_element("table")?;
-    div.append_child(&table)?;
-    table.set_inner_html("");
-    let row = document.create_element("tr")?;
-    let cell = document.create_element("th")?;
-    cell.set_text_content(Some("Rank 2"));
-    row.append_child(&cell)?;
-    table.append_child(&row)?;
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
         rts.push(vec![mapping.clone()]);
     }
-    let new_rts = cangwu::higher_rank_search(
-        &limit.pitches,
-        &mappings,
-        &rts,
-        ek,
-        n_results + safety);
-    for rt in new_rts.iter().take(n_results) {
+    for rank in 2..dimension {
+        // Make another table for the next lot of results
+        let table = document.create_element("table")?;
+        table.set_inner_html("");
         let row = document.create_element("tr")?;
-        let cell = document.create_element("td")?;
-        let text = format!("{} & {}", rt[0][0], rt[1][0]);
+        let cell = document.create_element("th")?;
+        let text = format!("Rank {}", rank);
         cell.set_text_content(Some(&text));
         row.append_child(&cell)?;
         table.append_child(&row)?;
+
+        let eff_n_results =
+            n_results + if rank == dimension - 1 { 0 } else { safety };
+        rts = cangwu::higher_rank_search(
+            &limit.pitches,
+            &mappings,
+            &rts,
+            ek,
+            eff_n_results);
+
+        for rt in rts.iter().take(n_results) {
+            let row = document.create_element("tr")?;
+            let cell = document.create_element("td")?;
+            let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
+            let text = join(" & ", &octaves);
+            cell.set_text_content(Some(&text));
+            row.append_child(&cell)?;
+            table.append_child(&row)?;
+        }
+        div.append_child(&table)?;
     }
     Ok(())
 }
