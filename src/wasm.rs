@@ -77,17 +77,19 @@ pub fn consecutive_prime_limit_search(
             eff_n_results,
         );
 
-        for rt in rts.iter().take(n_results) {
-            let row = document.create_element("tr")?;
-            let cell = document.create_element("td")?;
-            let octaves: Vec<FactorElement> =
-                rt.iter().map(|m| m[0]).collect();
-            let text = join(" & ", &octaves);
-            cell.set_text_content(Some(&text));
-            row.append_child(&cell)?;
-            table.append_child(&row)?;
+        if rts.len() > 0 {
+            for rt in rts.iter().take(n_results) {
+                let row = document.create_element("tr")?;
+                let cell = document.create_element("td")?;
+                let octaves: Vec<FactorElement> =
+                    rt.iter().map(|m| m[0]).collect();
+                let text = join(" & ", &octaves);
+                cell.set_text_content(Some(&text));
+                row.append_child(&cell)?;
+                table.append_child(&row)?;
+            }
+            div.append_child(&table)?;
         }
-        div.append_child(&table)?;
     }
     Ok(())
 }
