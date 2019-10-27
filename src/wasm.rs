@@ -13,8 +13,10 @@ pub fn consecutive_prime_limit_search(
     let document = window.document().expect("no document");
 
     let limit = PrimeLimit::new(prime_cap);
+    let dimension = limit.pitches.len();
     let ek =
         ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
+    let safety = 4 * (dimension as f64).sqrt().floor() as usize;
     // This is shamelessly coupled to the HTML
     let div = document.get_element_by_id("regular-temperaments").unwrap_or({
         // If there's no matching table, let's make one!
@@ -35,8 +37,8 @@ pub fn consecutive_prime_limit_search(
     }
     table.append_child(&row)?;
     let mappings = cangwu::get_equal_temperaments(
-                            &limit.pitches, ek, n_results);
-    for et in mappings.iter() {
+                            &limit.pitches, ek, n_results + safety);
+    for et in mappings.iter().take(n_results) {
         let row = document.create_element("tr")?;
         for element in et {
             let cell = document.create_element("td")?;
@@ -64,9 +66,8 @@ pub fn consecutive_prime_limit_search(
         &mappings,
         &rts,
         ek,
-        // Note: no safety
-        n_results);
-    for rt in new_rts {
+        n_results + safety);
+    for rt in new_rts.iter().take(n_results) {
         let row = document.create_element("tr")?;
         let cell = document.create_element("td")?;
         let text = format!("{} & {}", rt[0][0], rt[1][0]);
