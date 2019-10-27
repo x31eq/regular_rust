@@ -16,13 +16,16 @@ pub fn consecutive_prime_limit_search(
     let ek =
         ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
     // This is shamelessly coupled to the HTML
-    let table = document.get_element_by_id("equal-temperaments").unwrap_or({
+    let div = document.get_element_by_id("regular-temperaments").unwrap_or({
         // If there's no matching table, let's make one!
-        let table = document.create_element("table")?;
-        table.set_id("equal-temperaments");
-        document.body().expect("no body").append_child(&table)?;
-        table
+        let div = document.create_element("div")?;
+        div.set_id("regular-temperaments");
+        document.body().expect("no body").append_child(&div)?;
+        div
     });
+    div.set_inner_html("");
+    let table = document.create_element("table")?;
+    div.append_child(&table)?;
     table.set_inner_html("");
     let row = document.create_element("tr")?;
     for heading in limit.headings {
