@@ -256,7 +256,7 @@ impl<T> PriorityQueue<T> {
 
     fn sort(&mut self) {
         self.items.sort_unstable_by(|(bad1, _), (bad2, _)| {
-            bad1.partial_cmp(&bad2).unwrap()
+            bad1.partial_cmp(bad2).unwrap()
         });
     }
 
