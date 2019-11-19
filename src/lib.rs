@@ -123,23 +123,23 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
-    for col in 1..echelon.len() {
-        // The iterator can't be over echelon, because that
-        // borrows it and means the mutable iterator later
-        // won't work.
-        let ncol = echelon[col].clone();
+    let cols = echelon.len();
+    for col in 1..cols {
+        // Instead of nested iterators, work backwards and skip
+        let mut col_iter = echelon.iter_mut().rev().skip(cols - col - 1);
+        let top_col = col_iter.next().unwrap();
         if let Some((row, &n)) =
-            ncol.iter().enumerate().find(|(_i, &n)| n != 0)
+            top_col.iter().enumerate().find(|(_i, &n)| n != 0)
         {
             assert!(n > 0);
-            for scol in echelon.iter_mut().take(col) {
+            for scol in col_iter {
                 let s = scol[row];
                 if s == 0 {
                     continue;
                 }
                 // emulate flooring division
                 let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
-                for (i, &y) in ncol.iter().enumerate() {
+                for (i, &y) in top_col.iter().enumerate() {
                     scol[i] -= m * y;
                 }
                 assert!(scol[row] >= 0);
