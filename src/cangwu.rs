@@ -37,8 +37,7 @@ impl TemperamentClass {
         self.reduced_mapping()
             .iter()
             .enumerate()
-            .map(|(i, col)| col.iter().skip(i).cloned())
-            .flatten()
+            .flat_map(|(i, col)| col.iter().skip(i).cloned())
             .collect()
     }
 
@@ -81,8 +80,7 @@ impl TemperamentClass {
         let flattened = self
             .melody
             .iter()
-            .map(|mapping| mapping.iter())
-            .flatten()
+            .flat_map(|mapping| mapping.iter())
             .cloned();
         let melody = DMatrix::from_iterator(dimension, rank, flattened);
         let weighting_vec: Vec<f64> =
