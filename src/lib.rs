@@ -98,21 +98,14 @@ pub fn cents(ratio: f64) -> Cents {
 
 /// Eratosthenes sieve
 fn primes_below(n: Harmonic) -> Vec<Harmonic> {
-    let top = n as usize;
-    let mut hasfactors = vec![false; top - 2];
+    let mut sieve = vec![true; n as usize - 2];
     (2..n)
-        .filter(|i| {
-            let i = *i as usize;
-            if !hasfactors[i - 2] {
-                let mut j = i;
-                while {
-                    j += i;
-                    j < top
-                } {
-                    hasfactors[j - 2] = true;
-                }
+        .filter(|&i| {
+            let mut multiples = sieve.iter_mut().step_by(i as usize);
+            if *multiples.next().unwrap() {
+                multiples.for_each(|multiple| *multiple = false);
             }
-            !hasfactors[i - 2]
+            sieve.remove(0)
         })
         .collect()
 }
