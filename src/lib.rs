@@ -101,11 +101,11 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     let mut sieve = vec![true; n as usize - 2];
     (2..n)
         .filter(|&i| {
-            let mut multiples = sieve.iter_mut().step_by(i as usize);
+            let mut multiples = sieve.iter_mut().rev().step_by(i as usize);
             if *multiples.next().unwrap() {
                 multiples.for_each(|multiple| *multiple = false);
             }
-            sieve.remove(0)
+            sieve.pop().unwrap()
         })
         .collect()
 }
