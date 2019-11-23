@@ -3,14 +3,12 @@ use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
 
-
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
     prime_cap: Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
 ) -> Result<(), JsValue> {
-
     let limit = PrimeLimit::new(prime_cap);
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
@@ -65,12 +63,10 @@ pub fn consecutive_prime_limit_search(
     Ok(())
 }
 
-
 struct WebContext {
     document: web_sys::Document,
     div: web_sys::Element,
 }
-
 
 impl WebContext {
     pub fn new() -> Self {
@@ -82,13 +78,16 @@ impl WebContext {
                 // If there's no matching element, let's make one!
                 let div = document.create_element("div").unwrap();
                 div.set_id("regular-temperaments");
-                document.body().expect("no body").append_child(&div).unwrap();
+                document
+                    .body()
+                    .expect("no body")
+                    .append_child(&div)
+                    .unwrap();
                 div
             });
         WebContext { document, div }
     }
 }
-
 
 fn show_equal_temperaments(
     web: &WebContext,
