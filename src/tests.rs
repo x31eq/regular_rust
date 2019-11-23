@@ -8,14 +8,14 @@ fn octave_cents() {
 
 #[test]
 fn seven_limit() {
-    assert_eq!(&PrimeLimit::new(7).label, "7-limit");
+    assert_eq!(&PrimeLimit::new(7).label, "7");
 }
 
 #[test]
 fn non_consecutive_limit() {
     let primes = vec![2, 3, 7];
     let limit = PrimeLimit::explicit(primes);
-    assert_eq!(&limit.label, "2.3.7-limit");
+    assert_eq!(&limit.label, "2.3.7");
 }
 
 #[test]

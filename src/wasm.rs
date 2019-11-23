@@ -37,7 +37,7 @@ pub fn consecutive_prime_limit_search(
         );
         if rts.len() > 0 {
             let visible_rts = rts.iter().take(n_results);
-            show_regular_temperaments(&web, visible_rts, rank)?;
+            show_regular_temperaments(&web, &limit, visible_rts, rank)?;
         }
     }
     Ok(())
@@ -100,6 +100,7 @@ fn show_equal_temperaments<'a>(
 
 fn show_regular_temperaments<'a>(
     web: &WebContext,
+    limit: &PrimeLimit,
     rts: impl Iterator<Item = &'a Vec<ETMap>>,
     rank: usize,
 ) -> Result<(), JsValue> {
@@ -116,9 +117,17 @@ fn show_regular_temperaments<'a>(
     for rt in rts {
         let row = web.document.create_element("tr")?;
         let cell = web.document.create_element("td")?;
+        let link = web.document.create_element("a")?;
         let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
+        let url = format!(
+            "/cgi-bin/rt.cgi?ets={}&limit={}",
+            &join("_", &octaves),
+            &limit.label,
+        );
+        link.set_attribute("href", &url)?;
         let text = join(" & ", &octaves);
-        cell.set_text_content(Some(&text));
+        link.set_text_content(Some(&text));
+        cell.append_child(&link)?;
         row.append_child(&cell)?;
         table.append_child(&row)?;
     }
