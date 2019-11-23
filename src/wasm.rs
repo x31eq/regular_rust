@@ -3,23 +3,13 @@ use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
 
+
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
     prime_cap: Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
 ) -> Result<(), JsValue> {
-    let window = web_sys::window().expect("no window");
-    let document = window.document().expect("no document");
-    let div = document
-        .get_element_by_id("regular-temperaments")
-        .unwrap_or({
-            // If there's no matching element, let's make one!
-            let div = document.create_element("div")?;
-            div.set_id("regular-temperaments");
-            document.body().expect("no body").append_child(&div)?;
-            div
-        });
 
     let limit = PrimeLimit::new(prime_cap);
     let dimension = limit.pitches.len();
@@ -30,7 +20,8 @@ pub fn consecutive_prime_limit_search(
         ek,
         n_results + safety,
     );
-    show_equal_temperaments(&div, &limit, &mappings, n_results)?;
+    let web = WebContext::new();
+    show_equal_temperaments(&web, &limit, &mappings, n_results)?;
 
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
@@ -38,10 +29,10 @@ pub fn consecutive_prime_limit_search(
     }
     for rank in 2..dimension {
         // Make another table for the next lot of results
-        let table = document.create_element("table")?;
+        let table = web.document.create_element("table")?;
         table.set_inner_html("");
-        let row = document.create_element("tr")?;
-        let cell = document.create_element("th")?;
+        let row = web.document.create_element("tr")?;
+        let cell = web.document.create_element("th")?;
         let text = format!("Rank {}", rank);
         cell.set_text_content(Some(&text));
         row.append_child(&cell)?;
@@ -59,8 +50,8 @@ pub fn consecutive_prime_limit_search(
 
         if rts.len() > 0 {
             for rt in rts.iter().take(n_results) {
-                let row = document.create_element("tr")?;
-                let cell = document.create_element("td")?;
+                let row = web.document.create_element("tr")?;
+                let cell = web.document.create_element("td")?;
                 let octaves: Vec<FactorElement> =
                     rt.iter().map(|m| m[0]).collect();
                 let text = join(" & ", &octaves);
@@ -68,36 +59,59 @@ pub fn consecutive_prime_limit_search(
                 row.append_child(&cell)?;
                 table.append_child(&row)?;
             }
-            div.append_child(&table)?;
+            web.div.append_child(&table)?;
         }
     }
     Ok(())
 }
 
+
+struct WebContext {
+    document: web_sys::Document,
+    div: web_sys::Element,
+}
+
+
+impl WebContext {
+    pub fn new() -> Self {
+        let window = web_sys::window().expect("no window");
+        let document = window.document().expect("no document");
+        let div = document
+            .get_element_by_id("regular-temperaments")
+            .unwrap_or({
+                // If there's no matching element, let's make one!
+                let div = document.create_element("div").unwrap();
+                div.set_id("regular-temperaments");
+                document.body().expect("no body").append_child(&div).unwrap();
+                div
+            });
+        WebContext { document, div }
+    }
+}
+
+
 fn show_equal_temperaments(
-    div: &web_sys::Element,
+    web: &WebContext,
     limit: &PrimeLimit,
     mappings: &[ETMap],
     n_results: usize,
 ) -> Result<(), JsValue> {
     // This is shamelessly coupled to the HTML
-    div.set_inner_html("");
-    let window = web_sys::window().expect("no window");
-    let document = window.document().expect("no document");
-    let table = document.create_element("table")?;
-    div.append_child(&table)?;
+    web.div.set_inner_html("");
+    let table = web.document.create_element("table")?;
+    web.div.append_child(&table)?;
     table.set_inner_html("");
-    let row = document.create_element("tr")?;
+    let row = web.document.create_element("tr")?;
     for heading in limit.headings.iter() {
-        let cell = document.create_element("th")?;
+        let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(&heading));
         row.append_child(&cell)?;
     }
     table.append_child(&row)?;
     for et in mappings.iter().take(n_results) {
-        let row = document.create_element("tr")?;
+        let row = web.document.create_element("tr")?;
         for element in et {
-            let cell = document.create_element("td")?;
+            let cell = web.document.create_element("td")?;
             cell.set_text_content(Some(&element.to_string()));
             row.append_child(&cell)?;
         }
