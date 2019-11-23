@@ -19,7 +19,7 @@ pub fn consecutive_prime_limit_search(
         n_results + safety,
     );
     let web = WebContext::new();
-    show_equal_temperaments(&web, &limit, &mappings, n_results)?;
+    show_equal_temperaments(&web, &limit, mappings.iter().take(n_results))?;
 
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
@@ -89,11 +89,10 @@ impl WebContext {
     }
 }
 
-fn show_equal_temperaments(
+fn show_equal_temperaments<'a>(
     web: &WebContext,
     limit: &PrimeLimit,
-    mappings: &[ETMap],
-    n_results: usize,
+    mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Result<(), JsValue> {
     // This is shamelessly coupled to the HTML
     web.div.set_inner_html("");
@@ -107,7 +106,7 @@ fn show_equal_temperaments(
         row.append_child(&cell)?;
     }
     table.append_child(&row)?;
-    for et in mappings.iter().take(n_results) {
+    for et in mappings {
         let row = web.document.create_element("tr")?;
         for element in et {
             let cell = web.document.create_element("td")?;
