@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
 use super::cangwu;
-use super::{join, Cents, FactorElement, Harmonic, PrimeLimit};
+use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
 
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
@@ -11,46 +11,26 @@ pub fn consecutive_prime_limit_search(
 ) -> Result<(), JsValue> {
     let window = web_sys::window().expect("no window");
     let document = window.document().expect("no document");
-
-    let limit = PrimeLimit::new(prime_cap);
-    let dimension = limit.pitches.len();
-    let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
-    let safety = 4 * (dimension as f64).sqrt().floor() as usize;
-    // This is shamelessly coupled to the HTML
     let div = document
         .get_element_by_id("regular-temperaments")
         .unwrap_or({
-            // If there's no matching table, let's make one!
+            // If there's no matching element, let's make one!
             let div = document.create_element("div")?;
             div.set_id("regular-temperaments");
             document.body().expect("no body").append_child(&div)?;
             div
         });
-    div.set_inner_html("");
-    let table = document.create_element("table")?;
-    div.append_child(&table)?;
-    table.set_inner_html("");
-    let row = document.create_element("tr")?;
-    for heading in limit.headings {
-        let cell = document.create_element("th")?;
-        cell.set_text_content(Some(&heading));
-        row.append_child(&cell)?;
-    }
-    table.append_child(&row)?;
+
+    let limit = PrimeLimit::new(prime_cap);
+    let dimension = limit.pitches.len();
+    let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
+    let safety = 4 * (dimension as f64).sqrt().floor() as usize;
     let mappings = cangwu::get_equal_temperaments(
         &limit.pitches,
         ek,
         n_results + safety,
     );
-    for et in mappings.iter().take(n_results) {
-        let row = document.create_element("tr")?;
-        for element in et {
-            let cell = document.create_element("td")?;
-            cell.set_text_content(Some(&element.to_string()));
-            row.append_child(&cell)?;
-        }
-        table.append_child(&row)?;
-    }
+    show_equal_temperaments(&div, &limit, &mappings, n_results)?;
 
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
@@ -90,6 +70,38 @@ pub fn consecutive_prime_limit_search(
             }
             div.append_child(&table)?;
         }
+    }
+    Ok(())
+}
+
+fn show_equal_temperaments(
+    div: &web_sys::Element,
+    limit: &PrimeLimit,
+    mappings: &[ETMap],
+    n_results: usize,
+) -> Result<(), JsValue> {
+    // This is shamelessly coupled to the HTML
+    div.set_inner_html("");
+    let window = web_sys::window().expect("no window");
+    let document = window.document().expect("no document");
+    let table = document.create_element("table")?;
+    div.append_child(&table)?;
+    table.set_inner_html("");
+    let row = document.create_element("tr")?;
+    for heading in limit.headings.iter() {
+        let cell = document.create_element("th")?;
+        cell.set_text_content(Some(&heading));
+        row.append_child(&cell)?;
+    }
+    table.append_child(&row)?;
+    for et in mappings.iter().take(n_results) {
+        let row = document.create_element("tr")?;
+        for element in et {
+            let cell = document.create_element("td")?;
+            cell.set_text_content(Some(&element.to_string()));
+            row.append_child(&cell)?;
+        }
+        table.append_child(&row)?;
     }
     Ok(())
 }
