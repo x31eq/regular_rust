@@ -26,16 +26,6 @@ pub fn consecutive_prime_limit_search(
         rts.push(vec![mapping.clone()]);
     }
     for rank in 2..dimension {
-        // Make another table for the next lot of results
-        let table = web.document.create_element("table")?;
-        table.set_inner_html("");
-        let row = web.document.create_element("tr")?;
-        let cell = web.document.create_element("th")?;
-        let text = format!("Rank {}", rank);
-        cell.set_text_content(Some(&text));
-        row.append_child(&cell)?;
-        table.append_child(&row)?;
-
         let eff_n_results =
             n_results + if rank == dimension - 1 { 0 } else { safety };
         rts = cangwu::higher_rank_search(
@@ -45,19 +35,9 @@ pub fn consecutive_prime_limit_search(
             ek,
             eff_n_results,
         );
-
         if rts.len() > 0 {
-            for rt in rts.iter().take(n_results) {
-                let row = web.document.create_element("tr")?;
-                let cell = web.document.create_element("td")?;
-                let octaves: Vec<FactorElement> =
-                    rt.iter().map(|m| m[0]).collect();
-                let text = join(" & ", &octaves);
-                cell.set_text_content(Some(&text));
-                row.append_child(&cell)?;
-                table.append_child(&row)?;
-            }
-            web.div.append_child(&table)?;
+            let visible_rts = rts.iter().take(n_results);
+            show_regular_temperaments(&web, visible_rts, rank)?;
         }
     }
     Ok(())
@@ -115,5 +95,33 @@ fn show_equal_temperaments<'a>(
         }
         table.append_child(&row)?;
     }
+    Ok(())
+}
+
+fn show_regular_temperaments<'a>(
+    web: &WebContext,
+    rts: impl Iterator<Item = &'a Vec<ETMap>>,
+    rank: usize,
+) -> Result<(), JsValue> {
+    // Make another table for the next lot of results
+    let table = web.document.create_element("table")?;
+    table.set_inner_html("");
+    let row = web.document.create_element("tr")?;
+    let cell = web.document.create_element("th")?;
+    let text = format!("Rank {}", rank);
+    cell.set_text_content(Some(&text));
+    row.append_child(&cell)?;
+    table.append_child(&row)?;
+
+    for rt in rts {
+        let row = web.document.create_element("tr")?;
+        let cell = web.document.create_element("td")?;
+        let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
+        let text = join(" & ", &octaves);
+        cell.set_text_content(Some(&text));
+        row.append_child(&cell)?;
+        table.append_child(&row)?;
+    }
+    web.div.append_child(&table)?;
     Ok(())
 }
