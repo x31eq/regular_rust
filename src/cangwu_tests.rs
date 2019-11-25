@@ -70,14 +70,14 @@ fn hermite() {
 fn key() {
     assert_eq!(
         make_marvel().key(),
-        vec![1, 0, 0, -5, 12,
-                1, 0, 2, -1,
-                   1, 2, -3]
+        vec![1, 2, -3,
+          1, 0, 2, -1,
+       1, 0, 0, -5, 12]
     );
 
-    assert_eq!(make_jove().key(), vec![1, 1, 1, 2, 2,
-                                          2, 1, 1, 5,
-                                             2, 1, 0]);
+    assert_eq!(make_jove().key(), vec![2, 1, 0,
+                                    2, 1, 1, 5,
+                                 1, 1, 1, 2, 2]);
 }
 
 #[test]
@@ -96,8 +96,8 @@ fn mystery() {
     let limit13 = PrimeLimit::new(13);
     let mystery =
         cangwu::TemperamentClass::new(&limit13.pitches, &mystery_vector);
-    assert_eq!(mystery.key(), vec![29, 46, 0, 14, 33, 40,
-                                        0, 1, 1, 1, 1]);
+    assert_eq!(mystery.key(), vec![0, 1, 1, 1, 1,
+                             29, 46, 0, 14, 33, 40]);
     assert_eq!(mystery.rank(), 2);
     assert!(4.83894 < mystery.complexity());
     assert!(mystery.complexity() < 4.83895);

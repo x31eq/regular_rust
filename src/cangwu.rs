@@ -37,6 +37,7 @@ impl TemperamentClass {
         self.reduced_mapping()
             .iter()
             .enumerate()
+            .rev()
             .flat_map(|(i, col)| col.iter().skip(i).cloned())
             .collect()
     }
