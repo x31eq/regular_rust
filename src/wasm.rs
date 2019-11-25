@@ -119,10 +119,12 @@ fn show_regular_temperaments<'a>(
         let cell = web.document.create_element("td")?;
         let link = web.document.create_element("a")?;
         let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
+        let rt_obj = cangwu::TemperamentClass::new(&limit.pitches, &rt);
         let url = format!(
-            "/cgi-bin/rt.cgi?ets={}&limit={}",
+            "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
             &join("_", &octaves),
             &limit.label,
+            &join("_", &rt_obj.key()),
         );
         link.set_attribute("href", &url)?;
         let text = join(" & ", &octaves);
