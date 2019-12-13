@@ -79,6 +79,7 @@ fn show_equal_temperaments<'a>(
     // This is shamelessly coupled to the HTML
     web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
+    table.set_id("equal-temperaments");
     web.list.append_child(&table)?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
