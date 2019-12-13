@@ -18,7 +18,7 @@ opt-level = 3
 lto = true
 panic = 'abort'
 
-[dependencies.web-sys]
+[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.4"
 features = [
   'Document',
