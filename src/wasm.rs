@@ -67,6 +67,13 @@ impl WebContext {
             });
         WebContext { document, list }
     }
+
+    pub fn set_body_class(&self, value: &str) -> Result<(), JsValue> {
+        self.document
+            .body()
+            .expect("no body")
+            .set_attribute("class", value)
+    }
 }
 
 fn show_equal_temperaments<'a>(
@@ -132,10 +139,7 @@ fn show_regular_temperaments<'a>(
         cell.append_child(&link)?;
         row.append_child(&cell)?;
         table.append_child(&row)?;
-        web.document
-            .body()
-            .expect("no body")
-            .set_attribute("class", "show-list")?;
+        web.set_body_class("show-list")?;
     }
     web.list.append_child(&table)?;
     Ok(())
