@@ -132,6 +132,10 @@ fn show_regular_temperaments<'a>(
         cell.append_child(&link)?;
         row.append_child(&cell)?;
         table.append_child(&row)?;
+        web.document
+            .body()
+            .expect("no body")
+            .set_attribute("class", "show-list")?;
     }
     web.list.append_child(&table)?;
     Ok(())

@@ -7,6 +7,18 @@
                 text-align: right;
                 padding-right: 1em;
             }
+            #regular-temperament {
+                display: none;
+            }
+            .show-temperament #regular-temperament {
+                display: block;
+            }
+            #temperament-list {
+                display: none;
+            }
+            .show-list #temperament-list {
+                display: block;
+            }
         </style>
     </head>
     <body>
@@ -31,8 +43,11 @@
             </p>
             <button>Search</button>
         </form>
+        <div id="regular-temperament">
+            A single result will go here one day
+        </div>
         <div id="temperament-list">
-            <tr><td>Results will go here</td></tr>
+            Results will go here
         </div>
         <script type="module">
             import init, { consecutive_prime_limit_search }
