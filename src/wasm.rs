@@ -45,27 +45,27 @@ pub fn consecutive_prime_limit_search(
 
 struct WebContext {
     document: web_sys::Document,
-    div: web_sys::Element,
+    list: web_sys::Element,
 }
 
 impl WebContext {
     pub fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
-        let div = document
+        let list = document
             .get_element_by_id("temperament-list")
             .unwrap_or({
                 // If there's no matching element, let's make one!
-                let div = document.create_element("div").unwrap();
-                div.set_id("temperament-list");
+                let list = document.create_element("list").unwrap();
+                list.set_id("temperament-list");
                 document
                     .body()
                     .expect("no body")
-                    .append_child(&div)
+                    .append_child(&list)
                     .unwrap();
-                div
+                list
             });
-        WebContext { document, div }
+        WebContext { document, list }
     }
 }
 
@@ -75,9 +75,9 @@ fn show_equal_temperaments<'a>(
     mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Result<(), JsValue> {
     // This is shamelessly coupled to the HTML
-    web.div.set_inner_html("");
+    web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
-    web.div.append_child(&table)?;
+    web.list.append_child(&table)?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
     for heading in limit.headings.iter() {
@@ -133,6 +133,6 @@ fn show_regular_temperaments<'a>(
         row.append_child(&cell)?;
         table.append_child(&row)?;
     }
-    web.div.append_child(&table)?;
+    web.list.append_child(&table)?;
     Ok(())
 }
