@@ -53,11 +53,11 @@ impl WebContext {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         let div = document
-            .get_element_by_id("regular-temperaments")
+            .get_element_by_id("temperament-list")
             .unwrap_or({
                 // If there's no matching element, let's make one!
                 let div = document.create_element("div").unwrap();
-                div.set_id("regular-temperaments");
+                div.set_id("temperament-list");
                 document
                     .body()
                     .expect("no body")
