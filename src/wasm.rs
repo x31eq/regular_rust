@@ -52,27 +52,22 @@ impl WebContext {
     pub fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
+        let body = document.body().expect("no body");
         let list = document
             .get_element_by_id("temperament-list")
             .unwrap_or({
                 // If there's no matching element, let's make one!
                 let list = document.create_element("list").unwrap();
                 list.set_id("temperament-list");
-                document
-                    .body()
-                    .expect("no body")
-                    .append_child(&list)
-                    .unwrap();
+                body.append_child(&list).unwrap();
                 list
             });
         WebContext { document, list }
     }
 
     pub fn set_body_class(&self, value: &str) -> Result<(), JsValue> {
-        self.document
-            .body()
-            .expect("no body")
-            .set_attribute("class", value)
+        let body = self.document.body().expect("no body");
+        body.set_attribute("class", value)
     }
 }
 
