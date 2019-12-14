@@ -119,6 +119,21 @@ fn show_regular_temperaments<'a>(
     row.append_child(&cell)?;
     table.append_child(&row)?;
 
+    // Callback for clicking a link
+    let callback = Closure::wrap(
+        Box::new(|evt: Event| {
+                if let Some(target) = evt.current_target() {
+                    target
+                        .dyn_ref::<Element>()
+                        .expect("Target isn't an Element")
+                        .set_outer_html("Clicked");
+                }
+                evt.prevent_default()
+            }
+        )
+        as Box<dyn Fn(Event)>
+    );
+
     for rt in rts {
         let row = web.document.create_element("tr")?;
         let cell = web.document.create_element("td")?;
@@ -137,26 +152,10 @@ fn show_regular_temperaments<'a>(
         let text = join(" & ", &octaves);
         link.set_text_content(Some(&text));
 
-        // Setup the link as a callback
-        let callback = Closure::wrap(
-            Box::new(|evt: Event| {
-                    if let Some(target) = evt.current_target() {
-                        target
-                            .dyn_ref::<Element>()
-                            .expect("Target isn't an Element")
-                            .set_outer_html("Clicked");
-                    }
-                    evt.prevent_default()
-                }
-            )
-            as Box<dyn Fn(Event)>
-        );
         link
             .dyn_ref::<HtmlElement>()
             .expect("Link isn't an HtmlElement")
             .set_onclick(Some(callback.as_ref().unchecked_ref()));
-        // keep the callback alive
-        callback.forget();
 
         cell.append_child(&link)?;
         row.append_child(&cell)?;
@@ -164,5 +163,7 @@ fn show_regular_temperaments<'a>(
         web.set_body_class("show-list")?;
     }
     web.list.append_child(&table)?;
+    // keep the callback alive
+    callback.forget();
     Ok(())
 }
