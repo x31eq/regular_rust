@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue, Closure};
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlElement, Event};
+use web_sys::{Element, HtmlElement, Event};
 
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
@@ -138,13 +138,15 @@ fn show_regular_temperaments<'a>(
         link.set_text_content(Some(&text));
 
         // Setup the link as a callback
-        // Make a new element that we can lose ownership of
-        let prefix = web.document.create_element("span")?;
-        cell.append_child(&prefix)?;
         let callback = Closure::wrap(
-            Box::new(move |evt: Event| {
-                     prefix.set_text_content(Some("clicked"));
-                     evt.prevent_default()
+            Box::new(|evt: Event| {
+                    if let Some(target) = evt.current_target() {
+                        target
+                            .dyn_ref::<Element>()
+                            .expect("Target isn't an Element")
+                            .set_outer_html("Clicked");
+                    }
+                    evt.prevent_default()
                 }
             )
             as Box<dyn Fn(Event)>

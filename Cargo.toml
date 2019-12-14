@@ -24,6 +24,7 @@ features = [
   'Document',
   'Element',
   'Event',
+  'EventTarget',
   'HtmlElement',
   'Node',
   'Window',
