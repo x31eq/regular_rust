@@ -34,7 +34,7 @@ impl PrimeLimit {
     /// (or a slightly higher composite)
     pub fn new(n: Harmonic) -> Self {
         let mut result = PrimeLimit::explicit(primes_below(n + 1));
-        result.label = format!("{}", n.to_string());
+        result.label = n.to_string();
         result
     }
 
@@ -43,7 +43,7 @@ impl PrimeLimit {
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
         let pitches =
             prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
-        let label = format!("{}", join(".", &prime_numbers));
+        let label = join(".", &prime_numbers);
         let headings =
             prime_numbers.iter().map(Harmonic::to_string).collect();
         PrimeLimit {
