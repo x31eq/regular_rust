@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue, Closure};
 use wasm_bindgen::JsCast;
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, Event};
 
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
@@ -142,10 +142,12 @@ fn show_regular_temperaments<'a>(
         let prefix = web.document.create_element("span")?;
         cell.append_child(&prefix)?;
         let callback = Closure::wrap(
-            Box::new(move ||
-                     prefix.set_text_content(Some("clicked"))
+            Box::new(move |evt: Event| {
+                     prefix.set_text_content(Some("clicked"));
+                     evt.prevent_default()
+                }
             )
-            as Box<dyn Fn()>
+            as Box<dyn Fn(Event)>
         );
         link
             .dyn_ref::<HtmlElement>()
