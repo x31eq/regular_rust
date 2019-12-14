@@ -1,4 +1,6 @@
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::{wasm_bindgen, JsValue, Closure};
+use wasm_bindgen::JsCast;
+use web_sys::HtmlElement;
 
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
@@ -121,6 +123,8 @@ fn show_regular_temperaments<'a>(
         let row = web.document.create_element("tr")?;
         let cell = web.document.create_element("td")?;
         let link = web.document.create_element("a")?;
+
+        // Setup the link as a link
         let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
         let rt_obj = cangwu::TemperamentClass::new(&limit.pitches, &rt);
         let url = format!(
@@ -132,6 +136,24 @@ fn show_regular_temperaments<'a>(
         link.set_attribute("href", &url)?;
         let text = join(" & ", &octaves);
         link.set_text_content(Some(&text));
+
+        // Setup the link as a callback
+        // Make a new element that we can lose ownership of
+        let prefix = web.document.create_element("span")?;
+        cell.append_child(&prefix)?;
+        let callback = Closure::wrap(
+            Box::new(move ||
+                     prefix.set_text_content(Some("clicked"))
+            )
+            as Box<dyn Fn()>
+        );
+        link
+            .dyn_ref::<HtmlElement>()
+            .expect("Link isn't an HtmlElement")
+            .set_onclick(Some(callback.as_ref().unchecked_ref()));
+        // keep the callback alive
+        callback.forget();
+
         cell.append_child(&link)?;
         row.append_child(&cell)?;
         table.append_child(&row)?;
