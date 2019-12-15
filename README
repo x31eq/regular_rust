@@ -74,3 +74,8 @@ This should make the code smaller, and maybe faster.
 If you don't have wasm-opt, you can get it from
 
 https://github.com/webassembly/binaryen
+
+
+To get documentation including the Wasm code:
+
+cargo doc --target wasm32-unknown-unknown
