@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue, Closure};
+use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::JsCast;
-use web_sys::{Element, HtmlElement, Event};
+use web_sys::{Element, Event, HtmlElement};
 
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
@@ -44,16 +44,17 @@ pub fn consecutive_prime_limit_search(
     }
 
     // Callback for clicking a link
-    let callback = Closure::wrap(
-        Box::new(rt_click_handler) as Box<dyn Fn(Event)>
-    );
+    let callback =
+        Closure::wrap(Box::new(rt_click_handler) as Box<dyn Fn(Event)>);
     web.list
         .dyn_ref::<HtmlElement>()
         .expect("Table isn't an HtmlElement")
         .set_onclick(Some(callback.as_ref().unchecked_ref()));
 
     // Return the callback so the browser keeps it alive
-    Ok(SearchResult{_callback: callback})
+    Ok(SearchResult {
+        _callback: callback,
+    })
 }
 
 struct WebContext {
@@ -66,9 +67,8 @@ impl WebContext {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         let body = document.body().expect("no body");
-        let list = document
-            .get_element_by_id("temperament-list")
-            .unwrap_or({
+        let list =
+            document.get_element_by_id("temperament-list").unwrap_or({
                 // If there's no matching element, let's make one!
                 let list = document.create_element("list").unwrap();
                 list.set_id("temperament-list");
