@@ -10,7 +10,7 @@ pub fn consecutive_prime_limit_search(
     prime_cap: Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
-) -> Result<(), JsValue> {
+) -> Result<SearchResult, JsValue> {
     let limit = PrimeLimit::new(prime_cap);
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
@@ -42,7 +42,18 @@ pub fn consecutive_prime_limit_search(
             show_regular_temperaments(&web, &limit, visible_rts, rank)?;
         }
     }
-    Ok(())
+
+    // Callback for clicking a link
+    let callback = Closure::wrap(
+        Box::new(rt_click_handler) as Box<dyn Fn(Event)>
+    );
+    web.list
+        .dyn_ref::<HtmlElement>()
+        .expect("Table isn't an HtmlElement")
+        .set_onclick(Some(callback.as_ref().unchecked_ref()));
+
+    // Return the callback so the browser keeps it alive
+    Ok(SearchResult{_callback: callback})
 }
 
 struct WebContext {
@@ -142,20 +153,16 @@ fn show_regular_temperaments<'a>(
         table.append_child(&row)?;
     }
 
-    // Callback for clicking a link
-    let callback = Closure::wrap(
-        Box::new(rt_click_handler) as Box<dyn Fn(Event)>
-    );
-    table
-        .dyn_ref::<HtmlElement>()
-        .expect("Table isn't an HtmlElement")
-        .set_onclick(Some(callback.as_ref().unchecked_ref()));
     web.list.append_child(&table)?;
-    // keep the callback alive
-    callback.forget();
-
     web.set_body_class("show-list")?;
     Ok(())
+}
+
+#[wasm_bindgen]
+pub struct SearchResult {
+    /// Object to return from a search so that
+    /// the callbacks stay alive
+    _callback: Closure<dyn Fn(Event)>,
 }
 
 fn rt_click_handler(evt: Event) {
