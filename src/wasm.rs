@@ -147,12 +147,14 @@ fn show_regular_temperaments<'a>(
     let callback = Closure::wrap(
         Box::new(|evt: Event| {
                 if let Some(target) = evt.target() {
-                    target
+                    let target = target
                         .dyn_ref::<Element>()
-                        .expect("Target isn't an Element")
-                        .set_outer_html("Clicked");
+                        .expect("Target isn't an Element");
+                    if target.has_attribute("href") {
+                        target.set_outer_html("Clicked");
+                        evt.prevent_default();
+                    }
                 }
-                evt.prevent_default()
             }
         )
         as Box<dyn Fn(Event)>
