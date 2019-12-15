@@ -5,6 +5,8 @@ use web_sys::{Element, Event, HtmlElement};
 use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
 
+type Exceptionable = Result<(), JsValue>;
+
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
     prime_cap: Harmonic,
@@ -45,7 +47,8 @@ pub fn consecutive_prime_limit_search(
 
     // Callback for clicking a link
     let callback =
-        Closure::wrap(Box::new(rt_click_handler) as Box<dyn Fn(Event)>);
+        Closure::wrap(Box::new(rt_click_handler)
+            as Box<dyn FnMut(Event) -> Exceptionable>);
     web.list
         .dyn_ref::<HtmlElement>()
         .expect("Table isn't an HtmlElement")
@@ -78,7 +81,7 @@ impl WebContext {
         WebContext { document, list }
     }
 
-    pub fn set_body_class(&self, value: &str) -> Result<(), JsValue> {
+    pub fn set_body_class(&self, value: &str) -> Exceptionable {
         let body = self.document.body().expect("no body");
         body.set_attribute("class", value)
     }
@@ -88,7 +91,7 @@ fn show_equal_temperaments<'a>(
     web: &WebContext,
     limit: &PrimeLimit,
     mappings: impl Iterator<Item = &'a ETMap>,
-) -> Result<(), JsValue> {
+) -> Exceptionable {
     // This is shamelessly coupled to the HTML
     web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
@@ -119,7 +122,7 @@ fn show_regular_temperaments<'a>(
     limit: &PrimeLimit,
     rts: impl Iterator<Item = &'a Vec<ETMap>>,
     rank: usize,
-) -> Result<(), JsValue> {
+) -> Exceptionable {
     // Make another table for the next lot of results
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
@@ -162,17 +165,20 @@ fn show_regular_temperaments<'a>(
 pub struct SearchResult {
     /// Object to return from a search so that
     /// the callbacks stay alive
-    _callback: Closure<dyn Fn(Event)>,
+    _callback: Closure<dyn FnMut(Event) -> Exceptionable>,
 }
 
-fn rt_click_handler(evt: Event) {
+fn rt_click_handler(evt: Event) -> Exceptionable {
     if let Some(target) = evt.target() {
         let target = target
             .dyn_ref::<Element>()
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
+            let web = WebContext::new();
+            web.set_body_class("show-list show-temperament")?;
             target.set_outer_html("Clicked");
             evt.prevent_default();
         }
     }
+    Ok(())
 }
