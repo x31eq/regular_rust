@@ -52,8 +52,12 @@ If you don't have curl, this might work:
 
 wget -O - https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
 
-I can't get it to work at all on 32-bit Linux though.
-If it does work, you can then do
+If that doesn't work (like your platform isn't supported)
+you can build it yourself from this repository:
+
+https://github.com/rustwasm/wasm-pack
+
+Once you have it, run
 
 wasm-pack build --target web
 
