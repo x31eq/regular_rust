@@ -25,6 +25,19 @@ pub fn consecutive_prime_limit_search(
     let web = WebContext::new();
     show_equal_temperaments(&web, &limit, mappings.iter().take(n_results))?;
 
+    // Store the limit in the DOM so we can get it later
+    let mut items = limit.headings.iter();
+    let mut headings = "".to_string();
+    if let Some(heading) = items.next() {
+        headings.push_str(&heading);
+    };
+    for heading in items {
+        headings.push_str("_");
+        headings.push_str(heading);
+    }
+    web.list.set_attribute("data-headings", &headings)?;
+    web.list.set_attribute("data-pitches", &join("_", &limit.pitches))?;
+
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
         rts.push(vec![mapping.clone()]);
@@ -148,6 +161,15 @@ fn show_regular_temperaments<'a>(
             &join("_", &rt_obj.key()),
         );
         link.set_attribute("href", &url)?;
+
+        // Set data attributes so we get at the mapping later
+        link.set_attribute("data-rank", &rt.len().to_string())?;
+        for (i, mapping) in rt.iter().enumerate() {
+            let key = format!("data-mapping{}", i);
+            let value = join("_", mapping);
+            link.set_attribute(&key, &value)?;
+        }
+
         let text = join(" & ", &octaves);
         link.set_text_content(Some(&text));
 
