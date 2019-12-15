@@ -140,7 +140,6 @@ fn show_regular_temperaments<'a>(
         cell.append_child(&link)?;
         row.append_child(&cell)?;
         table.append_child(&row)?;
-        web.set_body_class("show-list")?;
     }
 
     // Callback for clicking a link
@@ -155,6 +154,7 @@ fn show_regular_temperaments<'a>(
     // keep the callback alive
     callback.forget();
 
+    web.set_body_class("show-list")?;
     Ok(())
 }
 
