@@ -162,12 +162,14 @@ fn show_regular_temperaments<'a>(
 }
 
 #[wasm_bindgen]
+/// Object to return from a search so that
+/// the callbacks stay alive
 pub struct SearchResult {
-    /// Object to return from a search so that
-    /// the callbacks stay alive
     _callback: Closure<dyn FnMut(Event) -> Exceptionable>,
 }
 
+/// Function to call when a temperament link is "clicked"
+/// (which includes in-page activation)
 fn rt_click_handler(evt: Event) -> Exceptionable {
     if let Some(target) = evt.target() {
         let target = target
@@ -175,9 +177,13 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-            web.set_body_class("show-list show-temperament")?;
             target.set_outer_html("Clicked");
             evt.prevent_default();
+            let result = web.document
+                .get_element_by_id("regular-temperament")
+                .unwrap();
+            web.set_body_class("show-list show-temperament")?;
+            result.scroll_into_view();
         }
     }
     Ok(())
