@@ -36,7 +36,8 @@ pub fn consecutive_prime_limit_search(
         headings.push_str(heading);
     }
     web.list.set_attribute("data-headings", &headings)?;
-    web.list.set_attribute("data-pitches", &join("_", &limit.pitches))?;
+    web.list
+        .set_attribute("data-pitches", &join("_", &limit.pitches))?;
 
     let mut rts = Vec::with_capacity(mappings.len());
     for mapping in mappings.iter() {
@@ -199,9 +200,54 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-            target.set_outer_html("Clicked");
+
+            let headings = web
+                .list
+                .get_attribute("data-headings")
+                .unwrap()
+                .split('_')
+                .map(|heading| heading.to_string())
+                .collect();
+            let pitches = web
+                .list
+                .get_attribute("data-pitches")
+                .unwrap()
+                .split('_')
+                .map(|p| p.parse().unwrap())
+                .collect();
+            let limit = PrimeLimit {
+                label: "placeholder".to_string(),
+                pitches,
+                headings,
+            };
+            let mut mapping = Vec::new();
+            let rank: usize =
+                target.get_attribute("data-rank").unwrap().parse().unwrap();
+            for i in 0..rank {
+                let vector = target
+                    .get_attribute(&format!("data-mapping{}", i))
+                    .unwrap()
+                    .split('_')
+                    .map(|m| m.parse().unwrap())
+                    .collect();
+                mapping.push(vector);
+            }
+            let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
+            let octaves: Vec<FactorElement> =
+                mapping.iter().map(|m| m[0]).collect();
+            let name = join(" & ", &octaves);
+            web.document
+                .get_element_by_id("rt-name")
+                .unwrap()
+                .set_text_content(Some(&name));
+            web.document
+                .get_element_by_id("rt-complexity")
+                .unwrap()
+                .set_text_content(Some(&rt.complexity().to_string()));
+
             evt.prevent_default();
-            let result = web.document
+            let result = web
+                .document
                 .get_element_by_id("regular-temperament")
                 .unwrap();
             web.set_body_class("show-list show-temperament")?;
