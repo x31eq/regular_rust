@@ -244,6 +244,23 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .get_element_by_id("rt-complexity")
                 .unwrap()
                 .set_text_content(Some(&rt.complexity().to_string()));
+            let te_error = rt.badness(0.0) / rt.complexity();
+            web.document
+                .get_element_by_id("rt-te-error")
+                .unwrap()
+                .set_text_content(Some(&te_error.to_string()));
+
+            let mut max_harmonic = 0.0;
+            for &harmonic in limit.pitches.iter() {
+                if harmonic > max_harmonic {
+                    max_harmonic = harmonic;
+                }
+            }
+            let error = te_error * max_harmonic / 12e2;
+            web.document
+                .get_element_by_id("error")
+                .unwrap()
+                .set_text_content(Some(&error.to_string()));
 
             evt.prevent_default();
             let result = web
