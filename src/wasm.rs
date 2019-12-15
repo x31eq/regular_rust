@@ -145,27 +145,27 @@ fn show_regular_temperaments<'a>(
 
     // Callback for clicking a link
     let callback = Closure::wrap(
-        Box::new(|evt: Event| {
-                if let Some(target) = evt.target() {
-                    let target = target
-                        .dyn_ref::<Element>()
-                        .expect("Target isn't an Element");
-                    if target.has_attribute("href") {
-                        target.set_outer_html("Clicked");
-                        evt.prevent_default();
-                    }
-                }
-            }
-        )
-        as Box<dyn Fn(Event)>
+        Box::new(rt_click_handler) as Box<dyn Fn(Event)>
     );
     table
         .dyn_ref::<HtmlElement>()
-        .expect("Link isn't an HtmlElement")
+        .expect("Table isn't an HtmlElement")
         .set_onclick(Some(callback.as_ref().unchecked_ref()));
-
     web.list.append_child(&table)?;
     // keep the callback alive
     callback.forget();
+
     Ok(())
+}
+
+fn rt_click_handler(evt: Event) {
+    if let Some(target) = evt.target() {
+        let target = target
+            .dyn_ref::<Element>()
+            .expect("Target isn't an Element");
+        if target.has_attribute("href") {
+            target.set_outer_html("Clicked");
+            evt.prevent_default();
+        }
+    }
 }
