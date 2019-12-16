@@ -121,14 +121,7 @@ fn write_mapping_matrix<'a>(
     limit: &PrimeLimit,
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
-    table.set_inner_html("");
-    let row = web.document.create_element("tr")?;
-    for heading in limit.headings.iter() {
-        let cell = web.document.create_element("th")?;
-        cell.set_text_content(Some(&heading));
-        row.append_child(&cell)?;
-    }
-    table.append_child(&row)?;
+    write_headings(&web, &table, &limit)?;
     for vector in values {
         let row = web.document.create_element("tr")?;
         for element in vector {
@@ -138,6 +131,22 @@ fn write_mapping_matrix<'a>(
         }
         table.append_child(&row)?;
     }
+    Ok(())
+}
+
+fn write_headings(
+    web: &WebContext,
+    table: &Element,
+    limit: &PrimeLimit,
+) -> Exceptionable {
+    table.set_inner_html("");
+    let row = web.document.create_element("tr")?;
+    for heading in limit.headings.iter() {
+        let cell = web.document.create_element("th")?;
+        cell.set_text_content(Some(&heading));
+        row.append_child(&cell)?;
+    }
+    table.append_child(&row)?;
     Ok(())
 }
 
@@ -243,6 +252,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 mapping.push(vector);
             }
             let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
+
             let octaves: Vec<FactorElement> =
                 mapping.iter().map(|m| m[0]).collect();
             let name = join(" & ", &octaves);
@@ -250,19 +260,36 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .get_element_by_id("rt-name")
                 .unwrap()
                 .set_text_content(Some(&name));
+
             let table = web.document
                 .get_element_by_id("rt-etmap")
                 .unwrap();
             write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+
             let table = web.document
                 .get_element_by_id("rt-redmap")
                 .unwrap();
             let redmap = rt.reduced_mapping();
             write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
+
+            let table = web.document
+                .get_element_by_id("rt-steps")
+                .unwrap();
+            table.set_inner_html("");
+            let row = web.document.create_element("tr")?;
+            for element in rt.optimal_tuning() {
+                let cell = web.document.create_element("td")?;
+                let formatted = format!("{:.4}", element);
+                cell.set_text_content(Some(&formatted));
+                row.append_child(&cell)?;
+            }
+            table.append_child(&row)?;
+
             web.document
                 .get_element_by_id("rt-complexity")
                 .unwrap()
                 .set_text_content(Some(&rt.complexity().to_string()));
+
             let te_error = rt.badness(0.0) / rt.complexity();
             web.document
                 .get_element_by_id("rt-te-error")
