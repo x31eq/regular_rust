@@ -110,18 +110,28 @@ fn show_equal_temperaments<'a>(
     web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
     table.set_id("equal-temperaments");
+    write_int_matrix(&web, &table, &limit.headings, mappings)?;
     web.list.append_child(&table)?;
+    Ok(())
+}
+
+fn write_int_matrix<'a>(
+    web: &WebContext,
+    table: &Element,
+    headings: &[String],
+    values: impl Iterator<Item = &'a ETMap>,
+) -> Exceptionable {
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for heading in limit.headings.iter() {
+    for heading in headings.iter() {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(&heading));
         row.append_child(&cell)?;
     }
     table.append_child(&row)?;
-    for et in mappings {
+    for vector in values {
         let row = web.document.create_element("tr")?;
-        for element in et {
+        for element in vector {
             let cell = web.document.create_element("td")?;
             cell.set_text_content(Some(&element.to_string()));
             row.append_child(&cell)?;
