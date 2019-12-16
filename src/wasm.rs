@@ -8,7 +8,7 @@ use super::{
 };
 
 extern crate nalgebra as na;
-use na::{DMatrix};
+use na::DMatrix;
 
 type Exceptionable = Result<(), JsValue>;
 
@@ -303,7 +303,8 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             let melody = DMatrix::from_iterator(dimension, rank, flattened);
             let tuning_map: DMatrix<f64> = melody * tuning;
             let tuning_map = tuning_map.iter().cloned().collect();
-            let table = web.document.get_element_by_id("rt-tuning-map").unwrap();
+            let table =
+                web.document.get_element_by_id("rt-tuning-map").unwrap();
             table.set_inner_html("");
             write_headings(&web, &table, &limit)?;
             write_float_row(&web, &table, &tuning_map, 3)?;
