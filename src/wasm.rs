@@ -254,6 +254,11 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .get_element_by_id("rt-etmap")
                 .unwrap();
             write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+            let table = web.document
+                .get_element_by_id("rt-redmap")
+                .unwrap();
+            let redmap = rt.reduced_mapping();
+            write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
             web.document
                 .get_element_by_id("rt-complexity")
                 .unwrap()
