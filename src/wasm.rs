@@ -110,20 +110,20 @@ fn show_equal_temperaments<'a>(
     web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
     table.set_id("equal-temperaments");
-    write_int_matrix(&web, &table, &limit.headings, mappings)?;
+    write_mapping_matrix(&web, &table, &limit, mappings)?;
     web.list.append_child(&table)?;
     Ok(())
 }
 
-fn write_int_matrix<'a>(
+fn write_mapping_matrix<'a>(
     web: &WebContext,
     table: &Element,
-    headings: &[String],
+    limit: &PrimeLimit,
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for heading in headings.iter() {
+    for heading in limit.headings.iter() {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(&heading));
         row.append_child(&cell)?;
@@ -250,6 +250,10 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .get_element_by_id("rt-name")
                 .unwrap()
                 .set_text_content(Some(&name));
+            let table = web.document
+                .get_element_by_id("rt-etmap")
+                .unwrap();
+            write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
             web.document
                 .get_element_by_id("rt-complexity")
                 .unwrap()
