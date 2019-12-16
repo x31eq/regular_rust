@@ -312,13 +312,13 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             web.document
                 .get_element_by_id("rt-complexity")
                 .unwrap()
-                .set_text_content(Some(&rt.complexity().to_string()));
+                .set_text_content(Some(&format!("{:.6}", rt.complexity())));
 
             let te_error = rt.badness(0.0) / rt.complexity();
             web.document
                 .get_element_by_id("rt-te-error")
                 .unwrap()
-                .set_text_content(Some(&te_error.to_string()));
+                .set_text_content(Some(&format!("{:.6}", te_error)));
 
             let mut max_harmonic = 0.0;
             for &harmonic in limit.pitches.iter() {
@@ -330,7 +330,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             web.document
                 .get_element_by_id("error")
                 .unwrap()
-                .set_text_content(Some(&error.to_string()));
+                .set_text_content(Some(&format!("{:.6}", error)));
 
             // Make another RT object to get the generator tunings
             let rt = cangwu::TemperamentClass::new(&limit.pitches, &redmap);
