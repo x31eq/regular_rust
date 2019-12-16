@@ -7,6 +7,9 @@ use super::{
     join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit, Tuning,
 };
 
+extern crate nalgebra as na;
+use na::{DMatrix};
+
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
@@ -289,7 +292,21 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
 
             let table = web.document.get_element_by_id("rt-steps").unwrap();
             table.set_inner_html("");
-            write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+            let tuning = rt.optimal_tuning();
+            write_float_row(&web, &table, &tuning, 4)?;
+
+            let tuning = DMatrix::from_vec(rank, 1, tuning);
+            let dimension = limit.pitches.len();
+            let flattened = mapping
+                .iter()
+                .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
+            let melody = DMatrix::from_iterator(dimension, rank, flattened);
+            let tuning_map: DMatrix<f64> = melody * tuning;
+            let tuning_map = tuning_map.iter().cloned().collect();
+            let table = web.document.get_element_by_id("rt-tuning-map").unwrap();
+            table.set_inner_html("");
+            write_headings(&web, &table, &limit)?;
+            write_float_row(&web, &table, &tuning_map, 3)?;
 
             web.document
                 .get_element_by_id("rt-complexity")
