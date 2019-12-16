@@ -314,6 +314,13 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .unwrap()
                 .set_text_content(Some(&error.to_string()));
 
+            // Make another RT object to get the generator tunings
+            let rt = cangwu::TemperamentClass::new(&limit.pitches, &redmap);
+            let table =
+                web.document.get_element_by_id("rt-generators").unwrap();
+            table.set_inner_html("");
+            write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+
             evt.prevent_default();
             let result = web
                 .document
