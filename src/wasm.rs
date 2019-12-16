@@ -109,7 +109,7 @@ fn show_equal_temperaments<'a>(
     // This is shamelessly coupled to the HTML
     web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
-    table.set_id("equal-temperaments");
+    table.set_attribute("class", "mapping")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
     web.list.append_child(&table)?;
     Ok(())
