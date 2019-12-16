@@ -3,7 +3,9 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, Event, HtmlElement};
 
 use super::cangwu;
-use super::{join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit};
+use super::{
+    join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit, Tuning,
+};
 
 type Exceptionable = Result<(), JsValue>;
 
@@ -150,6 +152,23 @@ fn write_headings(
     Ok(())
 }
 
+fn write_float_row(
+    web: &WebContext,
+    table: &Element,
+    pitches: &Tuning,
+    precision: usize,
+) -> Exceptionable {
+    let row = web.document.create_element("tr")?;
+    for element in pitches {
+        let cell = web.document.create_element("td")?;
+        let formatted = format!("{:.*}", precision, element);
+        cell.set_text_content(Some(&formatted));
+        row.append_child(&cell)?;
+    }
+    table.append_child(&row)?;
+    Ok(())
+}
+
 fn show_regular_temperaments<'a>(
     web: &WebContext,
     limit: &PrimeLimit,
@@ -261,29 +280,16 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .unwrap()
                 .set_text_content(Some(&name));
 
-            let table = web.document
-                .get_element_by_id("rt-etmap")
-                .unwrap();
+            let table = web.document.get_element_by_id("rt-etmap").unwrap();
             write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
 
-            let table = web.document
-                .get_element_by_id("rt-redmap")
-                .unwrap();
+            let table = web.document.get_element_by_id("rt-redmap").unwrap();
             let redmap = rt.reduced_mapping();
             write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
 
-            let table = web.document
-                .get_element_by_id("rt-steps")
-                .unwrap();
+            let table = web.document.get_element_by_id("rt-steps").unwrap();
             table.set_inner_html("");
-            let row = web.document.create_element("tr")?;
-            for element in rt.optimal_tuning() {
-                let cell = web.document.create_element("td")?;
-                let formatted = format!("{:.4}", element);
-                cell.set_text_content(Some(&formatted));
-                row.append_child(&cell)?;
-            }
-            table.append_child(&row)?;
+            write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
 
             web.document
                 .get_element_by_id("rt-complexity")
