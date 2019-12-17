@@ -309,6 +309,17 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             write_headings(&web, &table, &limit)?;
             write_float_row(&web, &table, &tuning_map, 3)?;
 
+            let mistunings = tuning_map
+                .iter()
+                .zip(limit.pitches.iter())
+                .map(|(&x, y)| x - y)
+                .collect();
+            let table =
+                web.document.get_element_by_id("rt-mistunings").unwrap();
+            table.set_inner_html("");
+            write_headings(&web, &table, &limit)?;
+            write_float_row(&web, &table, &mistunings, 4)?;
+
             web.document
                 .get_element_by_id("rt-complexity")
                 .unwrap()
