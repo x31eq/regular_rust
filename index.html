@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <title>Client-side temperament finding</title>
         <style type="text/css">
             table.mapping {
                 margin-bottom: 1em;
@@ -43,6 +44,12 @@
                     Badness parameter
                     <input id="prime-eka" value="1.0" size="5">
                     cents
+                </label>
+            </p>
+            <p>
+                <label>
+                    Number of results
+                    <input id="n-results" value="10" size="2">
                 </label>
             </p>
             <button>Search</button>
@@ -94,7 +101,9 @@
                         10)
                     var eka = parseFloat(
                         document.getElementById("prime-eka").value)
-                    consecutive_prime_limit_search(limit, eka, 10)
+                    var nresults = parseInt(
+                        document.getElementById("n-results").value)
+                    consecutive_prime_limit_search(limit, eka, nresults)
                 }
 
             run()
