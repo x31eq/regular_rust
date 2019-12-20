@@ -2,9 +2,6 @@
 //!
 //! Utilties for regular temperament finding
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -91,7 +88,6 @@ pub fn prime_mapping(
 }
 
 /// Convert a frequency ratio to cents
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub fn cents(ratio: f64) -> Cents {
     ratio.log2() * 12e2
 }
