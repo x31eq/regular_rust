@@ -70,7 +70,7 @@ pub fn consecutive_prime_limit_search(
             as Box<dyn FnMut(Event) -> Exceptionable>);
     web.list
         .dyn_ref::<HtmlElement>()
-        .expect("Table isn't an HtmlElement")
+        .expect("Result list isn't an HtmlElement")
         .set_onclick(Some(callback.as_ref().unchecked_ref()));
 
     // Return the callback so the browser keeps it alive
