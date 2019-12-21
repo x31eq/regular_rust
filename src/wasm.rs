@@ -104,6 +104,10 @@ impl WebContext {
         let body = self.document.body().expect("no body");
         body.set_attribute("class", value)
     }
+
+    pub fn element(&self, id: &str) -> Option<Element> {
+        self.document.get_element_by_id(id)
+    }
 }
 
 fn show_equal_temperaments<'a>(
@@ -283,14 +287,14 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .unwrap()
                 .set_text_content(Some(&name));
 
-            let table = web.document.get_element_by_id("rt-etmap").unwrap();
+            let table = web.element("rt-etmap").unwrap();
             write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
 
-            let table = web.document.get_element_by_id("rt-redmap").unwrap();
+            let table = web.element("rt-redmap").unwrap();
             let redmap = rt.reduced_mapping();
             write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
 
-            let table = web.document.get_element_by_id("rt-steps").unwrap();
+            let table = web.element("rt-steps").unwrap();
             table.set_inner_html("");
             let tuning = rt.optimal_tuning();
             write_float_row(&web, &table, &tuning, 4)?;
@@ -303,8 +307,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             let melody = DMatrix::from_iterator(dimension, rank, flattened);
             let tuning_map: DMatrix<f64> = melody * tuning;
             let tuning_map = tuning_map.iter().cloned().collect();
-            let table =
-                web.document.get_element_by_id("rt-tuning-map").unwrap();
+            let table = web.element("rt-tuning-map").unwrap();
             table.set_inner_html("");
             write_headings(&web, &table, &limit)?;
             write_float_row(&web, &table, &tuning_map, 3)?;
@@ -314,8 +317,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .zip(limit.pitches.iter())
                 .map(|(&x, y)| x - y)
                 .collect();
-            let table =
-                web.document.get_element_by_id("rt-mistunings").unwrap();
+            let table = web.element("rt-mistunings").unwrap();
             table.set_inner_html("");
             write_headings(&web, &table, &limit)?;
             write_float_row(&web, &table, &mistunings, 4)?;
@@ -345,8 +347,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
 
             // Make another RT object to get the generator tunings
             let rt = cangwu::TemperamentClass::new(&limit.pitches, &redmap);
-            let table =
-                web.document.get_element_by_id("rt-generators").unwrap();
+            let table = web.element("rt-generators").unwrap();
             table.set_inner_html("");
             write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
 
