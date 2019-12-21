@@ -307,7 +307,6 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             let tuning_map: DMatrix<f64> = melody * tuning;
             let tuning_map = tuning_map.iter().cloned().collect();
             if let Some(table) = web.element("rt-tuning-map") {
-                table.set_inner_html("");
                 write_headings(&web, &table, &limit)?;
                 write_float_row(&web, &table, &tuning_map, 3)?;
             }
@@ -318,7 +317,6 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                     .zip(limit.pitches.iter())
                     .map(|(&x, y)| x - y)
                     .collect();
-                table.set_inner_html("");
                 write_headings(&web, &table, &limit)?;
                 write_float_row(&web, &table, &mistunings, 4)?;
             }
