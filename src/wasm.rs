@@ -260,11 +260,8 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
                 .split('_')
                 .map(|p| p.parse().unwrap())
                 .collect();
-            let limit = PrimeLimit {
-                label: "placeholder".to_string(),
-                pitches,
-                headings,
-            };
+            let label = "placeholder".to_string();
+            let limit = PrimeLimit {label, pitches, headings};
             let mut mapping = Vec::new();
             let rank: usize =
                 target.get_attribute("data-rank").unwrap().parse().unwrap();
