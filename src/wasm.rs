@@ -279,25 +279,27 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             }
             let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
 
-            let octaves: Vec<FactorElement> =
-                mapping.iter().map(|m| m[0]).collect();
-            let name = join(" & ", &octaves);
-            web.document
-                .get_element_by_id("rt-name")
-                .unwrap()
-                .set_text_content(Some(&name));
+            if let Some(name_field) = web.element("rt-name") {
+                let octaves: Vec<FactorElement> =
+                    mapping.iter().map(|m| m[0]).collect();
+                let name = join(" & ", &octaves);
+                name_field.set_text_content(Some(&name));
+            }
 
-            let table = web.element("rt-etmap").unwrap();
-            write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+            if let Some(table) = web.element("rt-etmap") {
+                write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+            }
 
-            let table = web.element("rt-redmap").unwrap();
             let redmap = rt.reduced_mapping();
-            write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
+            if let Some(table) = web.element("rt-redmap") {
+                write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
+            }
 
-            let table = web.element("rt-steps").unwrap();
-            table.set_inner_html("");
             let tuning = rt.optimal_tuning();
-            write_float_row(&web, &table, &tuning, 4)?;
+            if let Some(table) = web.element("rt-steps") {
+                table.set_inner_html("");
+                write_float_row(&web, &table, &tuning, 4)?;
+            }
 
             let tuning = DMatrix::from_vec(rank, 1, tuning);
             let dimension = limit.pitches.len();
@@ -307,57 +309,58 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             let melody = DMatrix::from_iterator(dimension, rank, flattened);
             let tuning_map: DMatrix<f64> = melody * tuning;
             let tuning_map = tuning_map.iter().cloned().collect();
-            let table = web.element("rt-tuning-map").unwrap();
-            table.set_inner_html("");
-            write_headings(&web, &table, &limit)?;
-            write_float_row(&web, &table, &tuning_map, 3)?;
-
-            let mistunings = tuning_map
-                .iter()
-                .zip(limit.pitches.iter())
-                .map(|(&x, y)| x - y)
-                .collect();
-            let table = web.element("rt-mistunings").unwrap();
-            table.set_inner_html("");
-            write_headings(&web, &table, &limit)?;
-            write_float_row(&web, &table, &mistunings, 4)?;
-
-            web.document
-                .get_element_by_id("rt-complexity")
-                .unwrap()
-                .set_text_content(Some(&format!("{:.6}", rt.complexity())));
-
-            let te_error = rt.badness(0.0) / rt.complexity();
-            web.document
-                .get_element_by_id("rt-te-error")
-                .unwrap()
-                .set_text_content(Some(&format!("{:.6}", te_error)));
-
-            let mut max_harmonic = 0.0;
-            for &harmonic in limit.pitches.iter() {
-                if harmonic > max_harmonic {
-                    max_harmonic = harmonic;
-                }
+            if let Some(table) = web.element("rt-tuning-map") {
+                table.set_inner_html("");
+                write_headings(&web, &table, &limit)?;
+                write_float_row(&web, &table, &tuning_map, 3)?;
             }
-            let error = te_error * max_harmonic / 12e2;
-            web.document
-                .get_element_by_id("error")
-                .unwrap()
-                .set_text_content(Some(&format!("{:.6}", error)));
 
-            // Make another RT object to get the generator tunings
-            let rt = cangwu::TemperamentClass::new(&limit.pitches, &redmap);
-            let table = web.element("rt-generators").unwrap();
-            table.set_inner_html("");
-            write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+            if let Some(table) = web.element("rt-mistunings") {
+                let mistunings = tuning_map
+                    .iter()
+                    .zip(limit.pitches.iter())
+                    .map(|(&x, y)| x - y)
+                    .collect();
+                table.set_inner_html("");
+                write_headings(&web, &table, &limit)?;
+                write_float_row(&web, &table, &mistunings, 4)?;
+            }
+
+            let complexity = rt.complexity();
+            if let Some(field) = web.element("rt-complexity") {
+                let text = format!("{:.6}", complexity);
+                field.set_text_content(Some(&text));
+            }
+
+            let te_error = rt.badness(0.0) / complexity;
+            if let Some(field) = web.element("rt-te-error") {
+                field.set_text_content(Some(&format!("{:.6}", te_error)));
+            }
+
+            if let Some(field) = web.element("error") {
+                let mut max_harmonic = 0.0;
+                for &harmonic in limit.pitches.iter() {
+                    if harmonic > max_harmonic {
+                        max_harmonic = harmonic;
+                    }
+                }
+                let error = te_error * max_harmonic / 12e2;
+                field.set_text_content(Some(&format!("{:.6}", error)));
+            }
+
+            if let Some(table) = web.element("rt-generators") {
+                // Make another RT object to get the generator tunings
+                let rt =
+                    cangwu::TemperamentClass::new(&limit.pitches, &redmap);
+                table.set_inner_html("");
+                write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+            }
 
             evt.prevent_default();
-            let result = web
-                .document
-                .get_element_by_id("regular-temperament")
-                .unwrap();
             web.set_body_class("show-list show-temperament")?;
-            result.scroll_into_view();
+            if let Some(result) = web.element("regular-temperament") {
+                result.scroll_into_view();
+            }
         }
     }
     Ok(())
