@@ -81,7 +81,7 @@ pub fn consecutive_prime_limit_search(
 
 struct WebContext {
     document: web_sys::Document,
-    list: web_sys::Element,
+    list: Element,
 }
 
 impl WebContext {
