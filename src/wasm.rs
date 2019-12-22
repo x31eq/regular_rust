@@ -3,9 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, Event, HtmlElement};
 
 use super::cangwu;
-use super::{
-    join, Cents, ETMap, FactorElement, Harmonic, PrimeLimit, Tuning,
-};
+use super::{join, Cents, ETMap, FactorElement, Mapping, PrimeLimit};
 
 extern crate nalgebra as na;
 use na::DMatrix;
@@ -14,7 +12,7 @@ type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
 pub fn consecutive_prime_limit_search(
-    prime_cap: Harmonic,
+    prime_cap: super::Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
 ) -> Result<SearchResult, JsValue> {
@@ -162,7 +160,7 @@ fn write_headings(
 fn write_float_row(
     web: &WebContext,
     table: &Element,
-    pitches: &Tuning,
+    pitches: &super::Tuning,
     precision: usize,
 ) -> Exceptionable {
     let row = web.document.create_element("tr")?;
@@ -278,7 +276,7 @@ fn load_limit(list: &Element) -> PrimeLimit {
 }
 
 /// Get the regular temperament mapping from the DOM
-fn load_mapping(link: &Element) -> super::Mapping {
+fn load_mapping(link: &Element) -> Mapping {
     let mut mapping = Vec::new();
     let rank: usize =
         link.get_attribute("data-rank").unwrap().parse().unwrap();
@@ -298,7 +296,7 @@ fn load_mapping(link: &Element) -> super::Mapping {
 fn show_rt(
     web: &WebContext,
     limit: PrimeLimit,
-    mapping: super::Mapping,
+    mapping: Mapping,
 ) -> Exceptionable {
     let rank = mapping.len();
     let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
