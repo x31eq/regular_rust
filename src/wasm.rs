@@ -246,22 +246,7 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
         if target.has_attribute("href") {
             let web = WebContext::new();
 
-            let headings = web
-                .list
-                .get_attribute("data-headings")
-                .unwrap()
-                .split('_')
-                .map(|heading| heading.to_string())
-                .collect();
-            let pitches = web
-                .list
-                .get_attribute("data-pitches")
-                .unwrap()
-                .split('_')
-                .map(|p| p.parse().unwrap())
-                .collect();
-            let label = "placeholder".to_string();
-            let limit = PrimeLimit {label, pitches, headings};
+            let limit = load_limit(&web.list);
             let mut mapping = Vec::new();
             let rank: usize =
                 target.get_attribute("data-rank").unwrap().parse().unwrap();
@@ -360,3 +345,22 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
     }
     Ok(())
 }
+
+/// Pull the prime limit out of the DOM
+fn load_limit(list: &Element) -> PrimeLimit {
+    let headings = list
+        .get_attribute("data-headings")
+        .unwrap()
+        .split('_')
+        .map(|heading| heading.to_string())
+        .collect();
+    let pitches = list
+        .get_attribute("data-pitches")
+        .unwrap()
+        .split('_')
+        .map(|p| p.parse().unwrap())
+        .collect();
+    let label = "placeholder".to_string();
+    PrimeLimit {label, pitches, headings}
+}
+
