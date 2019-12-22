@@ -302,10 +302,8 @@ fn show_rt(
     let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        let octaves: Vec<FactorElement> =
-            mapping.iter().map(|m| m[0]).collect();
-        let name = join(" & ", &octaves);
-        name_field.set_text_content(Some(&name));
+        let octaves: ETMap = mapping.iter().map(|m| m[0]).collect();
+        name_field.set_text_content(Some(&join(" & ", &octaves)));
     }
 
     if let Some(table) = web.element("rt-etmap") {
@@ -358,12 +356,11 @@ fn show_rt(
     }
 
     if let Some(field) = web.element("error") {
-        let mut max_harmonic = 0.0;
-        for &harmonic in limit.pitches.iter() {
-            if harmonic > max_harmonic {
-                max_harmonic = harmonic;
-            }
-        }
+        let max_harmonic = limit
+            .pitches
+            .iter()
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
         let error = te_error * max_harmonic / 12e2;
         field.set_text_content(Some(&format!("{:.6}", error)));
     }
