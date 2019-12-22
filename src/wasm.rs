@@ -247,8 +247,9 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
             let web = WebContext::new();
 
             let limit = load_limit(&web.list);
-            let (mapping, rt) = load_rt(&target, &limit);
+            let mapping = load_mapping(&target);
             let rank = mapping.len();
+            let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
 
             if let Some(name_field) = web.element("rt-name") {
                 let octaves: Vec<FactorElement> =
@@ -357,11 +358,8 @@ fn load_limit(list: &Element) -> PrimeLimit {
     }
 }
 
-/// Get the regular temperament from the DOM
-fn load_rt(
-    link: &Element,
-    limit: &PrimeLimit,
-) -> (super::Mapping, cangwu::TemperamentClass) {
+/// Get the regular temperament mapping from the DOM
+fn load_mapping(link: &Element) -> super::Mapping {
     let mut mapping = Vec::new();
     let rank: usize =
         link.get_attribute("data-rank").unwrap().parse().unwrap();
@@ -374,6 +372,5 @@ fn load_rt(
             .collect();
         mapping.push(vector);
     }
-    let rt = cangwu::TemperamentClass::new(&limit.pitches, &mapping);
-    (mapping, rt)
+    mapping
 }
