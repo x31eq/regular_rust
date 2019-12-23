@@ -4,7 +4,7 @@ target/release/regular: src/main.rs src/lib.rs src/cangwu.rs
 target/debug/regular: src/main.rs src/lib.rs src/cangwu.rs
 	cargo build
 
-pkg/regular_bg.wasm:
+pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs
 	wasm-pack build --target web
 
 regular_bg.wasm: pkg/regular_bg.wasm

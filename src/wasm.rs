@@ -2,8 +2,9 @@ use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::JsCast;
 use web_sys::{Element, Event, HtmlElement};
 
-use super::cangwu;
 use super::{join, Cents, ETMap, FactorElement, Mapping, PrimeLimit};
+use super::cangwu;
+use cangwu::TemperamentClass;
 
 extern crate nalgebra as na;
 use na::DMatrix;
