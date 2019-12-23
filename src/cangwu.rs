@@ -11,6 +11,32 @@ pub struct TemperamentClass {
     melody: Mapping,
 }
 
+trait TenneyWeighted {
+    fn mapping<'a>(&'a self) -> &'a Mapping;
+    fn plimit<'a>(&'a self) -> &'a DVector<Cents>;
+
+    fn weighted_mapping(&self) -> DMatrix<f64> {
+        let melody = self.mapping();
+        let plimit = self.plimit();
+        let rank = melody.len();
+        let dimension = plimit.len();
+        let flattened = melody
+            .iter()
+            .flat_map(|mapping| mapping.iter())
+            .cloned();
+        let melody = DMatrix::from_iterator(dimension, rank, flattened);
+        let weighting_vec: Vec<f64> =
+            plimit.iter().map(|x| 1200.0 / x).collect();
+        let mut weighting =
+            DMatrix::from_vec(dimension, 1, weighting_vec.clone());
+        assert!(rank > 0);
+        for _ in 1..rank {
+            weighting.extend(weighting_vec.clone());
+        }
+        melody.map(f64::from).component_mul(&weighting)
+    }
+}
+
 impl TemperamentClass {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
@@ -74,25 +100,15 @@ impl TemperamentClass {
         let tuning = pinv.column_sum() * 1200.0;
         tuning.iter().cloned().collect()
     }
+}
 
-    fn weighted_mapping(&self) -> DMatrix<f64> {
-        let rank = self.melody.len();
-        let dimension = self.plimit.len();
-        let flattened = self
-            .melody
-            .iter()
-            .flat_map(|mapping| mapping.iter())
-            .cloned();
-        let melody = DMatrix::from_iterator(dimension, rank, flattened);
-        let weighting_vec: Vec<f64> =
-            self.plimit.iter().map(|x| 1200.0 / x).collect();
-        let mut weighting =
-            DMatrix::from_vec(dimension, 1, weighting_vec.clone());
-        assert!(rank > 0);
-        for _ in 1..rank {
-            weighting.extend(weighting_vec.clone());
-        }
-        melody.map(f64::from).component_mul(&weighting)
+impl TenneyWeighted for TemperamentClass {
+    fn mapping<'a>(&'a self) -> &'a Mapping {
+       &self.melody
+    }
+
+    fn plimit<'a>(&'a self) -> &'a DVector<Cents> {
+       &self.plimit
     }
 }
 
