@@ -32,8 +32,7 @@ impl TETemperament {
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
         let plimit = DVector::from_vec(plimit.to_vec());
         let melody = melody.to_vec();
-        let tuning = vec![0.0];  // placeholder
-        let mut rt = TETemperament { plimit, melody, tuning };
+        let mut rt = TETemperament { plimit, melody, tuning: vec![0.0] };
         let wmap = rt.weighted_mapping();
         let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
         let tuning = pinv.column_sum() * 12e2;
