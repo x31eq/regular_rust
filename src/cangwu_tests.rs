@@ -1,6 +1,6 @@
+use super::PrimeLimit;
 use super::cangwu;
 use cangwu::TemperamentClass;
-use super::PrimeLimit;
 
 fn make_marvel() -> cangwu::CangwuTemperament {
     let marvel_vector = vec![
@@ -35,18 +35,6 @@ fn badness() {
     assert!(jove.badness(1.0) < 0.18270);
     assert!(0.05606 < jove.badness(0.1));
     assert!(jove.badness(0.1) < 0.05607);
-}
-
-#[test]
-fn complexity() {
-    let marvel = make_marvel();
-    assert!(0.155663 < marvel.complexity());
-    assert!(marvel.complexity() < 0.155664);
-
-    let jove = make_jove();
-    // Less precision here because it disagrees with Python.
-    assert!(0.17475 < jove.complexity());
-    assert!(jove.complexity() < 0.174755);
 }
 
 #[rustfmt::skip]
@@ -100,25 +88,10 @@ fn mystery() {
     assert_eq!(mystery.key(), vec![0, 1, 1, 1, 1,
                              29, 46, 0, 14, 33, 40]);
     assert_eq!(mystery.rank(), 2);
-    assert!(4.83894 < mystery.complexity());
-    assert!(mystery.complexity() < 4.83895);
     assert!(5.43717 < mystery.badness(1.0));
     assert!(mystery.badness(1.0) < 5.43718);
     assert!(2.52619 < mystery.badness(0.1));
     assert!(mystery.badness(0.1) < 2.52620);
-}
-
-#[test]
-fn tuning() {
-    let marvel = make_marvel();
-    let expected_tuning = vec![3.96487, 17.32226, 14.05909];
-    for (expected, calculated) in expected_tuning
-        .iter()
-        .zip(marvel.optimal_tuning().into_iter())
-    {
-        let discrepancy = (expected - calculated).abs();
-        assert!(discrepancy < 0.00001);
-    }
 }
 
 #[test]

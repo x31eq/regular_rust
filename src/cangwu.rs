@@ -11,6 +11,7 @@ pub struct CangwuTemperament {
     melody: Mapping,
 }
 
+/// This isn't specific to TE/Cangwu but sits here for now.
 pub trait TemperamentClass {
     fn mapping(&'_ self) -> &'_ Mapping;
 
@@ -90,18 +91,6 @@ impl CangwuTemperament {
         }
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
     }
-
-    pub fn complexity(&self) -> f64 {
-        rms_of_matrix(&self.weighted_mapping())
-    }
-
-    /// This shouldn't really be here, but it's easy
-    pub fn optimal_tuning(&self) -> Tuning {
-        let wmap = self.weighted_mapping();
-        let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
-        let tuning = pinv.column_sum() * 1200.0;
-        tuning.iter().cloned().collect()
-    }
 }
 
 impl TemperamentClass for CangwuTemperament {
@@ -150,7 +139,7 @@ pub fn higher_rank_search(
     results.extract()
 }
 
-fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
+pub fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
     let gram = a.transpose().clone() * a;
     ((gram / dimension).determinant()).sqrt()

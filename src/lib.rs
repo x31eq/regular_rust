@@ -258,6 +258,8 @@ impl<T> PriorityQueue<T> {
 
 pub mod cangwu;
 
+pub mod te;
+
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
 
