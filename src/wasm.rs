@@ -7,9 +7,6 @@ use super::te;
 use super::{join, Cents, ETMap, FactorElement, Mapping, PrimeLimit};
 use cangwu::TemperamentClass;
 
-extern crate nalgebra as na;
-use na::DMatrix;
-
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
@@ -300,7 +297,6 @@ fn show_rt(
     limit: PrimeLimit,
     mapping: Mapping,
 ) -> Exceptionable {
-    let rank = mapping.len();
     let rt = te::TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
@@ -317,54 +313,32 @@ fn show_rt(
         write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
     }
 
-    let tuning = rt.optimal_tuning();
     if let Some(table) = web.element("rt-steps") {
         table.set_inner_html("");
-        write_float_row(&web, &table, &tuning, 4)?;
+        write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
     }
 
-    let tuning = DMatrix::from_vec(rank, 1, tuning);
-    let dimension = limit.pitches.len();
-    let flattened = mapping
-        .iter()
-        .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
-    let melody = DMatrix::from_iterator(dimension, rank, flattened);
-    let tuning_map: DMatrix<f64> = melody * tuning;
-    let tuning_map = tuning_map.iter().cloned().collect();
     if let Some(table) = web.element("rt-tuning-map") {
         write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &tuning_map, 3)?;
+        write_float_row(&web, &table, &rt.tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("rt-mistunings") {
-        let mistunings = tuning_map
-            .iter()
-            .zip(limit.pitches.iter())
-            .map(|(&x, y)| x - y)
-            .collect();
         write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &mistunings, 4)?;
+        write_float_row(&web, &table, &rt.mistunings(), 4)?;
     }
 
-    let complexity = rt.complexity();
     if let Some(field) = web.element("rt-complexity") {
-        let text = format!("{:.6}", complexity);
+        let text = format!("{:.6}", rt.complexity());
         field.set_text_content(Some(&text));
     }
 
-    let te_error = rt.badness() / complexity;
     if let Some(field) = web.element("rt-te-error") {
-        field.set_text_content(Some(&format!("{:.6}", te_error)));
+        field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
     if let Some(field) = web.element("error") {
-        let max_harmonic = limit
-            .pitches
-            .iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap();
-        let error = te_error * max_harmonic / 12e2;
-        field.set_text_content(Some(&format!("{:.6}", error)));
+        field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
     if let Some(table) = web.element("rt-generators") {

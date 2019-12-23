@@ -34,15 +34,28 @@ impl TETemperament {
         TETemperament { plimit, melody }
     }
 
+    pub fn error(&self) -> f64 {
+        self.badness() / self.complexity()
+    }
+
     pub fn complexity(&self) -> f64 {
         rms_of_matrix(&self.weighted_mapping())
+    }
+
+    pub fn adjusted_error(&self) -> f64 {
+        let max_harmonic = self
+            .plimit
+            .iter()
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
+        self.error() * max_harmonic / 12e2
     }
 
     /// This shouldn't really be here, but it's easy
     pub fn optimal_tuning(&self) -> Tuning {
         let wmap = self.weighted_mapping();
         let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
-        let tuning = pinv.column_sum() * 1200.0;
+        let tuning = pinv.column_sum() * 12e2;
         tuning.iter().cloned().collect()
     }
 
@@ -57,6 +70,25 @@ impl TETemperament {
             translation.extend(offset_vec.clone());
         }
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
+    }
+
+    pub fn tuning_map(&self) -> Tuning {
+        let rank = self.melody.len();
+        let dimension = self.plimit.len();
+        let tuning = DMatrix::from_vec(rank, 1, self.optimal_tuning());
+        let mapping = &self.melody;
+        let flattened = mapping
+            .iter()
+            .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
+        let melody = DMatrix::from_iterator(dimension, rank, flattened);
+        let tuning_map: DMatrix<f64> = melody * tuning;
+        tuning_map.iter().cloned().collect()
+    }
+
+    pub fn mistunings(&self) -> Tuning {
+        let tuning_map = self.tuning_map();
+        let comparison = tuning_map.iter().zip(self.plimit.iter());
+        comparison.map(|(&x, y)| x - y).collect()
     }
 }
 
