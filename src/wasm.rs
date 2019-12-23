@@ -4,6 +4,7 @@ use web_sys::{Element, Event, HtmlElement};
 
 use super::{join, Cents, ETMap, FactorElement, Mapping, PrimeLimit};
 use super::cangwu;
+use super::te;
 use cangwu::TemperamentClass;
 
 extern crate nalgebra as na;
@@ -198,7 +199,7 @@ fn show_regular_temperaments<'a>(
 
         // Setup the link as a link
         let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
-        let rt_obj = cangwu::CangwuTemperament::new(&limit.pitches, &rt);
+        let rt_obj = te::TETemperament::new(&limit.pitches, &rt);
         let url = format!(
             "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
             &join("_", &octaves),
@@ -300,7 +301,7 @@ fn show_rt(
     mapping: Mapping,
 ) -> Exceptionable {
     let rank = mapping.len();
-    let rt = cangwu::CangwuTemperament::new(&limit.pitches, &mapping);
+    let rt = te::TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
         let octaves: ETMap = mapping.iter().map(|m| m[0]).collect();
@@ -351,7 +352,7 @@ fn show_rt(
         field.set_text_content(Some(&text));
     }
 
-    let te_error = rt.badness(0.0) / complexity;
+    let te_error = rt.badness() / complexity;
     if let Some(field) = web.element("rt-te-error") {
         field.set_text_content(Some(&format!("{:.6}", te_error)));
     }
@@ -368,7 +369,7 @@ fn show_rt(
 
     if let Some(table) = web.element("rt-generators") {
         // Make another RT object to get the generator tunings
-        let rt = cangwu::CangwuTemperament::new(&limit.pitches, &redmap);
+        let rt = te::TETemperament::new(&limit.pitches, &redmap);
         table.set_inner_html("");
         write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
     }
