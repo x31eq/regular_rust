@@ -12,8 +12,8 @@ pub struct TemperamentClass {
 }
 
 trait TenneyWeighted {
-    fn mapping<'a>(&'a self) -> &'a Mapping;
-    fn plimit<'a>(&'a self) -> &'a DVector<Cents>;
+    fn mapping(&'_ self) -> &'_ Mapping;
+    fn plimit(&'_ self) -> &'_ DVector<Cents>;
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
@@ -103,11 +103,11 @@ impl TemperamentClass {
 }
 
 impl TenneyWeighted for TemperamentClass {
-    fn mapping<'a>(&'a self) -> &'a Mapping {
+    fn mapping(&'_ self) -> &'_ Mapping {
        &self.melody
     }
 
-    fn plimit<'a>(&'a self) -> &'a DVector<Cents> {
+    fn plimit(&'_ self) -> &'_ DVector<Cents> {
        &self.plimit
     }
 }
