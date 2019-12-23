@@ -315,7 +315,7 @@ fn show_rt(
 
     if let Some(table) = web.element("rt-steps") {
         table.set_inner_html("");
-        write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+        write_float_row(&web, &table, &rt.tuning, 4)?;
     }
 
     if let Some(table) = web.element("rt-tuning-map") {
@@ -345,7 +345,7 @@ fn show_rt(
         // Make another RT object to get the generator tunings
         let rt = te::TETemperament::new(&limit.pitches, &redmap);
         table.set_inner_html("");
-        write_float_row(&web, &table, &rt.optimal_tuning(), 4)?;
+        write_float_row(&web, &table, &rt.tuning, 4)?;
     }
 
     web.set_body_class("show-list show-temperament")?;

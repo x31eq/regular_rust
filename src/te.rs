@@ -8,6 +8,7 @@ use cangwu::{rms_of_matrix, TenneyWeighted};
 pub struct TETemperament {
     plimit: DVector<Cents>,
     melody: Mapping,
+    pub tuning: Tuning,
 }
 
 impl cangwu::TemperamentClass for TETemperament {
@@ -31,7 +32,13 @@ impl TETemperament {
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
         let plimit = DVector::from_vec(plimit.to_vec());
         let melody = melody.to_vec();
-        TETemperament { plimit, melody }
+        let tuning = vec![0.0];  // placeholder
+        let mut rt = TETemperament { plimit, melody, tuning };
+        let wmap = rt.weighted_mapping();
+        let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
+        let tuning = pinv.column_sum() * 12e2;
+        rt.tuning = tuning.iter().cloned().collect();
+        rt
     }
 
     pub fn error(&self) -> f64 {
@@ -51,14 +58,6 @@ impl TETemperament {
         self.error() * max_harmonic / 12e2
     }
 
-    /// This shouldn't really be here, but it's easy
-    pub fn optimal_tuning(&self) -> Tuning {
-        let wmap = self.weighted_mapping();
-        let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
-        let tuning = pinv.column_sum() * 12e2;
-        tuning.iter().cloned().collect()
-    }
-
     pub fn badness(&self) -> Cents {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
@@ -75,14 +74,13 @@ impl TETemperament {
     pub fn tuning_map(&self) -> Tuning {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let tuning = DMatrix::from_vec(rank, 1, self.optimal_tuning());
+        let tuning = DMatrix::from_vec(rank, 1, self.tuning.clone());
         let mapping = &self.melody;
         let flattened = mapping
             .iter()
             .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
         let melody = DMatrix::from_iterator(dimension, rank, flattened);
-        let tuning_map: DMatrix<f64> = melody * tuning;
-        tuning_map.iter().cloned().collect()
+        (melody * tuning).iter().cloned().collect()
     }
 
     pub fn mistunings(&self) -> Tuning {
@@ -132,7 +130,7 @@ fn tuning() {
     let expected_tuning = vec![3.96487, 17.32226, 14.05909];
     for (expected, calculated) in expected_tuning
         .iter()
-        .zip(marvel.optimal_tuning().into_iter())
+        .zip(marvel.tuning.into_iter())
     {
         let discrepancy = (expected - calculated).abs();
         assert!(discrepancy < 0.00001);
