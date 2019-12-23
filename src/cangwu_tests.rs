@@ -1,4 +1,5 @@
 use super::cangwu;
+use cangwu::TemperamentClass;
 use super::PrimeLimit;
 
 fn make_marvel() -> cangwu::CangwuTemperament {
