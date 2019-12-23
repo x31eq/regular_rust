@@ -35,13 +35,15 @@ cargo run 5 1 cents <<FIN
 FIN
 
 
-Faster calculation for a big limit (currently incomplete results):
+For other build targets, this project includes a makefile, because
+I like makefiles.  To do a faster calculation for a big limit
+(currently incomplete results):
 
-cargo build --release && target/release/regular 5 0.1 257
+make release && target/release/regular 5 0.1 257
 
 
-WebAssembly application
------------------------
+WebAssembly (Wasm) application
+------------------------------
 
 You can also run the code in a web browser without Python
 or other server-side support.  You need wasm-pack:
@@ -57,9 +59,9 @@ you can build it yourself from this repository:
 
 https://github.com/rustwasm/wasm-pack
 
-Once you have it, run
+Once you have it,
 
-wasm-pack build --target web
+make wasm
 
 and run a web server from the project root.  For example,
 
@@ -68,14 +70,14 @@ python3 -m http.server
 
 If you have wasm-opt, you can also try
 
-wasm-opt -O4 pkg/regular_bg.wasm -o pkg/regular_bg.wasm
+make wasm-release
 
-This should make the code smaller, and maybe faster.
-If you don't have wasm-opt, you can get it from
+This should make the code smaller, and maybe faster, and put it in
+the root folder.  If you don't have wasm-opt, you can get it from
 
 https://github.com/webassembly/binaryen
 
 
 To get documentation including the Wasm code:
 
-cargo doc --target wasm32-unknown-unknown
+make doc
