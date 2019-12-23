@@ -1,9 +1,9 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::{Cents, ETMap, Mapping, Tuning};
 use super::cangwu;
-use cangwu::{TenneyWeighted, rms_of_matrix};
+use super::{Cents, ETMap, Mapping, Tuning};
+use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
     plimit: DVector<Cents>,
@@ -18,11 +18,11 @@ impl cangwu::TemperamentClass for TETemperament {
 
 impl cangwu::TenneyWeighted for TETemperament {
     fn mapping(&'_ self) -> &'_ Mapping {
-       &self.melody
+        &self.melody
     }
 
     fn plimit(&'_ self) -> &'_ DVector<Cents> {
-       &self.plimit
+        &self.plimit
     }
 }
 
@@ -119,4 +119,3 @@ fn mystery() {
     assert!(4.83894 < mystery.complexity());
     assert!(mystery.complexity() < 4.83895);
 }
-
