@@ -73,7 +73,7 @@ impl TETemperament {
     pub fn tuning_map(&self) -> Tuning {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let tuning = DMatrix::from_vec(rank, 1, self.tuning.clone());
+        let tuning = DVector::from_vec(self.tuning.clone());
         let mapping = &self.melody;
         let flattened = mapping
             .iter()
