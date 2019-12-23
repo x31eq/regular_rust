@@ -6,12 +6,43 @@ use na::{DMatrix, DVector};
 use super::{Cents, ETMap, FactorElement, Mapping, PriorityQueue, Tuning};
 use std::collections::HashSet;
 
-pub struct TemperamentClass {
+pub struct CangwuTemperament {
     plimit: DVector<Cents>,
     melody: Mapping,
 }
 
-trait TenneyWeighted {
+pub trait TemperamentClass {
+    fn mapping(&'_ self) -> &'_ Mapping;
+
+    /// Unique identifier for the mapping
+    /// (hermite normal form flattened and
+    /// with always-zero entries removed)
+    fn key(&self) -> ETMap {
+        self.reduced_mapping()
+            .iter()
+            .enumerate()
+            .rev()
+            .flat_map(|(i, col)| col.iter().skip(i).cloned())
+            .collect()
+    }
+
+    fn reduced_mapping(&self) -> Mapping {
+        super::hermite_normal_form(&self.mapping())
+    }
+
+    /// Actual rank of the mapping matrix
+    fn rank(&self) -> usize {
+        let mut result = 0;
+        for col in self.reduced_mapping().iter() {
+            if col.iter().any(|&x| x != 0) {
+                result += 1;
+            }
+        }
+        result
+    }
+}
+
+pub trait TenneyWeighted {
     fn mapping(&'_ self) -> &'_ Mapping;
     fn plimit(&'_ self) -> &'_ DVector<Cents>;
 
@@ -20,10 +51,8 @@ trait TenneyWeighted {
         let plimit = self.plimit();
         let rank = melody.len();
         let dimension = plimit.len();
-        let flattened = melody
-            .iter()
-            .flat_map(|mapping| mapping.iter())
-            .cloned();
+        let flattened =
+            melody.iter().flat_map(|mapping| mapping.iter()).cloned();
         let melody = DMatrix::from_iterator(dimension, rank, flattened);
         let weighting_vec: Vec<f64> =
             plimit.iter().map(|x| 1200.0 / x).collect();
@@ -37,39 +66,12 @@ trait TenneyWeighted {
     }
 }
 
-impl TemperamentClass {
+impl CangwuTemperament {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
         let plimit = DVector::from_vec(plimit.to_vec());
         let melody = melody.to_vec();
-        TemperamentClass { plimit, melody }
-    }
-
-    /// Actual rank of the mapping matrix
-    pub fn rank(&self) -> usize {
-        let mut result = 0;
-        for col in self.reduced_mapping().iter() {
-            if col.iter().any(|&x| x != 0) {
-                result += 1;
-            }
-        }
-        result
-    }
-
-    /// Unique identifier for the mapping
-    /// (hermite normal form flattened and
-    /// with always-zero entries removed)
-    pub fn key(&self) -> ETMap {
-        self.reduced_mapping()
-            .iter()
-            .enumerate()
-            .rev()
-            .flat_map(|(i, col)| col.iter().skip(i).cloned())
-            .collect()
-    }
-
-    pub fn reduced_mapping(&self) -> Mapping {
-        super::hermite_normal_form(&self.melody)
+        CangwuTemperament { plimit, melody }
     }
 
     pub fn badness(&self, ek: Cents) -> Cents {
@@ -102,13 +104,19 @@ impl TemperamentClass {
     }
 }
 
-impl TenneyWeighted for TemperamentClass {
+impl TemperamentClass for CangwuTemperament {
     fn mapping(&'_ self) -> &'_ Mapping {
-       &self.melody
+        &self.melody
+    }
+}
+
+impl TenneyWeighted for CangwuTemperament {
+    fn mapping(&'_ self) -> &'_ Mapping {
+        &self.melody
     }
 
     fn plimit(&'_ self) -> &'_ DVector<Cents> {
-       &self.plimit
+        &self.plimit
     }
 }
 
@@ -126,7 +134,7 @@ pub fn higher_rank_search(
         for et in ets {
             let mut new_rt = rt.clone();
             new_rt.push(et.clone());
-            let rt_obj = TemperamentClass::new(&plimit, &new_rt);
+            let rt_obj = CangwuTemperament::new(&plimit, &new_rt);
             if rt_obj.rank() == rank {
                 let badness = rt_obj.badness(ek);
                 if badness < results.cap {

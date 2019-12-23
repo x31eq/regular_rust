@@ -1,24 +1,24 @@
 use super::cangwu;
 use super::PrimeLimit;
 
-fn make_marvel() -> cangwu::TemperamentClass {
+fn make_marvel() -> cangwu::CangwuTemperament {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
     let limit11 = PrimeLimit::new(11);
-    cangwu::TemperamentClass::new(&limit11.pitches, &marvel_vector)
+    cangwu::CangwuTemperament::new(&limit11.pitches, &marvel_vector)
 }
 
-fn make_jove() -> cangwu::TemperamentClass {
+fn make_jove() -> cangwu::CangwuTemperament {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
     let limit11 = PrimeLimit::new(11);
-    cangwu::TemperamentClass::new(&limit11.pitches, &jove_vector)
+    cangwu::CangwuTemperament::new(&limit11.pitches, &jove_vector)
 }
 
 #[test]
@@ -95,7 +95,7 @@ fn mystery() {
     ];
     let limit13 = PrimeLimit::new(13);
     let mystery =
-        cangwu::TemperamentClass::new(&limit13.pitches, &mystery_vector);
+        cangwu::CangwuTemperament::new(&limit13.pitches, &mystery_vector);
     assert_eq!(mystery.key(), vec![0, 1, 1, 1, 1,
                              29, 46, 0, 14, 33, 40]);
     assert_eq!(mystery.rank(), 2);
