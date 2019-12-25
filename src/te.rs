@@ -1,5 +1,4 @@
-extern crate nalgebra as na;
-use na::{DMatrix, DVector};
+extern crate nalgebra as na; use na::{DMatrix, DVector};
 
 use super::cangwu;
 use super::{Cents, ETMap, Mapping, Tuning};
@@ -124,16 +123,53 @@ fn complexity() {
 }
 
 #[test]
+fn error() {
+    let marvel = make_marvel();
+    assert!(0.43069 < marvel.error());
+    assert!(marvel.error() < 0.43070);
+
+    let jove = make_jove();
+    assert!(0.30486 < jove.error());
+    assert!(jove.error() < 0.30487);
+}
+
+#[test]
 fn tuning() {
     let marvel = make_marvel();
-    let expected_tuning = vec![3.96487, 17.32226, 14.05909];
-    for (expected, calculated) in expected_tuning
-        .iter()
-        .zip(marvel.tuning.into_iter())
-    {
-        let discrepancy = (expected - calculated).abs();
-        assert!(discrepancy < 0.00001);
-    }
+    let expected = "3.96487 17.32226 14.05909";
+    let fmt_tuning = format_float_vec(&marvel.tuning, 5);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "6.00023 17.78766 11.87013";
+    let fmt_tuning = format_float_vec(&jove.tuning, 5);
+    assert!(fmt_tuning == expected.to_string());
+}
+
+#[test]
+fn tuning_map() {
+    let marvel = make_marvel();
+    let expected = "1200.640 1901.403 2785.025 3369.655 4151.204";
+    let fmt_tuning = format_float_vec(&marvel.tuning_map(), 3);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "1200.099 1901.163 2786.388 3368.609 4152.859";
+    let fmt_tuning = format_float_vec(&jove.tuning_map(), 3);
+    assert!(fmt_tuning == expected.to_string());
+}
+
+#[test]
+fn mistunings() {
+    let marvel = make_marvel();
+    let expected = "0.640 -0.552 -1.288 0.829 -0.114";
+    let fmt_tuning = format_float_vec(&marvel.mistunings(), 3);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "0.099 -0.792 0.074 -0.217 1.541";
+    let fmt_tuning = format_float_vec(&jove.mistunings(), 3);
+    assert!(fmt_tuning == expected.to_string());
 }
 
 #[rustfmt::skip]
@@ -147,4 +183,27 @@ fn mystery() {
     let mystery = TETemperament::new(&limit13.pitches, &mystery_vector);
     assert!(4.83894 < mystery.complexity());
     assert!(mystery.complexity() < 4.83895);
+    assert!(0.51238 < mystery.error());
+    assert!(mystery.error() < 0.51239);
+    assert!(1.89606 < mystery.adjusted_error());
+    assert!(mystery.adjusted_error() < 1.89607);
+
+    let fmt_tuning_map = format_float_vec(&mystery.tuning_map(), 3);
+    let expected = "1199.507 1902.667 2787.209 3366.282 4152.166 4441.702";
+    assert!(fmt_tuning_map == expected.to_string());
+
+    let fmt_errors = format_float_vec(&mystery.mistunings(), 3);
+    let expected = "-0.493 0.712 0.896 -2.544 0.848 1.175";
+    assert!(fmt_errors == expected.to_string());
+}
+
+#[cfg(test)]
+fn format_float_vec(tuning: &Tuning, decimals: usize) -> String {
+    let mut result = "".to_string();
+    for pitch in tuning.iter() {
+        result.push_str(" ");
+        result.push_str(&format!("{:.*}", decimals, pitch));
+    }
+    result.remove(0);
+    result
 }
