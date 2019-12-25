@@ -86,6 +86,16 @@ impl TETemperament {
         let comparison = tuning_map.iter().zip(self.plimit.iter());
         comparison.map(|(&x, y)| x - y).collect()
     }
+
+    fn stretch(&self) -> f64 {
+        self.tuning_map()[0] / self.plimit[0]
+    }
+
+    /// Strictly, pure equivalence interval TE
+    pub fn pote_tuning_map(&self) -> Tuning {
+        let tuning_map = self.tuning_map();
+        tuning_map.iter().map(|x| x / self.stretch()).collect()
+    }
 }
 
 #[cfg(test)]
@@ -172,6 +182,19 @@ fn mistunings() {
     assert!(fmt_tuning == expected.to_string());
 }
 
+#[test]
+fn pote_tuning_map() {
+    let marvel = make_marvel();
+    let expected = "1200.000 1900.389 2783.540 3367.858 4148.990";
+    let fmt_tuning = format_float_vec(&marvel.pote_tuning_map(), 3);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "1200.000 1901.007 2786.159 3368.331 4152.517";
+    let fmt_tuning = format_float_vec(&jove.pote_tuning_map(), 3);
+    assert!(fmt_tuning == expected.to_string());
+}
+
 #[rustfmt::skip]
 #[test]
 fn mystery() {
@@ -195,6 +218,10 @@ fn mystery() {
     let fmt_errors = format_float_vec(&mystery.mistunings(), 3);
     let expected = "-0.493 0.712 0.896 -2.544 0.848 1.175";
     assert!(fmt_errors == expected.to_string());
+
+    let fmt_tuning_map = format_float_vec(&mystery.pote_tuning_map(), 3);
+    let expected = "1200.000 1903.448 2788.354 3367.664 4153.871 4443.527";
+    assert!(fmt_tuning_map == expected.to_string());
 }
 
 #[cfg(test)]
