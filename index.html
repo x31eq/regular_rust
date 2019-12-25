@@ -24,6 +24,12 @@
             .show-list #temperament-list {
                 display: block;
             }
+            input#show-pote:checked ~ .te {
+                display: none;
+            }
+            input#show-te:checked ~ .pote {
+                display: none;
+            }
         </style>
     </head>
     <body>
@@ -60,22 +66,25 @@
             <table id="rt-etmap" class="mapping"></table>
             <h4>Reduced Mapping</h4>
             <table id="rt-redmap" class="mapping"></table>
-            <h4>TE Generator Tunings (cents)</h4>
-            <table id="rt-generators" class="mapping"></table>
-            <h4>POTE Generator Tunings (cents)</h4>
-            <table id="rt-pote-generators" class="mapping"></table>
-            <h4>TE Step Tunings (cents)</h4>
-            <table id="rt-steps" class="mapping"></table>
-            <h4>POTE Step Tunings (cents)</h4>
-            <table id="rt-pote-steps" class="mapping"></table>
-            <h4>TE Tuning Map (cents)</h4>
-            <table id="rt-tuning-map" class="mapping"></table>
-            <h4>POTE Tuning Map (cents)</h4>
-            <table id="rt-pote-tuning-map" class="mapping"></table>
-            <h4>TE mistunings (cents)</h4>
-            <table id="rt-mistunings" class="mapping"></table>
-            <h4>POTE mistunings (cents)</h4>
-            <table id="rt-pote-mistunings" class="mapping"></table>
+            Tuning type:
+            <input type="radio" id="show-te" name="tuning-type" checked>TE</input>
+            <input type="radio" id="show-pote" name="tuning-type">POTE</input>
+            <h4 class="te">TE Generator Tunings (cents)</h4>
+            <table id="rt-generators" class="te mapping"></table>
+            <h4 class="pote">POTE Generator Tunings (cents)</h4>
+            <table id="rt-pote-generators" class="pote mapping"></table>
+            <h4 class="te">TE Step Tunings (cents)</h4>
+            <table id="rt-steps" class="te mapping"></table>
+            <h4 class="pote">POTE Step Tunings (cents)</h4>
+            <table id="rt-pote-steps" class="pote mapping"></table>
+            <h4 class="te">TE Tuning Map (cents)</h4>
+            <table id="rt-tuning-map" class="te mapping"></table>
+            <h4 class="pote">POTE Tuning Map (cents)</h4>
+            <table id="rt-pote-tuning-map" class="pote mapping"></table>
+            <h4 class="te">TE mistunings (cents)</h4>
+            <table id="rt-mistunings" class="te mapping"></table>
+            <h4 class="pote">POTE mistunings (cents)</h4>
+            <table id="rt-pote-mistunings" class="pote mapping"></table>
             <table>
                 <tr><td>Complexity</td><td id="rt-complexity"></td></tr>
                 <tr>
