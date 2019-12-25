@@ -92,9 +92,13 @@ impl TETemperament {
     }
 
     /// Strictly, pure equivalence interval TE
+    pub fn pote_tuning(&self) -> Tuning {
+        self.tuning.iter().map(|x| x / self.stretch()).collect()
+    }
+
+    /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
-        let tuning_map = self.tuning_map();
-        tuning_map.iter().map(|x| x / self.stretch()).collect()
+        self.tuning_map().iter().map(|x| x / self.stretch()).collect()
     }
 }
 
@@ -179,6 +183,19 @@ fn mistunings() {
     let jove = make_jove();
     let expected = "0.099 -0.792 0.074 -0.217 1.541";
     let fmt_tuning = format_float_vec(&jove.mistunings(), 3);
+    assert!(fmt_tuning == expected.to_string());
+}
+
+#[test]
+fn pote_tuning() {
+    let marvel = make_marvel();
+    let expected = "3.96276 17.31303 14.05160";
+    let fmt_tuning = format_float_vec(&marvel.pote_tuning(), 5);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "5.99973 17.78620 11.86915";
+    let fmt_tuning = format_float_vec(&jove.pote_tuning(), 5);
     assert!(fmt_tuning == expected.to_string());
 }
 
