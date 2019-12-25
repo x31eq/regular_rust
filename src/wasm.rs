@@ -318,14 +318,29 @@ fn show_rt(
         write_float_row(&web, &table, &rt.tuning, 4)?;
     }
 
+    if let Some(table) = web.element("rt-pote-steps") {
+        table.set_inner_html("");
+        write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
+    }
+
     if let Some(table) = web.element("rt-tuning-map") {
         write_headings(&web, &table, &limit)?;
         write_float_row(&web, &table, &rt.tuning_map(), 3)?;
     }
 
+    if let Some(table) = web.element("rt-pote-tuning-map") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.pote_tuning_map(), 3)?;
+    }
+
     if let Some(table) = web.element("rt-mistunings") {
         write_headings(&web, &table, &limit)?;
         write_float_row(&web, &table, &rt.mistunings(), 4)?;
+    }
+
+    if let Some(table) = web.element("rt-pote-mistunings") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.pote_mistunings(), 4)?;
     }
 
     if let Some(field) = web.element("rt-complexity") {
@@ -341,11 +356,16 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
+    // Make another RT object to get the generator tunings
+    let rt = te::TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
-        // Make another RT object to get the generator tunings
-        let rt = te::TETemperament::new(&limit.pitches, &redmap);
         table.set_inner_html("");
         write_float_row(&web, &table, &rt.tuning, 4)?;
+    }
+
+    if let Some(table) = web.element("rt-pote-generators") {
+        table.set_inner_html("");
+        write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
     web.set_body_class("show-list show-temperament")?;
