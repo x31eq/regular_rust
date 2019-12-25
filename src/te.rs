@@ -100,6 +100,13 @@ impl TETemperament {
     pub fn pote_tuning_map(&self) -> Tuning {
         self.tuning_map().iter().map(|x| x / self.stretch()).collect()
     }
+
+    /// Strictly, pure equivalence interval TE
+    pub fn pote_mistunings(&self) -> Tuning {
+        let tuning_map = self.pote_tuning_map();
+        let comparison = tuning_map.iter().zip(self.plimit.iter());
+        comparison.map(|(&x, y)| x - y).collect()
+    }
 }
 
 #[cfg(test)]
@@ -209,6 +216,19 @@ fn pote_tuning_map() {
     let jove = make_jove();
     let expected = "1200.000 1901.007 2786.159 3368.331 4152.517";
     let fmt_tuning = format_float_vec(&jove.pote_tuning_map(), 3);
+    assert!(fmt_tuning == expected.to_string());
+}
+
+#[test]
+fn pote_mistunings() {
+    let marvel = make_marvel();
+    let expected = "0.000 -1.566 -2.773 -0.968 -2.328";
+    let fmt_tuning = format_float_vec(&marvel.pote_mistunings(), 3);
+    assert!(fmt_tuning == expected.to_string());
+
+    let jove = make_jove();
+    let expected = "0.000 -0.948 -0.155 -0.495 1.199";
+    let fmt_tuning = format_float_vec(&jove.pote_mistunings(), 3);
     assert!(fmt_tuning == expected.to_string());
 }
 
