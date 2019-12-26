@@ -11,24 +11,24 @@
                 text-align: right;
                 padding-right: 1em;
             }
-            #regular-temperament {
+            #regular-temperament, #temperament-list {
                 display: none;
             }
             .show-temperament #regular-temperament {
                 display: block;
                 margin-bottom: 2em;
             }
-            #temperament-list {
-                display: none;
-            }
             .show-list #temperament-list {
                 display: block;
             }
-            input#show-pote:checked ~ .te {
+            .te, .pote {
                 display: none;
             }
-            input#show-te:checked ~ .pote {
-                display: none;
+            input#show-te:checked ~ .te {
+                display: block;
+            }
+            input#show-pote:checked ~ .pote {
+                display: block;
             }
         </style>
     </head>
