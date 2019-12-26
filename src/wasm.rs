@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::JsCast;
-use web_sys::{Element, Event, HtmlElement};
+use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
@@ -10,6 +10,32 @@ use cangwu::TemperamentClass;
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
+pub fn form_submit(evt: Event) -> Result<SearchResult, JsValue> {
+    evt.prevent_default();
+    let web = WebContext::new();
+    let limit = web
+        .element("prime-limit")
+        .unwrap()
+        .dyn_ref::<HtmlInputElement>()
+        .expect("prime-limit isn't an input element")
+        .value_as_number() as super::Harmonic;
+    let eka = web
+        .element("prime-eka")
+        .unwrap()
+        .dyn_ref::<HtmlInputElement>()
+        .expect("prime-limit isn't an input element")
+        .value()
+        .parse()
+        .unwrap();
+    let nresults = web
+        .element("n-results")
+        .unwrap()
+        .dyn_ref::<HtmlInputElement>()
+        .expect("prime-limit isn't an input element")
+        .value_as_number() as usize;
+    consecutive_prime_limit_search(limit, eka, nresults)
+}
+
 pub fn consecutive_prime_limit_search(
     prime_cap: super::Harmonic,
     ek_adjusted: Cents,

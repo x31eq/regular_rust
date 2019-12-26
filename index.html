@@ -125,25 +125,14 @@
             Results will go here
         </div>
         <script type="module">
-            import init, { consecutive_prime_limit_search }
+            import init, { form_submit }
                 from './pkg/regular.js'
+
+            document.querySelector("form").onsubmit = form_submit
 
             async function run() {
                 await init()
             }
-
-            document.querySelector("form").onsubmit =
-                function(evt) {
-                    evt.preventDefault();
-                    var limit = parseInt(
-                        document.getElementById("prime-limit").value,
-                        10)
-                    var eka = parseFloat(
-                        document.getElementById("prime-eka").value)
-                    var nresults = parseInt(
-                        document.getElementById("n-results").value)
-                    consecutive_prime_limit_search(limit, eka, nresults)
-                }
 
             run()
         </script>
