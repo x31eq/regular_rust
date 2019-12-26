@@ -1,4 +1,5 @@
-extern crate nalgebra as na; use na::{DMatrix, DVector};
+extern crate nalgebra as na;
+use na::{DMatrix, DVector};
 
 use super::cangwu;
 use super::{Cents, ETMap, Mapping, Tuning};
@@ -31,7 +32,11 @@ impl TETemperament {
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
         let plimit = DVector::from_vec(plimit.to_vec());
         let melody = melody.to_vec();
-        let mut rt = TETemperament { plimit, melody, tuning: vec![0.0] };
+        let mut rt = TETemperament {
+            plimit,
+            melody,
+            tuning: vec![0.0],
+        };
         let wmap = rt.weighted_mapping();
         let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
         let tuning = pinv.column_sum() * 12e2;
@@ -98,7 +103,10 @@ impl TETemperament {
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
-        self.tuning_map().iter().map(|x| x / self.stretch()).collect()
+        self.tuning_map()
+            .iter()
+            .map(|x| x / self.stretch())
+            .collect()
     }
 
     /// Strictly, pure equivalence interval TE
