@@ -40,6 +40,7 @@ pub fn consecutive_prime_limit_search(
         headings.push_str(heading);
     }
     web.list.set_attribute("data-headings", &headings)?;
+    web.list.set_attribute("data-label", &limit.label)?;
     web.list
         .set_attribute("data-pitches", &join("_", &limit.pitches))?;
 
@@ -274,7 +275,7 @@ fn load_limit(list: &Element) -> PrimeLimit {
         .split('_')
         .map(|p| p.parse().unwrap())
         .collect();
-    let label = "placeholder".to_string();
+    let label = list.get_attribute("data-label").unwrap();
     PrimeLimit {
         label,
         pitches,
