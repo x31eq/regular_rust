@@ -43,10 +43,10 @@ pub fn consecutive_prime_limit_search(
     web.list
         .set_attribute("data-pitches", &join("_", &limit.pitches))?;
 
-    let mut rts = Vec::with_capacity(mappings.len());
-    for mapping in mappings.iter() {
-        rts.push(vec![mapping.clone()]);
-    }
+    let mut rts: Vec<Mapping> = mappings
+        .iter()
+        .map(|mapping| vec![mapping.clone()])
+        .collect();
     for rank in 2..dimension {
         let eff_n_results =
             n_results + if rank == dimension - 1 { 0 } else { safety };
