@@ -199,15 +199,8 @@ fn show_regular_temperaments<'a>(
         let link = web.document.create_element("a")?;
 
         // Setup the link as a link
-        let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
         let rt_obj = te::TETemperament::new(&limit.pitches, &rt);
-        let url = format!(
-            "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
-            &join("_", &octaves),
-            &limit.label,
-            &join("_", &rt_obj.key()),
-        );
-        link.set_attribute("href", &url)?;
+        link.set_attribute("href", &rt_url(&rt_obj, &limit.label))?;
 
         // Set data attributes so we get at the mapping later
         link.set_attribute("data-rank", &rt.len().to_string())?;
@@ -217,6 +210,7 @@ fn show_regular_temperaments<'a>(
             link.set_attribute(&key, &value)?;
         }
 
+        let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
         let text = join(" & ", &octaves);
         link.set_text_content(Some(&text));
 
@@ -227,6 +221,17 @@ fn show_regular_temperaments<'a>(
 
     web.list.append_child(&table)?;
     Ok(())
+}
+
+fn rt_url(rt: &te::TETemperament, label: &str) -> String {
+    let octaves: Vec<FactorElement> =
+        rt.melody.iter().map(|m| m[0]).collect();
+    format!(
+        "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
+        &join("_", &octaves),
+        &label,
+        &join("_", &rt.key()),
+    )
 }
 
 #[wasm_bindgen]
@@ -357,6 +362,10 @@ fn show_rt(
 
     if let Some(field) = web.element("error") {
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
+    }
+
+    if let Some(field) = web.element("rt-link") {
+        field.set_attribute("href", &rt_url(&rt, &limit.label))?;
     }
 
     // Make another RT object to get the generator tunings

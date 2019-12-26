@@ -7,7 +7,7 @@ use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
     plimit: DVector<Cents>,
-    melody: Mapping,
+    pub melody: Mapping,
     pub tuning: Tuning,
 }
 
