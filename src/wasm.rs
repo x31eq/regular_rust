@@ -25,6 +25,8 @@ pub fn consecutive_prime_limit_search(
         n_results + safety,
     );
     let web = WebContext::new();
+    web.list.set_inner_html("");
+    web.set_body_class("show-list")?;
     show_equal_temperaments(&web, &limit, mappings.iter().take(n_results))?;
 
     // Store the limit in the DOM so we can get it later
@@ -113,7 +115,6 @@ fn show_equal_temperaments<'a>(
     mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     // This is shamelessly coupled to the HTML
-    web.list.set_inner_html("");
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
@@ -222,7 +223,6 @@ fn show_regular_temperaments<'a>(
     }
 
     web.list.append_child(&table)?;
-    web.set_body_class("show-list")?;
     Ok(())
 }
 
