@@ -115,6 +115,9 @@ fn show_equal_temperaments<'a>(
     mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     // This is shamelessly coupled to the HTML
+    let heading = web.document.create_element("h4")?;
+    heading.set_text_content(Some("Equal Temperaments"));
+    web.list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
