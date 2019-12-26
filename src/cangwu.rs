@@ -112,10 +112,10 @@ impl TenneyWeighted for CangwuTemperament {
 pub fn higher_rank_search(
     plimit: &[Cents],
     ets: &[ETMap],
-    rts: &[Vec<ETMap>],
+    rts: &[Mapping],
     ek: Cents,
     n_results: usize,
-) -> Vec<Vec<ETMap>> {
+) -> Vec<Mapping> {
     let mut results = PriorityQueue::new(n_results);
     let mut cache = HashSet::new();
     for rt in rts {
@@ -156,7 +156,7 @@ pub fn get_equal_temperaments(
     plimit: &[Cents],
     ek: Cents,
     n_results: usize,
-) -> Vec<ETMap> {
+) -> Mapping {
     // Stop weird things happening for non-standard units
     let plimit: Tuning =
         plimit.iter().map(|p| 12e2 * (p / plimit[0])).collect();
@@ -251,7 +251,7 @@ pub fn limited_mappings(
     ek: Cents,
     bmax: Cents,
     plimit: &[Cents],
-) -> Vec<ETMap> {
+) -> Mapping {
     // Call things Cents but turn them to octaves/dimensionless
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
@@ -300,7 +300,7 @@ fn more_limited_mappings(
     cap: Cents,
     epsilon2: Cents,
     plimit: &[Cents],
-    mut results: &mut Vec<ETMap>,
+    mut results: &mut Mapping,
 ) {
     assert!(mapping.len() == plimit.len());
     let weighted_size = f64::from(mapping[i - 1]) / plimit[i - 1];
