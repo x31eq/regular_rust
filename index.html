@@ -42,20 +42,39 @@
             <p>
                 <label>
                     Prime limit
-                    <input id="prime-limit" value="" size="2">
+                    <!-- Select odd numbers: primes only are more difficult -->
+                    <input
+                        id="prime-limit"
+                        type="number"
+                        min="3"
+                        step="2"
+                        value=""
+                        size="2"
+                        >
                 </label>
             </p>
             <p>
                 <label>
                     Badness parameter
-                    <input id="prime-eka" value="1.0" size="5">
+                    <input
+                        id="prime-eka"
+                        value="1.0"
+                        inputmode="decimal"
+                        size="5"
+                        >
                     cents
                 </label>
             </p>
             <p>
                 <label>
                     Number of results
-                    <input id="n-results" value="10" size="2">
+                    <input
+                        id="n-results"
+                        type="number"
+                        min="1"
+                        value="10"
+                        size="2"
+                        >
                 </label>
             </p>
             <button>Search</button>
