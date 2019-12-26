@@ -13,26 +13,9 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) -> Result<SearchResult, JsValue> {
     evt.prevent_default();
     let web = WebContext::new();
-    let limit = web
-        .element("prime-limit")
-        .unwrap()
-        .dyn_ref::<HtmlInputElement>()
-        .expect("prime-limit isn't an input element")
-        .value_as_number() as super::Harmonic;
-    let eka = web
-        .element("prime-eka")
-        .unwrap()
-        .dyn_ref::<HtmlInputElement>()
-        .expect("prime-limit isn't an input element")
-        .value()
-        .parse()
-        .unwrap();
-    let nresults = web
-        .element("n-results")
-        .unwrap()
-        .dyn_ref::<HtmlInputElement>()
-        .expect("prime-limit isn't an input element")
-        .value_as_number() as usize;
+    let limit = web.input_value("prime-limit").parse().unwrap();
+    let eka = web.input_value("prime-eka").parse().unwrap();
+    let nresults = web.input_value("n-results").parse().unwrap();
     consecutive_prime_limit_search(limit, eka, nresults)
 }
 
@@ -133,6 +116,14 @@ impl WebContext {
 
     pub fn element(&self, id: &str) -> Option<Element> {
         self.document.get_element_by_id(id)
+    }
+
+    pub fn input_value(&self, id: &str) -> String {
+        self.element(id)
+            .unwrap()
+            .dyn_ref::<HtmlInputElement>()
+            .expect("Element isn't an input element")
+            .value()
     }
 }
 
