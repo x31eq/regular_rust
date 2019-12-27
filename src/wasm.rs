@@ -201,21 +201,26 @@ fn show_regular_temperaments<'a>(
     rts: impl Iterator<Item = &'a Vec<ETMap>>,
     rank: usize,
 ) -> Exceptionable {
+    let heading = web.document.create_element("h4")?;
+    let text = format!("Rank {}", rank);
+    heading.set_text_content(Some(&text));
+    web.list.append_child(&heading)?;
+
     // Make another table for the next lot of results
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    let cell = web.document.create_element("th")?;
-    let text = format!("Rank {}", rank);
-    cell.set_text_content(Some(&text));
-    row.append_child(&cell)?;
+    for column_heading in &["ETs", "complexity", "error (cents)"] {
+        let cell = web.document.create_element("th")?;
+        cell.set_text_content(Some(column_heading));
+        row.append_child(&cell)?;
+    }
     table.append_child(&row)?;
 
     for rt in rts {
         let row = rt_row(&rt, &limit, &web)?;
         table.append_child(&row)?;
     }
-
     web.list.append_child(&table)?;
     Ok(())
 }
@@ -245,9 +250,17 @@ fn rt_row(
     let octaves: Vec<FactorElement> = mapping.iter().map(|m| m[0]).collect();
     let text = join(" & ", &octaves);
     link.set_text_content(Some(&text));
-
     cell.append_child(&link)?;
     row.append_child(&cell)?;
+
+    let cell = web.document.create_element("td")?;
+    cell.set_text_content(Some(&format!("{:.3}", rt.complexity())));
+    row.append_child(&cell)?;
+
+    let cell = web.document.create_element("td")?;
+    cell.set_text_content(Some(&format!("{:.3}", rt.adjusted_error())));
+    row.append_child(&cell)?;
+
     Ok(row)
 }
 
