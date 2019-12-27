@@ -212,33 +212,43 @@ fn show_regular_temperaments<'a>(
     table.append_child(&row)?;
 
     for rt in rts {
-        let row = web.document.create_element("tr")?;
-        let cell = web.document.create_element("td")?;
-        let link = web.document.create_element("a")?;
-
-        // Setup the link as a link
-        let rt_obj = te::TETemperament::new(&limit.pitches, &rt);
-        link.set_attribute("href", &rt_url(&rt_obj, &limit.label))?;
-
-        // Set data attributes so we get at the mapping later
-        link.set_attribute("data-rank", &rt.len().to_string())?;
-        for (i, mapping) in rt.iter().enumerate() {
-            let key = format!("data-mapping{}", i);
-            let value = join("_", mapping);
-            link.set_attribute(&key, &value)?;
-        }
-
-        let octaves: Vec<FactorElement> = rt.iter().map(|m| m[0]).collect();
-        let text = join(" & ", &octaves);
-        link.set_text_content(Some(&text));
-
-        cell.append_child(&link)?;
-        row.append_child(&cell)?;
+        let row = rt_row(&rt, &limit, &web)?;
         table.append_child(&row)?;
     }
 
     web.list.append_child(&table)?;
     Ok(())
+}
+
+/// Return the table row for a regular temperament mapping
+fn rt_row(
+    mapping: &Mapping,
+    limit: &PrimeLimit,
+    web: &WebContext,
+) -> Result<(Element), JsValue> {
+    let row = web.document.create_element("tr")?;
+    let cell = web.document.create_element("td")?;
+    let link = web.document.create_element("a")?;
+
+    // Setup the link as a link
+    let rt = te::TETemperament::new(&limit.pitches, &mapping);
+    link.set_attribute("href", &rt_url(&rt, &limit.label))?;
+
+    // Set data attributes so we get at the mapping later
+    link.set_attribute("data-rank", &mapping.len().to_string())?;
+    for (i, etmap) in mapping.iter().enumerate() {
+        let key = format!("data-mapping{}", i);
+        let value = join("_", etmap);
+        link.set_attribute(&key, &value)?;
+    }
+
+    let octaves: Vec<FactorElement> = mapping.iter().map(|m| m[0]).collect();
+    let text = join(" & ", &octaves);
+    link.set_text_content(Some(&text));
+
+    cell.append_child(&link)?;
+    row.append_child(&cell)?;
+    Ok(row)
 }
 
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
