@@ -358,7 +358,10 @@ fn rt_click_handler(evt: Event) {
 fn load_limit(list: &Element) -> Option<PrimeLimit> {
     let label = list.get_attribute("data-label")?;
     let value = list.get_attribute("data-pitches")?;
-    let pitches = value.split('_').map(|p| p.parse().unwrap()).collect();
+    let pitches = match value.split('_').map(|p| p.parse()).collect() {
+        Ok(value) => value,
+        Err(_) => return None,
+    };
     let value = list.get_attribute("data-headings")?;
     let headings = value
         .split('_')
@@ -381,8 +384,10 @@ fn load_mapping(link: &Element) -> Option<Mapping> {
     };
     for i in 0..rank {
         let value = link.get_attribute(&format!("data-mapping{}", i))?;
-        let vector = value.split('_').map(|m| m.parse().unwrap()).collect();
-        mapping.push(vector);
+        match value.split('_').map(|m| m.parse()).collect() {
+            Ok(vector) => mapping.push(vector),
+            Err(_) => return None,
+        }
     }
     Some(mapping)
 }
