@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
@@ -13,9 +13,18 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) -> Result<SearchResult, JsValue> {
     evt.prevent_default();
     let web = WebContext::new();
-    let limit = web.input_value("prime-limit").parse().unwrap();
-    let eka = web.input_value("prime-eka").parse().unwrap();
-    let nresults = web.input_value("n-results").parse().unwrap();
+    let limit = match web.input_value("prime-limit").parse() {
+        Ok(limit) => limit,
+        Err(_) => web.fail("Unrecognized prime limit"),
+    };
+    let eka = match web.input_value("prime-eka").parse() {
+        Ok(eka) => eka,
+        Err(_) => web.fail("Unrecognized badness parameter"),
+    };
+    let nresults = match web.input_value("n-results").parse() {
+        Ok(nresults) => nresults,
+        Err(_) => web.fail("Unrecognized number of results"),
+    };
     consecutive_prime_limit_search(limit, eka, nresults)
 }
 
@@ -124,6 +133,14 @@ impl WebContext {
             .dyn_ref::<HtmlInputElement>()
             .expect("Element isn't an input element")
             .value()
+    }
+
+    pub fn fail(&self, message: &str) -> ! {
+        if let Some(error_field) = self.element("error-report") {
+            error_field.set_text_content(Some(message));
+        }
+        self.set_body_class("show-errors").unwrap();
+        throw_str(message);
     }
 }
 

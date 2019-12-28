@@ -11,7 +11,7 @@
                 text-align: right;
                 padding-right: 1em;
             }
-            #regular-temperament, #temperament-list {
+            #regular-temperament, #temperament-list, #error-report {
                 display: none;
             }
             .show-temperament #regular-temperament {
@@ -20,6 +20,10 @@
             }
             .show-list #temperament-list {
                 display: block;
+            }
+            .show-errors #error-report {
+                display: block;
+                color: red;
             }
             #temperament-list th, #temperament-list td {
                 padding-left: 0;
@@ -90,6 +94,9 @@
             </p>
             <button>Search</button>
         </form>
+        <p id="error-report">
+            Oh noes!  Something went wrong and this didn't get hidden!
+        </p>
         <div id="regular-temperament">
             <h3 id="rt-name">A result will go here</h3>
             <h4>Equal Temperament Mappings</h4>
