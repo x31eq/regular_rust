@@ -337,7 +337,13 @@ fn rt_click_handler(evt: Event) {
         if target.has_attribute("href") {
             let web = WebContext::new();
 
-            let limit = load_limit(&web.list);
+            let limit = match load_limit(&web.list) {
+                Some(value) => value,
+                None => {
+                    web.fail("Programming Error: failed to load prime limit")
+                }
+            };
+
             let mapping = load_mapping(&target);
             web.unwrap(
                 show_rt(&web, limit, mapping),
@@ -349,25 +355,23 @@ fn rt_click_handler(evt: Event) {
 }
 
 /// Pull the prime limit out of the DOM
-fn load_limit(list: &Element) -> PrimeLimit {
-    let headings = list
-        .get_attribute("data-headings")
-        .unwrap()
-        .split('_')
-        .map(|heading| heading.to_string())
-        .collect();
-    let pitches = list
-        .get_attribute("data-pitches")
-        .unwrap()
+fn load_limit(list: &Element) -> Option<PrimeLimit> {
+    let label = list.get_attribute("data-label")?;
+    let value = list.get_attribute("data-pitches")?;
+    let pitches = value
         .split('_')
         .map(|p| p.parse().unwrap())
         .collect();
-    let label = list.get_attribute("data-label").unwrap();
-    PrimeLimit {
+    let value = list.get_attribute("data-headings")?;
+    let headings = value
+        .split('_')
+        .map(|heading| heading.to_string())
+        .collect();
+    Some(PrimeLimit {
         label,
         pitches,
         headings,
-    }
+    })
 }
 
 /// Get the regular temperament mapping from the DOM
