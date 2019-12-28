@@ -376,7 +376,10 @@ fn load_limit(list: &Element) -> Option<PrimeLimit> {
 fn load_mapping(link: &Element) -> Option<Mapping> {
     let mut mapping = Vec::new();
     let value = link.get_attribute("data-rank")?;
-    let rank: usize = value.parse().unwrap();
+    let rank: usize = match value.parse() {
+        Ok(value) => value,
+        Err(_) => return None,
+    };
     for i in 0..rank {
         let value = link.get_attribute(&format!("data-mapping{}", i))?;
         let vector = value.split('_').map(|m| m.parse().unwrap()).collect();
