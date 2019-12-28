@@ -10,7 +10,7 @@ use cangwu::TemperamentClass;
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
-pub fn form_submit(evt: Event) -> Result<SearchResult, JsValue> {
+pub fn form_submit(evt: Event) -> SearchResult {
     evt.prevent_default();
     let web = WebContext::new();
     let limit = web.unwrap(
@@ -32,7 +32,7 @@ pub fn consecutive_prime_limit_search(
     prime_cap: super::Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
-) -> Result<SearchResult, JsValue> {
+) -> SearchResult {
     let limit = PrimeLimit::new(prime_cap);
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
@@ -45,7 +45,14 @@ pub fn consecutive_prime_limit_search(
     let web = WebContext::new();
     web.list.set_inner_html("");
     web.set_body_class("show-list");
-    show_equal_temperaments(&web, &limit, mappings.iter().take(n_results))?;
+    web.unwrap(
+        show_equal_temperaments(
+            &web,
+            &limit,
+            mappings.iter().take(n_results),
+        ),
+        "Programming Error: Failed to display equal temperaments",
+    );
 
     // Store the limit in the DOM so we can get it later
     let mut items = limit.headings.iter();
@@ -57,10 +64,19 @@ pub fn consecutive_prime_limit_search(
         headings.push_str("_");
         headings.push_str(heading);
     }
-    web.list.set_attribute("data-headings", &headings)?;
-    web.list.set_attribute("data-label", &limit.label)?;
-    web.list
-        .set_attribute("data-pitches", &join("_", &limit.pitches))?;
+    web.unwrap(
+        web.list.set_attribute("data-headings", &headings),
+        "Programming Error: Failed to store headings",
+    );
+    web.unwrap(
+        web.list.set_attribute("data-label", &limit.label),
+        "Programming Error: Failed to store prime limit label",
+    );
+    web.unwrap(
+        web.list
+            .set_attribute("data-pitches", &join("_", &limit.pitches)),
+        "Programming Error: Failed to store pitches",
+    );
 
     let mut rts: Vec<Mapping> = mappings
         .iter()
@@ -78,7 +94,10 @@ pub fn consecutive_prime_limit_search(
         );
         if rts.len() > 0 {
             let visible_rts = rts.iter().take(n_results);
-            show_regular_temperaments(&web, &limit, visible_rts, rank)?;
+            web.unwrap(
+                show_regular_temperaments(&web, &limit, visible_rts, rank),
+                "Failed to display regular temperaments",
+            );
         }
     }
 
@@ -92,9 +111,9 @@ pub fn consecutive_prime_limit_search(
         .set_onclick(Some(callback.as_ref().unchecked_ref()));
 
     // Return the callback so the browser keeps it alive
-    Ok(SearchResult {
+    SearchResult {
         _callback: callback,
-    })
+    }
 }
 
 struct WebContext {
