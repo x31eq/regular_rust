@@ -336,15 +336,16 @@ fn rt_click_handler(evt: Event) {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-
             let limit = match load_limit(&web.list) {
                 Some(value) => value,
                 None => {
                     web.fail("Programming Error: failed to load prime limit")
                 }
             };
-
-            let mapping = load_mapping(&target);
+            let mapping = match load_mapping(&target) {
+                Some(value) => value,
+                None => web.fail("Programming Error: failed to load mapping"),
+            };
             web.unwrap(
                 show_rt(&web, limit, mapping),
                 "Failed to show the regular temperament",
@@ -358,10 +359,7 @@ fn rt_click_handler(evt: Event) {
 fn load_limit(list: &Element) -> Option<PrimeLimit> {
     let label = list.get_attribute("data-label")?;
     let value = list.get_attribute("data-pitches")?;
-    let pitches = value
-        .split('_')
-        .map(|p| p.parse().unwrap())
-        .collect();
+    let pitches = value.split('_').map(|p| p.parse().unwrap()).collect();
     let value = list.get_attribute("data-headings")?;
     let headings = value
         .split('_')
@@ -375,20 +373,16 @@ fn load_limit(list: &Element) -> Option<PrimeLimit> {
 }
 
 /// Get the regular temperament mapping from the DOM
-fn load_mapping(link: &Element) -> Mapping {
+fn load_mapping(link: &Element) -> Option<Mapping> {
     let mut mapping = Vec::new();
-    let rank: usize =
-        link.get_attribute("data-rank").unwrap().parse().unwrap();
+    let value = link.get_attribute("data-rank")?;
+    let rank: usize = value.parse().unwrap();
     for i in 0..rank {
-        let vector = link
-            .get_attribute(&format!("data-mapping{}", i))
-            .unwrap()
-            .split('_')
-            .map(|m| m.parse().unwrap())
-            .collect();
+        let value = link.get_attribute(&format!("data-mapping{}", i))?;
+        let vector = value.split('_').map(|m| m.parse().unwrap()).collect();
         mapping.push(vector);
     }
-    mapping
+    Some(mapping)
 }
 
 /// Set the fields about the regular temperament
