@@ -44,7 +44,7 @@ pub fn consecutive_prime_limit_search(
     );
     let web = WebContext::new();
     web.list.set_inner_html("");
-    web.set_body_class("show-list")?;
+    web.set_body_class("show-list");
     show_equal_temperaments(&web, &limit, mappings.iter().take(n_results))?;
 
     // Store the limit in the DOM so we can get it later
@@ -118,9 +118,9 @@ impl WebContext {
         WebContext { document, list }
     }
 
-    pub fn set_body_class(&self, value: &str) -> Exceptionable {
+    pub fn set_body_class(&self, value: &str) {
         let body = self.document.body().expect("no body");
-        body.set_attribute("class", value)
+        body.set_attribute("class", value).unwrap();
     }
 
     pub fn element(&self, id: &str) -> Option<Element> {
@@ -139,7 +139,7 @@ impl WebContext {
         if let Some(error_field) = self.element("error-report") {
             error_field.set_text_content(Some(message));
         }
-        self.set_body_class("show-errors").unwrap();
+        self.set_body_class("show-errors");
         throw_str(message);
     }
 }
@@ -438,7 +438,7 @@ fn show_rt(
         write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
-    web.set_body_class("show-list show-temperament")?;
+    web.set_body_class("show-list show-temperament");
     if let Some(result) = web.element("regular-temperament") {
         result.scroll_into_view();
     }
