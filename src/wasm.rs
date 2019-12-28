@@ -102,9 +102,9 @@ pub fn consecutive_prime_limit_search(
     }
 
     // Callback for clicking a link
-    let callback =
-        Closure::wrap(Box::new(rt_click_handler)
-            as Box<dyn FnMut(Event) -> Exceptionable>);
+    let callback = Closure::wrap(
+        Box::new(rt_click_handler) as Box<dyn FnMut(Event) -> ()>
+    );
     web.list
         .dyn_ref::<HtmlElement>()
         .expect("Result list isn't an HtmlElement")
@@ -324,12 +324,12 @@ fn rt_url(rt: &te::TETemperament, label: &str) -> String {
 /// Object to return from a search so that
 /// the callbacks stay alive
 pub struct SearchResult {
-    _callback: Closure<dyn FnMut(Event) -> Exceptionable>,
+    _callback: Closure<dyn FnMut(Event) -> ()>,
 }
 
 /// Function to call when a temperament link is "clicked"
 /// (which includes in-page activation)
-fn rt_click_handler(evt: Event) -> Exceptionable {
+fn rt_click_handler(evt: Event) {
     if let Some(target) = evt.target() {
         let target = target
             .dyn_ref::<Element>()
@@ -339,11 +339,13 @@ fn rt_click_handler(evt: Event) -> Exceptionable {
 
             let limit = load_limit(&web.list);
             let mapping = load_mapping(&target);
-            show_rt(&web, limit, mapping)?;
+            web.unwrap(
+                show_rt(&web, limit, mapping),
+                "Failed to show the regular temperament",
+            );
             evt.prevent_default();
         }
     }
-    Ok(())
 }
 
 /// Pull the prime limit out of the DOM
