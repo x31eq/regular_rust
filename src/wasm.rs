@@ -125,16 +125,12 @@ impl WebContext {
     pub fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
-        let body = document.body().expect("no body");
-        let list =
-            document.get_element_by_id("temperament-list").unwrap_or({
-                // If there's no matching element, let's make one!
-                let list = document.create_element("list").unwrap();
-                list.set_id("temperament-list");
-                body.append_child(&list).unwrap();
-                list
-            });
-        WebContext { document, list }
+        if let Some(list) = document.get_element_by_id("temperament-list") {
+            WebContext { document, list }
+        } else {
+            // This is an error in the HTML
+            throw_str("Programming Error: temperament-list not found");
+        }
     }
 
     pub fn set_body_class(&self, value: &str) {
@@ -147,11 +143,13 @@ impl WebContext {
     }
 
     pub fn input_value(&self, id: &str) -> String {
-        self.element(id)
-            .expect("Unable to find input element")
-            .dyn_ref::<HtmlInputElement>()
-            .expect("Element isn't an input element")
-            .value()
+        let element =
+            self.expect(self.element(id), "Unable to find input element");
+        self.expect(
+            element.dyn_ref::<HtmlInputElement>(),
+            "Element isn't an input element",
+        )
+        .value()
     }
 
     /// Unwrap a value with the potential of an exception
