@@ -358,10 +358,8 @@ fn rt_click_handler(evt: Event) {
 fn load_limit(list: &Element) -> Option<PrimeLimit> {
     let label = list.get_attribute("data-label")?;
     let value = list.get_attribute("data-pitches")?;
-    let pitches = match value.split('_').map(|p| p.parse()).collect() {
-        Ok(value) => value,
-        Err(_) => return None,
-    };
+    let pitches =
+        result_to_option(value.split('_').map(|p| p.parse()).collect())?;
     let value = list.get_attribute("data-headings")?;
     let headings = value
         .split('_')
@@ -378,16 +376,12 @@ fn load_limit(list: &Element) -> Option<PrimeLimit> {
 fn load_mapping(link: &Element) -> Option<Mapping> {
     let mut mapping = Vec::new();
     let value = link.get_attribute("data-rank")?;
-    let rank: usize = match value.parse() {
-        Ok(value) => value,
-        Err(_) => return None,
-    };
+    let rank: usize = result_to_option(value.parse())?;
     for i in 0..rank {
         let value = link.get_attribute(&format!("data-mapping{}", i))?;
-        match value.split('_').map(|m| m.parse()).collect() {
-            Ok(vector) => mapping.push(vector),
-            Err(_) => return None,
-        }
+        let vector =
+            result_to_option(value.split('_').map(|m| m.parse()).collect())?;
+        mapping.push(vector);
     }
     Some(mapping)
 }
@@ -479,4 +473,11 @@ fn show_rt(
     }
 
     Ok(())
+}
+
+fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
+    match result {
+        Ok(value) => Some(value),
+        Err(_) => None,
+    }
 }
