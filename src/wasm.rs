@@ -148,7 +148,7 @@ impl WebContext {
 
     pub fn input_value(&self, id: &str) -> String {
         self.element(id)
-            .unwrap()
+            .expect("Unable to find input element")
             .dyn_ref::<HtmlInputElement>()
             .expect("Element isn't an input element")
             .value()
@@ -159,6 +159,14 @@ impl WebContext {
         match result {
             Ok(value) => value,
             Err(_) => self.fail(message),
+        }
+    }
+
+    /// Raise an exception on a none
+    pub fn expect<T>(&self, result: Option<T>, message: &str) -> T {
+        match result {
+            Some(value) => value,
+            None => self.fail(message),
         }
     }
 
@@ -335,16 +343,14 @@ fn rt_click_handler(evt: Event) {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-            let limit = match load_limit(&web.list) {
-                Some(value) => value,
-                None => {
-                    web.fail("Programming Error: failed to load prime limit")
-                }
-            };
-            let mapping = match load_mapping(&target) {
-                Some(value) => value,
-                None => web.fail("Programming Error: failed to load mapping"),
-            };
+            let limit = web.expect(
+                load_limit(&web.list),
+                "Programming Error: failed to load prime limit",
+            );
+            let mapping = web.expect(
+                load_mapping(&target),
+                "Programming Error: failed to load mapping",
+            );
             web.unwrap(
                 show_rt(&web, limit, mapping),
                 "Failed to show the regular temperament",
