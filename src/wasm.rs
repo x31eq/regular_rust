@@ -4,7 +4,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
-use super::{join, Cents, ETMap, FactorElement, Mapping, PrimeLimit};
+use super::{join, Cents, ETMap, Harmonic, Mapping, PrimeLimit};
 use cangwu::TemperamentClass;
 
 type Exceptionable = Result<(), JsValue>;
@@ -29,7 +29,7 @@ pub fn form_submit(evt: Event) -> SearchResult {
 }
 
 pub fn consecutive_prime_limit_search(
-    prime_cap: super::Harmonic,
+    prime_cap: Harmonic,
     ek_adjusted: Cents,
     n_results: usize,
 ) -> SearchResult {
@@ -226,7 +226,7 @@ fn write_headings(
 fn write_float_row(
     web: &WebContext,
     table: &Element,
-    pitches: &super::Tuning,
+    pitches: &[Cents],
     precision: usize,
 ) -> Exceptionable {
     let row = web.document.create_element("tr")?;
@@ -272,7 +272,7 @@ fn show_regular_temperaments<'a>(
 
 /// Return the table row for a regular temperament mapping
 fn rt_row(
-    mapping: &Mapping,
+    mapping: &[ETMap],
     limit: &PrimeLimit,
     web: &WebContext,
 ) -> Result<(Element), JsValue> {
@@ -292,7 +292,7 @@ fn rt_row(
         link.set_attribute(&key, &value)?;
     }
 
-    let octaves: Vec<FactorElement> = mapping.iter().map(|m| m[0]).collect();
+    let octaves: ETMap = mapping.iter().map(|m| m[0]).collect();
     let text = join(" & ", &octaves);
     link.set_text_content(Some(&text));
     cell.append_child(&link)?;
@@ -310,8 +310,7 @@ fn rt_row(
 }
 
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
-    let octaves: Vec<FactorElement> =
-        rt.melody.iter().map(|m| m[0]).collect();
+    let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
     format!(
         "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
         &join("_", &octaves),
