@@ -13,18 +13,18 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) -> Result<SearchResult, JsValue> {
     evt.prevent_default();
     let web = WebContext::new();
-    let limit = match web.input_value("prime-limit").parse() {
-        Ok(limit) => limit,
-        Err(_) => web.fail("Unrecognized prime limit"),
-    };
-    let eka = match web.input_value("prime-eka").parse() {
-        Ok(eka) => eka,
-        Err(_) => web.fail("Unrecognized badness parameter"),
-    };
-    let nresults = match web.input_value("n-results").parse() {
-        Ok(nresults) => nresults,
-        Err(_) => web.fail("Unrecognized number of results"),
-    };
+    let limit = web.unwrap(
+        web.input_value("prime-limit").parse(),
+        "Unrecognized prime limit",
+    );
+    let eka = web.unwrap(
+        web.input_value("prime-eka").parse(),
+        "Unrecognized badness parameter",
+    );
+    let nresults = web.unwrap(
+        web.input_value("n-results").parse(),
+        "Unrecognized number of results",
+    );
     consecutive_prime_limit_search(limit, eka, nresults)
 }
 
@@ -135,6 +135,15 @@ impl WebContext {
             .value()
     }
 
+    /// Unwrap a value with the potential of an exception
+    pub fn unwrap<T, U>(&self, result: Result<T, U>, message: &str) -> T {
+        match result {
+            Ok(value) => value,
+            Err(_) => self.fail(message),
+        }
+    }
+
+    /// Escalate an error to an exception
     pub fn fail(&self, message: &str) -> ! {
         if let Some(error_field) = self.element("error-report") {
             error_field.set_text_content(Some(message));
