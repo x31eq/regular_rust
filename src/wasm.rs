@@ -92,7 +92,7 @@ pub fn consecutive_prime_limit_search(
             ek,
             eff_n_results,
         );
-        if rts.len() > 0 {
+        if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
             web.unwrap(
                 show_regular_temperaments(&web, &limit, visible_rts, rank),
