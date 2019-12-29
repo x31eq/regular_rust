@@ -4,7 +4,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
-use super::{join, Cents, ETMap, Harmonic, Mapping, PrimeLimit};
+use super::{join, Cents, ETMap, Mapping, PrimeLimit};
 use cangwu::TemperamentClass;
 
 type Exceptionable = Result<(), JsValue>;
@@ -25,15 +25,14 @@ pub fn form_submit(evt: Event) -> SearchResult {
         web.input_value("n-results").parse(),
         "Unrecognized number of results",
     );
-    consecutive_prime_limit_search(limit, eka, nresults)
+    regular_temperament_search(PrimeLimit::new(limit), eka, nresults)
 }
 
-pub fn consecutive_prime_limit_search(
-    prime_cap: Harmonic,
+pub fn regular_temperament_search(
+    limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
 ) -> SearchResult {
-    let limit = PrimeLimit::new(prime_cap);
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
     let safety = 4 * (dimension as f64).sqrt().floor() as usize;
