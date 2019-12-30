@@ -2,6 +2,8 @@
 //!
 //! Utilties for regular temperament finding
 
+use std::str::FromStr;
+
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
 // which means 11 bits (assuming the root is 1).
@@ -59,8 +61,12 @@ impl PrimeLimit {
             headings,
         }
     }
+}
 
-    pub fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
+impl FromStr for PrimeLimit {
+    type Err = ParseLimitError;
+
+    fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
         if let Ok(limit) = src.parse() {
             Ok(PrimeLimit::new(limit))
         } else {

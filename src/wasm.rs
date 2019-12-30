@@ -14,7 +14,7 @@ pub fn form_submit(evt: Event) -> SearchResult {
     evt.prevent_default();
     let web = WebContext::new();
     let limit = web.unwrap(
-        PrimeLimit::from_str(&web.input_value("prime-limit")),
+        web.input_value("prime-limit").parse(),
         "Unrecognized prime limit",
     );
     let eka = web.unwrap(
