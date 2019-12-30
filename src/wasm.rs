@@ -14,15 +14,15 @@ pub fn form_submit(evt: Event) -> SearchResult {
     evt.prevent_default();
     let web = WebContext::new();
     let limit = web.unwrap(
-        web.input_value("prime-limit").parse(),
+        web.input_value("prime-limit").trim().parse(),
         "Unrecognized prime limit",
     );
     let eka = web.unwrap(
-        web.input_value("prime-eka").parse(),
+        web.input_value("prime-eka").trim().parse(),
         "Unrecognized badness parameter",
     );
     let nresults = web.unwrap(
-        web.input_value("n-results").parse(),
+        web.input_value("n-results").trim().parse(),
         "Unrecognized number of results",
     );
     regular_temperament_search(limit, eka, nresults)
