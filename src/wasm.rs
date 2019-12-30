@@ -14,7 +14,7 @@ pub fn form_submit(evt: Event) -> SearchResult {
     evt.prevent_default();
     let web = WebContext::new();
     let limit = web.unwrap(
-        web.input_value("prime-limit").parse(),
+        PrimeLimit::from_str(&web.input_value("prime-limit")),
         "Unrecognized prime limit",
     );
     let eka = web.unwrap(
@@ -25,7 +25,7 @@ pub fn form_submit(evt: Event) -> SearchResult {
         web.input_value("n-results").parse(),
         "Unrecognized number of results",
     );
-    regular_temperament_search(PrimeLimit::new(limit), eka, nresults)
+    regular_temperament_search(limit, eka, nresults)
 }
 
 pub fn regular_temperament_search(

@@ -59,7 +59,17 @@ impl PrimeLimit {
             headings,
         }
     }
+
+    pub fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
+        if let Ok(limit) = src.parse() {
+            Ok(PrimeLimit::new(limit))
+        } else {
+            Err(ParseLimitError {})
+        }
+    }
 }
+
+pub struct ParseLimitError {}
 
 fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
     let mut items = items.iter();
