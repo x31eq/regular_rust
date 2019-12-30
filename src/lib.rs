@@ -69,6 +69,8 @@ impl FromStr for PrimeLimit {
     fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
         if let Ok(limit) = src.parse() {
             Ok(PrimeLimit::new(limit))
+        } else if let Ok(primes) = src.split('.').map(str::parse).collect() {
+            Ok(PrimeLimit::explicit(primes))
         } else {
             Err(ParseLimitError {})
         }
