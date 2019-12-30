@@ -67,6 +67,7 @@ impl FromStr for PrimeLimit {
     type Err = ParseLimitError;
 
     fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
+        // FIXME: prime limit of zero causes a runtime error
         if let Ok(limit) = src.parse() {
             Ok(PrimeLimit::new(limit))
         } else if let Ok(primes) = src.split('.').map(str::parse).collect() {
