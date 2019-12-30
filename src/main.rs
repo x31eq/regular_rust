@@ -7,7 +7,7 @@ fn main() {
         0 | 1 | 2 | 3 => panic!(format!(
             "{} {}",
             "Supply the number of results, badness parameter,",
-            "and prime limit as command line arguments"
+            "and prime limit as command line arguments",
         )),
         4 => {
             if args[3] == "cents" {
