@@ -19,6 +19,29 @@ fn non_consecutive_limit() {
 }
 
 #[test]
+fn limit_from_str() {
+    let label = "7";
+    let limit: PrimeLimit = label.parse().unwrap();
+    assert_eq!(&limit.label, label);
+    assert_eq!(limit.headings, vec!["2", "3", "5", "7"]);
+}
+
+#[test]
+fn non_consecutive_limit_from_str() {
+    let label = "2.3.7";
+    let limit: PrimeLimit = label.parse().unwrap();
+    assert_eq!(&limit.label, label);
+    assert_eq!(limit.headings, vec!["2", "3", "7"]);
+}
+
+#[test]
+fn bad_limit_from_str() {
+    let label = "foo";
+    let limit: Result<PrimeLimit, _> = label.parse();
+    assert!(limit.is_err());
+}
+
+#[test]
 fn test_join() {
     assert_eq!(&join(", ", &vec![1, 2, 3]), "1, 2, 3");
     let mut tokens = Vec::new();
