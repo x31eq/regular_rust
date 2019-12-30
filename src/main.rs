@@ -13,7 +13,7 @@ fn main() {
             if args[3] == "cents" {
                 read_cents()
             } else {
-                PrimeLimit::new(args[3].parse().unwrap())
+                args[3].parse().unwrap()
             }
         }
         _ => PrimeLimit::explicit(

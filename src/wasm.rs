@@ -362,7 +362,7 @@ fn load_limit(list: &Element) -> Option<PrimeLimit> {
     let label = list.get_attribute("data-label")?;
     let value = list.get_attribute("data-pitches")?;
     let pitches =
-        result_to_option(value.split('_').map(|p| p.parse()).collect())?;
+        result_to_option(value.split('_').map(str::parse).collect())?;
     let value = list.get_attribute("data-headings")?;
     let headings = value
         .split('_')
@@ -383,7 +383,7 @@ fn load_mapping(link: &Element) -> Option<Mapping> {
     for i in 0..rank {
         let value = link.get_attribute(&format!("data-mapping{}", i))?;
         let vector =
-            result_to_option(value.split('_').map(|m| m.parse()).collect())?;
+            result_to_option(value.split('_').map(str::parse).collect())?;
         mapping.push(vector);
     }
     Some(mapping)

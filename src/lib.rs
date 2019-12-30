@@ -2,6 +2,7 @@
 //!
 //! Utilties for regular temperament finding
 
+use std::fmt;
 use std::str::FromStr;
 
 pub type Cents = f64;
@@ -78,7 +79,14 @@ impl FromStr for PrimeLimit {
     }
 }
 
+#[derive(Debug)]
 pub struct ParseLimitError {}
+
+impl fmt::Display for ParseLimitError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        "Unrecognized prime limit".fmt(f)
+    }
+}
 
 fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
     let mut items = items.iter();
