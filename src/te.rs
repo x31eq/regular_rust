@@ -122,6 +122,22 @@ fn maximally_even(d: usize, n: usize, rotation: usize) -> Vec<usize> {
     (1..=d).map(|i| (i * n + rotation % d) / d).collect()
 }
 
+fn fokker_block(octaves: Vec<usize>) -> Vec<Vec<usize>> {
+    let rank = octaves.len();
+    assert!(rank > 0);
+    let n_pitches = octaves[0];
+    let mut result = Vec::with_capacity(n_pitches);
+    for i in 0..n_pitches {
+        let mut pitch = Vec::with_capacity(rank);
+        for &m in octaves.iter() {
+            let p = maximally_even(n_pitches, m, n_pitches - 1)[i];
+            pitch.push(p);
+        }
+        result.push(pitch);
+    }
+    result
+}
+
 #[cfg(test)]
 fn make_marvel() -> TETemperament {
     let marvel_vector = vec![
@@ -282,6 +298,16 @@ fn test_maximally_even() {
     for i in 0..10 {
         assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
     }
+}
+
+#[test]
+fn test_fokker_block() {
+    assert_eq!(
+        fokker_block(vec![7, 12]),
+        vec![vec![1, 2], vec![2, 4], vec![3, 6], vec![4, 7],
+        vec![5, 9], vec![6, 11], vec![7, 12],
+        ]
+        );
 }
 
 #[cfg(test)]
