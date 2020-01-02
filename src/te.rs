@@ -117,6 +117,11 @@ impl TETemperament {
     }
 }
 
+/// A maximally even d from n scale
+fn maximally_even(d: usize, n: usize, rotation: usize) -> Vec<usize> {
+    (1..=d).map(|i| (i * n + rotation % d) / d).collect()
+}
+
 #[cfg(test)]
 fn make_marvel() -> TETemperament {
     let marvel_vector = vec![
@@ -267,6 +272,16 @@ fn mystery() {
     let fmt_tuning_map = format_float_vec(&mystery.pote_tuning_map(), 3);
     let expected = "1200.000 1903.448 2788.354 3367.664 4153.871 4443.527";
     assert!(fmt_tuning_map == expected.to_string());
+}
+
+#[test]
+fn test_maximally_even() {
+    assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
+    assert_eq!(maximally_even(7, 12, 5), vec![2, 4, 5, 7, 9, 11, 12]);
+    assert_eq!(maximally_even(5, 19, 3), vec![4, 8, 12, 15, 19]);
+    for i in 0..10 {
+        assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
+    }
 }
 
 #[cfg(test)]
