@@ -115,6 +115,11 @@ impl TETemperament {
         let comparison = tuning_map.iter().zip(self.plimit.iter());
         comparison.map(|(&x, y)| x - y).collect()
     }
+
+    /// Fokker block as steps as integers, not pitches
+    pub fn fokker_block_steps(&self) -> Vec<Vec<usize>> {
+        fokker_block(self.melody.iter().map(|row| row[0] as usize).collect())
+    }
 }
 
 /// A maximally even d from n scale
@@ -319,6 +324,38 @@ fn test_fokker_block() {
             vec![4, 4, 12],
             vec![5, 5, 15],
             vec![6, 5, 17],
+        ]
+    );
+}
+
+#[test]
+fn rt_fokker_block() {
+    let marvel = make_marvel();
+    assert_eq!(
+        marvel.fokker_block_steps(),
+        vec![
+            vec![1, 2, 2],
+            vec![2, 3, 4],
+            vec![3, 5, 6],
+            vec![4, 6, 8],
+            vec![5, 8, 10],
+            vec![6, 9, 12],
+            vec![7, 10, 14],
+            vec![8, 12, 15],
+            vec![9, 13, 17],
+            vec![10, 15, 19],
+            vec![11, 16, 21],
+            vec![12, 17, 23],
+            vec![13, 19, 25],
+            vec![14, 20, 27],
+            vec![15, 22, 28],
+            vec![16, 23, 30],
+            vec![17, 24, 32],
+            vec![18, 26, 34],
+            vec![19, 27, 36],
+            vec![20, 29, 38],
+            vec![21, 30, 40],
+            vec![22, 31, 41],
         ]
     );
 }
