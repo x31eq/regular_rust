@@ -310,6 +310,17 @@ fn test_fokker_block() {
             vec![7, 12],
         ]
     );
+    assert_eq!(
+        fokker_block(vec![6, 5, 17]),
+        vec![
+            vec![1, 1, 3],
+            vec![2 ,2, 6],
+            vec![3, 3, 9],
+            vec![4, 4, 12],
+            vec![5, 5, 15],
+            vec![6, 5, 17],
+        ]
+    );
 }
 
 #[cfg(test)]
