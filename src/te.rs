@@ -136,7 +136,7 @@ fn maximally_even(
 }
 
 fn fokker_block(octaves: ETMap) -> Mapping {
-    assert!(octaves.len() > 0);
+    assert!(!octaves.is_empty());
     let n_pitches = octaves[0];
     let scales: Mapping = octaves
         .iter()
