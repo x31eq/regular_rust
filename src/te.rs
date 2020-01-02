@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 use super::cangwu;
-use super::{Cents, ETMap, Mapping, Tuning};
+use super::{Cents, ETMap, FactorElement, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
@@ -117,25 +117,36 @@ impl TETemperament {
     }
 
     /// Fokker block as steps as integers, not pitches
-    pub fn fokker_block_steps(&self) -> Vec<Vec<usize>> {
-        fokker_block(self.melody.iter().map(|row| row[0] as usize).collect())
+    pub fn fokker_block_steps(&self) -> Mapping {
+        fokker_block(self.melody.iter().map(|row| row[0]).collect())
     }
 }
 
 /// A maximally even d from n scale
-fn maximally_even(d: usize, n: usize, rotation: usize) -> Vec<usize> {
+fn maximally_even(
+    d: FactorElement,
+    n: FactorElement,
+    rotation: FactorElement,
+) -> ETMap {
+    // Nothing can be negative because of the way / and % work
+    assert!(d >= 0);
+    assert!(n > 0);
+    assert!(rotation >= 0);
     (1..=d).map(|i| (i * n + rotation % d) / d).collect()
 }
 
-fn fokker_block(octaves: Vec<usize>) -> Vec<Vec<usize>> {
+fn fokker_block(octaves: ETMap) -> Mapping {
     assert!(octaves.len() > 0);
     let n_pitches = octaves[0];
-    let scales: Vec<Vec<usize>> = octaves
+    let scales: Mapping = octaves
         .iter()
         .map(|&m| maximally_even(n_pitches, m, n_pitches - 1))
         .collect();
     (0..n_pitches)
-        .map(|pitch| scales.iter().map(|scale| scale[pitch]).collect())
+        .map(|pitch| {
+            assert!(pitch >= 0);
+            scales.iter().map(|scale| scale[pitch as usize]).collect()
+        })
         .collect()
 }
 
@@ -299,6 +310,7 @@ fn test_maximally_even() {
     for i in 0..10 {
         assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
     }
+    assert_eq!(maximally_even(0, 10, 11).len(), 0);
 }
 
 #[test]
@@ -319,7 +331,7 @@ fn test_fokker_block() {
         fokker_block(vec![6, 5, 17]),
         vec![
             vec![1, 1, 3],
-            vec![2 ,2, 6],
+            vec![2, 2, 6],
             vec![3, 3, 9],
             vec![4, 4, 12],
             vec![5, 5, 15],
