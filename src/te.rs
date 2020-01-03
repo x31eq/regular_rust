@@ -109,6 +109,12 @@ impl TETemperament {
             .collect()
     }
 
+    pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
+        self.tuning_map().iter().zip(interval)
+            .map(|(&x, y)| x * y as Cents)
+            .sum()
+    }
+
     /// Strictly, pure equivalence interval TE
     pub fn pote_mistunings(&self) -> Tuning {
         let tuning_map = self.pote_tuning_map();
@@ -395,6 +401,15 @@ fn rt_fokker_block() {
             vec![22, 31, 41],
         ]
     );
+}
+
+#[test]
+fn pitches() {
+    let marvel = make_marvel();
+    let twotoe = marvel.pitch_from_primes(vec![3, 0, 0, -1, 0]);
+    assert_eq!(format!("{:.3}", twotoe), "232.266");
+    let twotoe = marvel.pitch_from_primes(vec![-3, 0, 0, 0, 1]);
+    assert_eq!(format!("{:.3}", twotoe), "549.283");
 }
 
 #[cfg(test)]
