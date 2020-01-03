@@ -131,11 +131,7 @@ impl TETemperament {
     }
 
     pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
-        self.tuning_map()
-            .iter()
-            .zip(interval)
-            .map(|(&x, y)| x * y as Cents)
-            .sum()
+        self.pitch_from_generators(self.generators_from_primes(interval))
     }
 
     /// Strictly, pure equivalence interval TE
