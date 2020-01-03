@@ -237,12 +237,12 @@ fn tuning() {
     let marvel = make_marvel();
     let expected = "3.96487 17.32226 14.05909";
     let fmt_tuning = format_float_vec(&marvel.tuning, 5);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "6.00023 17.78766 11.87013";
     let fmt_tuning = format_float_vec(&jove.tuning, 5);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[test]
@@ -250,12 +250,12 @@ fn tuning_map() {
     let marvel = make_marvel();
     let expected = "1200.640 1901.403 2785.025 3369.655 4151.204";
     let fmt_tuning = format_float_vec(&marvel.tuning_map(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "1200.099 1901.163 2786.388 3368.609 4152.859";
     let fmt_tuning = format_float_vec(&jove.tuning_map(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[test]
@@ -263,12 +263,12 @@ fn mistunings() {
     let marvel = make_marvel();
     let expected = "0.640 -0.552 -1.288 0.829 -0.114";
     let fmt_tuning = format_float_vec(&marvel.mistunings(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "0.099 -0.792 0.074 -0.217 1.541";
     let fmt_tuning = format_float_vec(&jove.mistunings(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[test]
@@ -276,12 +276,12 @@ fn pote_tuning() {
     let marvel = make_marvel();
     let expected = "3.96276 17.31303 14.05160";
     let fmt_tuning = format_float_vec(&marvel.pote_tuning(), 5);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "5.99973 17.78620 11.86915";
     let fmt_tuning = format_float_vec(&jove.pote_tuning(), 5);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[test]
@@ -289,12 +289,12 @@ fn pote_tuning_map() {
     let marvel = make_marvel();
     let expected = "1200.000 1900.389 2783.540 3367.858 4148.990";
     let fmt_tuning = format_float_vec(&marvel.pote_tuning_map(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "1200.000 1901.007 2786.159 3368.331 4152.517";
     let fmt_tuning = format_float_vec(&jove.pote_tuning_map(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[test]
@@ -302,12 +302,12 @@ fn pote_mistunings() {
     let marvel = make_marvel();
     let expected = "0.000 -1.566 -2.773 -0.968 -2.328";
     let fmt_tuning = format_float_vec(&marvel.pote_mistunings(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 
     let jove = make_jove();
     let expected = "0.000 -0.948 -0.155 -0.495 1.199";
     let fmt_tuning = format_float_vec(&jove.pote_mistunings(), 3);
-    assert!(fmt_tuning == expected.to_string());
+    assert_eq!(fmt_tuning, expected.to_string());
 }
 
 #[rustfmt::skip]
@@ -328,15 +328,15 @@ fn mystery() {
 
     let fmt_tuning_map = format_float_vec(&mystery.tuning_map(), 3);
     let expected = "1199.507 1902.667 2787.209 3366.282 4152.166 4441.702";
-    assert!(fmt_tuning_map == expected.to_string());
+    assert_eq!(fmt_tuning_map, expected.to_string());
 
     let fmt_errors = format_float_vec(&mystery.mistunings(), 3);
     let expected = "-0.493 0.712 0.896 -2.544 0.848 1.175";
-    assert!(fmt_errors == expected.to_string());
+    assert_eq!(fmt_errors, expected.to_string());
 
     let fmt_tuning_map = format_float_vec(&mystery.pote_tuning_map(), 3);
     let expected = "1200.000 1903.448 2788.354 3367.664 4153.871 4443.527";
-    assert!(fmt_tuning_map == expected.to_string());
+    assert_eq!(fmt_tuning_map, expected.to_string());
 }
 
 #[test]
