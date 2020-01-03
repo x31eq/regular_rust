@@ -116,9 +116,12 @@ impl TETemperament {
         comparison.map(|(&x, y)| x - y).collect()
     }
 
-    /// Fokker block as steps as integers, not pitches
-    pub fn fokker_block_steps(&self) -> Mapping {
-        fokker_block(self.melody.iter().map(|row| row[0]).collect())
+    /// Fokker block as steps as integers, not pitches.
+    /// This might not actually be a periodicity block
+    /// because there's no check on n_pitches
+    pub fn fokker_block_steps(&self, n_pitches: FactorElement) -> Mapping {
+        let octaves = self.melody.iter().map(|row| row[0]).collect();
+        fokker_block(n_pitches, octaves)
     }
 }
 
@@ -135,9 +138,8 @@ fn maximally_even(
     (1..=d).map(|i| (i * n + rotation % d) / d).collect()
 }
 
-fn fokker_block(octaves: ETMap) -> Mapping {
+fn fokker_block(n_pitches: FactorElement, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
-    let n_pitches = octaves[0];
     let scales: Mapping = octaves
         .iter()
         .map(|&m| maximally_even(n_pitches, m, n_pitches - 1))
@@ -316,7 +318,7 @@ fn test_maximally_even() {
 #[test]
 fn test_fokker_block() {
     assert_eq!(
-        fokker_block(vec![7, 12]),
+        fokker_block(7, vec![7, 12]),
         vec![
             vec![1, 2],
             vec![2, 4],
@@ -328,7 +330,7 @@ fn test_fokker_block() {
         ]
     );
     assert_eq!(
-        fokker_block(vec![6, 5, 17]),
+        fokker_block(6, vec![6, 5, 17]),
         vec![
             vec![1, 1, 3],
             vec![2, 2, 6],
@@ -338,13 +340,24 @@ fn test_fokker_block() {
             vec![6, 5, 17],
         ]
     );
+    assert_eq!(
+        fokker_block(6, vec![5, 17]),
+        vec![
+            vec![1, 3],
+            vec![2, 6],
+            vec![3, 9],
+            vec![4, 12],
+            vec![5, 15],
+            vec![5, 17],
+        ]
+    );
 }
 
 #[test]
 fn rt_fokker_block() {
     let marvel = make_marvel();
     assert_eq!(
-        marvel.fokker_block_steps(),
+        marvel.fokker_block_steps(22),
         vec![
             vec![1, 2, 2],
             vec![2, 3, 4],
@@ -367,6 +380,18 @@ fn rt_fokker_block() {
             vec![19, 27, 36],
             vec![20, 29, 38],
             vec![21, 30, 40],
+            vec![22, 31, 41],
+        ]
+    );
+    assert_eq!(
+        marvel.fokker_block_steps(7),
+        vec![
+            vec![4, 5, 6],
+            vec![7, 9, 12],
+            vec![10, 14, 18],
+            vec![13, 18, 24],
+            vec![16, 23, 30],
+            vec![19, 27, 36],
             vec![22, 31, 41],
         ]
     );
