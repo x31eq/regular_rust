@@ -109,8 +109,23 @@ impl TETemperament {
             .collect()
     }
 
+    pub fn generators_from_primes(&self, interval: ETMap) -> ETMap {
+        self.melody
+            .iter()
+            .map(|mapping| {
+                mapping
+                    .iter()
+                    .zip(interval.iter())
+                    .map(|(&x, y)| x * y)
+                    .sum()
+            })
+            .collect()
+    }
+
     pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
-        self.tuning_map().iter().zip(interval)
+        self.tuning_map()
+            .iter()
+            .zip(interval)
             .map(|(&x, y)| x * y as Cents)
             .sum()
     }
@@ -401,6 +416,13 @@ fn rt_fokker_block() {
             vec![22, 31, 41],
         ]
     );
+}
+
+#[test]
+fn generators() {
+    let marvel = make_marvel();
+    let twotoe = marvel.generators_from_primes(vec![3, 0, 0, -1, 0]);
+    assert_eq!(twotoe, vec![4, 6, 8]);
 }
 
 #[test]
