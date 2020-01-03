@@ -122,6 +122,14 @@ impl TETemperament {
             .collect()
     }
 
+    pub fn pitch_from_generators(&self, interval: ETMap) -> Cents {
+        self.tuning
+            .iter()
+            .zip(interval)
+            .map(|(&x, y)| x * y as Cents)
+            .sum()
+    }
+
     pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
         self.tuning_map()
             .iter()
@@ -428,6 +436,9 @@ fn generators() {
 #[test]
 fn pitches() {
     let marvel = make_marvel();
+    let twotoe = marvel.pitch_from_generators(vec![4, 6, 8]);
+    assert_eq!(format!("{:.3}", twotoe), "232.266");
+
     let twotoe = marvel.pitch_from_primes(vec![3, 0, 0, -1, 0]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
     let twotoe = marvel.pitch_from_primes(vec![-3, 0, 0, 0, 1]);
