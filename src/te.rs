@@ -148,6 +148,16 @@ impl TETemperament {
         let octaves = self.melody.iter().map(|row| row[0]).collect();
         fokker_block(n_pitches, octaves)
     }
+
+    /// This might not actually be a periodicity block
+    /// because there's no check on n_pitches
+    pub fn fokker_block_pitches(&self, n_pitches: FactorElement) -> Tuning {
+        self.fokker_block_steps(n_pitches)
+            .iter()
+            .cloned()
+            .map(|interval| self.pitch_from_generators(interval))
+            .collect()
+    }
 }
 
 /// A maximally even d from n scale
@@ -420,6 +430,13 @@ fn rt_fokker_block() {
             vec![22, 31, 41],
         ]
     );
+}
+
+#[test]
+fn tuned_block() {
+    let block = make_marvel().fokker_block_pitches(22);
+    let fmt_block = format_float_vec(&block, 3);
+    assert_eq!(fmt_block, "66.728 116.133 182.861 232.266 298.993 348.399 397.804 450.473 499.878 566.605 616.011 665.416 732.144 781.549 834.218 883.623 933.028 999.756 1049.161 1115.889 1165.294 1200.640")
 }
 
 #[test]
