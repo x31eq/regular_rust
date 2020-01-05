@@ -280,7 +280,7 @@ fn rt_row(
     mapping: &[ETMap],
     limit: &PrimeLimit,
     web: &WebContext,
-) -> Result<(Element), JsValue> {
+) -> Result<Element, JsValue> {
     let row = web.document.create_element("tr")?;
     let cell = web.document.create_element("td")?;
     let link = web.document.create_element("a")?;
@@ -498,13 +498,27 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
         return Ok(());
     }
     let span = web.document.create_element("span")?;
-    let button = web.document.create_element("button")?;
     let tonic: ETMap = (0..rank).map(|_| 0).collect();
-    button.set_attribute("data-steps", &join("_", &tonic))?;
-    button.set_text_content(Some(&join(", ", &tonic)));
+    let button = accordion_button(&web, &rt, &tonic)?;
     span.append_child(&button)?;
     accordion.append_child(&span)?;
     Ok(())
+}
+
+fn accordion_button(
+    web: &WebContext,
+    rt: &te::TETemperament,
+    pitch: &ETMap,
+) -> Result<Element, JsValue> {
+    let button = web.document.create_element("button")?;
+    button.set_attribute("data-steps", &join("_", &pitch))?;
+    button.set_text_content(Some(&join(", ", &pitch)));
+    let pitch = rt.pitch_from_steps(&pitch);
+    // Tonic is middle C for now
+    let freq = 264.0 * 2.0_f64.powf(pitch);
+    button.set_attribute("data-freq", &format!("{:.6}", freq))?;
+
+    Ok(button)
 }
 
 fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
