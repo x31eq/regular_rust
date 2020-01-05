@@ -109,29 +109,29 @@ impl TETemperament {
             .collect()
     }
 
-    pub fn generators_from_primes(&self, interval: ETMap) -> ETMap {
+    pub fn generators_from_primes(&self, interval: &ETMap) -> ETMap {
         self.melody
             .iter()
             .map(|mapping| {
                 mapping
                     .iter()
                     .zip(interval.iter())
-                    .map(|(&x, y)| x * y)
+                    .map(|(&x, &y)| x * y)
                     .sum()
             })
             .collect()
     }
 
-    pub fn pitch_from_steps(&self, interval: ETMap) -> Cents {
+    pub fn pitch_from_steps(&self, interval: &ETMap) -> Cents {
         self.tuning
             .iter()
             .zip(interval)
-            .map(|(&x, y)| x * y as Cents)
+            .map(|(&x, &y)| x * y as Cents)
             .sum()
     }
 
-    pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
-        self.pitch_from_steps(self.generators_from_primes(interval))
+    pub fn pitch_from_primes(&self, interval: &ETMap) -> Cents {
+        self.pitch_from_steps(&self.generators_from_primes(interval))
     }
 
     /// Strictly, pure equivalence interval TE
@@ -155,7 +155,7 @@ impl TETemperament {
         self.fokker_block_steps(n_pitches)
             .iter()
             .cloned()
-            .map(|interval| self.pitch_from_steps(interval))
+            .map(|interval| self.pitch_from_steps(&interval))
             .collect()
     }
 }
@@ -442,19 +442,19 @@ fn tuned_block() {
 #[test]
 fn generators() {
     let marvel = make_marvel();
-    let twotoe = marvel.generators_from_primes(vec![3, 0, 0, -1, 0]);
+    let twotoe = marvel.generators_from_primes(&vec![3, 0, 0, -1, 0]);
     assert_eq!(twotoe, vec![4, 6, 8]);
 }
 
 #[test]
 fn pitches() {
     let marvel = make_marvel();
-    let twotoe = marvel.pitch_from_steps(vec![4, 6, 8]);
+    let twotoe = marvel.pitch_from_steps(&vec![4, 6, 8]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
 
-    let twotoe = marvel.pitch_from_primes(vec![3, 0, 0, -1, 0]);
+    let twotoe = marvel.pitch_from_primes(&vec![3, 0, 0, -1, 0]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
-    let twotoe = marvel.pitch_from_primes(vec![-3, 0, 0, 0, 1]);
+    let twotoe = marvel.pitch_from_primes(&vec![-3, 0, 0, 0, 1]);
     assert_eq!(format!("{:.3}", twotoe), "549.283");
 }
 
