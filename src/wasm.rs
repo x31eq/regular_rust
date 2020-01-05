@@ -505,6 +505,7 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     // Buttons are added bottom-up
     let mut element_stack = Vec::new();
     let button = accordion_button(&web, &rt, &tonic)?;
+    let mut last_pitch = tonic;
     element_stack.push(button);
     for pitch in rt.fokker_block_steps(rt.melody.iter().map(|m| m[0]).sum()) {
         let button = accordion_button(&web, &rt, &pitch)?;
@@ -519,7 +520,12 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
             row.append_child(&cell)?;
             element_stack = Vec::new();
         }
-        element_stack.push(button);
+        if pitch != last_pitch {
+            // Filter out duplicate pitches.
+            // This means the fokker block calculation is wrong
+            element_stack.push(button);
+            last_pitch = pitch;
+        }
     }
     let cell = web.document.create_element("td")?;
     while !element_stack.is_empty() {
