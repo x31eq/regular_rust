@@ -45,17 +45,30 @@
             input#show-pote:checked ~ .pote {
                 display: block;
             }
+            .accordion {
+                white-space: nowrap;
+            }
+            .accordion span {
+                display: block;
+                float: left;
+            }
             .accordion button {
                 color: blue;
                 background-color: #EEE;
                 border-color: #CCC;
                 width: 3em;
-                height: 2em;
+                height: 3em;
+                white-space: break-spaces;
+                float: left;
+                clear: left;
             }
             .accordion button.playing {
                 color: #EEE;
                 background-color: blue;
                 border-color: blue;
+            }
+            h4 {
+                clear: both;
             }
         </style>
     </head>
