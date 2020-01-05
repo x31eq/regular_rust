@@ -458,6 +458,14 @@ fn show_rt(
         field.set_attribute("href", &rt_url(&rt, &limit.label))?;
     }
 
+    if show_accordion(&web, &rt).is_err() {
+        if let Some(accordion) = web.element("rt-accordion") {
+            // This is an optional feature,
+            // so hide it if something went wrong
+            accordion.set_inner_html("");
+        }
+    }
+
     // Make another RT object to get the generator tunings
     let rt = te::TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
@@ -475,14 +483,6 @@ fn show_rt(
         result.scroll_into_view();
     }
 
-    if show_accordion(&web, &rt).is_err() {
-        if let Some(accordion) = web.element("rt-accordion") {
-            // This is an optional feature,
-            // so hide it if something went wrong
-            accordion.set_inner_html("");
-        }
-    }
-
     Ok(())
 }
 
@@ -497,10 +497,20 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     if rank != 2 {
         return Ok(());
     }
-    let span = web.document.create_element("span")?;
     let tonic: ETMap = (0..rank).map(|_| 0).collect();
+    let mut diatonic_steps = 0;
+    let mut span = web.document.create_element("span")?;
     let button = accordion_button(&web, &rt, &tonic)?;
     span.append_child(&button)?;
+    for pitch in rt.fokker_block_steps(rt.melody.iter().map(|m| m[0]).sum()) {
+        let button = accordion_button(&web, &rt, &pitch)?;
+        if pitch[0] != diatonic_steps {
+            diatonic_steps = pitch[0];
+            accordion.append_child(&span)?;
+            span = web.document.create_element("span")?;
+        }
+        span.append_child(&button)?;
+    }
     accordion.append_child(&span)?;
     Ok(())
 }
@@ -515,9 +525,8 @@ fn accordion_button(
     button.set_text_content(Some(&join(", ", &pitch)));
     let pitch = rt.pitch_from_steps(&pitch);
     // Tonic is middle C for now
-    let freq = 264.0 * 2.0_f64.powf(pitch);
+    let freq = 264.0 * 2.0_f64.powf(pitch / 12e2);
     button.set_attribute("data-freq", &format!("{:.6}", freq))?;
-
     Ok(button)
 }
 
