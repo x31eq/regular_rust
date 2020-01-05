@@ -475,6 +475,35 @@ fn show_rt(
         result.scroll_into_view();
     }
 
+    if show_accordion(&web, &rt).is_err() {
+        if let Some(accordion) = web.element("rt-accordion") {
+            // This is an optional feature,
+            // so hide it if something went wrong
+            accordion.set_inner_html("");
+        }
+    }
+
+    Ok(())
+}
+
+/// An accordion is an instrument with buttons
+fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
+    let accordion = match web.element("rt-accordion") {
+        Some(result) => result,
+        None => return Ok(()),
+    };
+    accordion.set_inner_html("");
+    let rank = rt.melody.len();
+    if rank != 2 {
+        return Ok(());
+    }
+    let span = web.document.create_element("span")?;
+    let button = web.document.create_element("button")?;
+    let tonic: ETMap = (0..rank).map(|_| 0).collect();
+    button.set_attribute("data-steps", &join("_", &tonic))?;
+    button.set_text_content(Some(&join(", ", &tonic)));
+    span.append_child(&button)?;
+    accordion.append_child(&span)?;
     Ok(())
 }
 
