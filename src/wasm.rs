@@ -502,17 +502,30 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     let tonic: ETMap = (0..rank).map(|_| 0).collect();
     let mut diatonic_steps = 0;
     let row = web.document.create_element("tr")?;
-    let mut cell = web.document.create_element("td")?;
+    // Buttons are added bottom-up
+    let mut element_stack = Vec::new();
     let button = accordion_button(&web, &rt, &tonic)?;
-    cell.append_child(&button)?;
+    element_stack.push(button);
     for pitch in rt.fokker_block_steps(rt.melody.iter().map(|m| m[0]).sum()) {
         let button = accordion_button(&web, &rt, &pitch)?;
         if pitch[0] != diatonic_steps {
             diatonic_steps = pitch[0];
+            let cell = web.document.create_element("td")?;
+            while !element_stack.is_empty() {
+                if let Some(button) = element_stack.pop() {
+                    cell.append_child(&button)?;
+                }
+            }
             row.append_child(&cell)?;
-            cell = web.document.create_element("td")?;
+            element_stack = Vec::new();
         }
-        cell.append_child(&button)?;
+        element_stack.push(button);
+    }
+    let cell = web.document.create_element("td")?;
+    while !element_stack.is_empty() {
+        if let Some(button) = element_stack.pop() {
+            cell.append_child(&button)?;
+        }
     }
     row.append_child(&cell)?;
     table.append_child(&row)?;
