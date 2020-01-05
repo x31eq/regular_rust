@@ -462,7 +462,7 @@ fn show_rt(
         if let Some(accordion) = web.element("rt-accordion") {
             // This is an optional feature,
             // so hide it if something went wrong
-            accordion.set_inner_html("");
+            accordion.set_inner_html("<!-- accordion went wrong -->");
         }
     }
 
@@ -497,21 +497,26 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     if rank != 2 {
         return Ok(());
     }
+    // give up on styling and use a table
+    let table = web.document.create_element("table")?;
     let tonic: ETMap = (0..rank).map(|_| 0).collect();
     let mut diatonic_steps = 0;
-    let mut span = web.document.create_element("span")?;
+    let row = web.document.create_element("tr")?;
+    let mut cell = web.document.create_element("td")?;
     let button = accordion_button(&web, &rt, &tonic)?;
-    span.append_child(&button)?;
+    cell.append_child(&button)?;
     for pitch in rt.fokker_block_steps(rt.melody.iter().map(|m| m[0]).sum()) {
         let button = accordion_button(&web, &rt, &pitch)?;
         if pitch[0] != diatonic_steps {
             diatonic_steps = pitch[0];
-            accordion.append_child(&span)?;
-            span = web.document.create_element("span")?;
+            row.append_child(&cell)?;
+            cell = web.document.create_element("td")?;
         }
-        span.append_child(&button)?;
+        cell.append_child(&button)?;
     }
-    accordion.append_child(&span)?;
+    row.append_child(&cell)?;
+    table.append_child(&row)?;
+    accordion.append_child(&table)?;
     Ok(())
 }
 
