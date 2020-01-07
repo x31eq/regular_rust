@@ -21,6 +21,9 @@ test:
 .PHONY: wasm
 wasm: pkg/regular_bg.wasm
 
+.PHONY: release
+release: target/release/regular
+
 .PHONY: wasm-release
 wasm-release: regular_bg.wasm
 
