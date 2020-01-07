@@ -23,7 +23,7 @@ pub trait TemperamentClass {
             .iter()
             .enumerate()
             .rev()
-            .flat_map(|(i, col)| col.iter().skip(i).cloned())
+            .flat_map(|(i, col)| col[i..].iter().cloned())
             .collect()
     }
 

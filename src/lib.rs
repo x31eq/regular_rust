@@ -141,8 +141,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
     let cols = echelon.len();
     for col in 1..cols {
-        // Instead of nested iterators, work backwards and skip
-        let mut col_iter = echelon.iter_mut().rev().skip(cols - col - 1);
+        let mut col_iter = echelon[..=col].iter_mut().rev();
         let top_col = col_iter.next().unwrap();
         if let Some((row, &n)) =
             top_col.iter().enumerate().find(|(_i, &n)| n != 0)

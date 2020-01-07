@@ -17,7 +17,7 @@ fn main() {
             }
         }
         _ => PrimeLimit::explicit(
-            args.iter().skip(3).map(|m| m.parse().unwrap()).collect(),
+            args[3..].iter().map(|m| m.parse().unwrap()).collect(),
         ),
     };
     let n_results: usize = args[1].parse().unwrap();

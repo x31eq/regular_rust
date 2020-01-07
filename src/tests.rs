@@ -105,13 +105,13 @@ fn hermite_reduction() {
         vec![0, 2, 1, 1, 5],
         vec![0, 0, 2, 1, 0],
     ];
-    assert!(hermite_normal_form(&jove) == jove_hermite);
+    assert_eq!(hermite_normal_form(&jove), jove_hermite);
     let jove_neg_hermite = vec![
         vec![1, -1, 0, 1, -3],
         vec![0, 2, -1, 0, 5],
         vec![0, 0, 2, 1, 0],
     ];
-    assert!(hermite_normal_form(&jove_neg_hermite) == jove_hermite);
+    assert_eq!(hermite_normal_form(&jove_neg_hermite), jove_hermite);
 }
 
 fn near_enough_equal(x: f64, y: f64) -> bool {
