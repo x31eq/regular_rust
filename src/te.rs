@@ -180,7 +180,7 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     let columns = octaves.iter().cloned().min().unwrap();
     let scales: Mapping = octaves
         .iter()
-        .map(|&m|
+        .map(|&m| {
             if (m + columns) <= n_pitches && columns != m && columns > 0 {
                 let correction = (n_pitches - m) / columns;
                 let eff_m = m + columns * correction;
@@ -189,11 +189,10 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
                     .zip(maximally_even(n_pitches, columns, 1))
                     .map(|(&x, y)| x - correction * y)
                     .collect()
-            }
-            else {
+            } else {
                 maximally_even(n_pitches, m, 1)
             }
-        )
+        })
         .collect();
     (0..n_pitches)
         .map(|pitch| {
