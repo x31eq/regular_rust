@@ -139,9 +139,10 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
-    let cols = echelon.len();
-    for col in 1..cols {
+    for col in 1..echelon.len() {
         let mut col_iter = echelon[..=col].iter_mut().rev();
+        // Getting top_col from the mutable iterator
+        // ensures "echelon" is consistently borrowed
         let top_col = col_iter.next().unwrap();
         if let Some((row, &n)) =
             top_col.iter().enumerate().find(|(_i, &n)| n != 0)
