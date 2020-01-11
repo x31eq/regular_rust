@@ -104,10 +104,7 @@ fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
-pub fn prime_mapping(
-    plimit: &[Cents],
-    n_notes: Exponent,
-) -> Vec<Exponent> {
+pub fn prime_mapping(plimit: &[Cents], n_notes: Exponent) -> Vec<Exponent> {
     let multiplier = Cents::from(n_notes) / plimit[0];
     plimit
         .iter()

@@ -161,11 +161,7 @@ impl TETemperament {
 }
 
 /// A maximally even d from n scale
-fn maximally_even(
-    d: Exponent,
-    n: Exponent,
-    rotation: Exponent,
-) -> ETMap {
+fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
     if d == 0 {
         return Vec::new();
     }
@@ -442,7 +438,16 @@ fn rt_fokker_block() {
 fn tuned_block() {
     let block = make_marvel().fokker_block_pitches(22);
     let fmt_block = format_float_vec(&block, 3);
-    assert_eq!(fmt_block, "49.405 116.133 165.538 232.266 281.671 331.076 383.745 433.150 499.878 549.283 598.689 665.416 714.821 767.490 816.895 866.301 933.028 982.434 1049.161 1098.566 1165.294 1200.640")
+    let expected = format_float_vec(
+        &vec![
+            49.405, 116.133, 165.538, 232.266, 281.671, 331.076, 383.745,
+            433.150, 499.878, 549.283, 598.689, 665.416, 714.821, 767.490,
+            816.895, 866.301, 933.028, 982.434, 1049.161, 1098.566, 1165.294,
+            1200.640,
+        ],
+        3,
+    );
+    assert_eq!(fmt_block, expected);
 }
 
 #[test]
