@@ -170,14 +170,20 @@ fn maximally_even(
     assert!(d >= 0);
     assert!(n > 0);
     assert!(rotation >= 0);
-    (1..=d).map(|i| (i * n + rotation % d) / d).collect()
+    let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
+    if let Some(tonic) = raw_scale.next() {
+        raw_scale.map(|pitch| pitch - tonic).collect()
+    }
+    else {
+        Vec::new()
+    }
 }
 
 fn fokker_block(n_pitches: FactorElement, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
     let scales: Mapping = octaves
         .iter()
-        .map(|&m| maximally_even(n_pitches, m, n_pitches - 1))
+        .map(|&m| maximally_even(n_pitches, m, 1))
         .collect();
     (0..n_pitches)
         .map(|pitch| {
