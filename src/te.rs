@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 use super::cangwu;
-use super::{Cents, ETMap, ETSlice, FactorElement, Mapping, Tuning};
+use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
@@ -144,14 +144,14 @@ impl TETemperament {
     /// Fokker block as steps as integers, not pitches.
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
-    pub fn fokker_block_steps(&self, n_pitches: FactorElement) -> Mapping {
+    pub fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
         let octaves = self.melody.iter().map(|row| row[0]).collect();
         fokker_block(n_pitches, octaves)
     }
 
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
-    pub fn fokker_block_pitches(&self, n_pitches: FactorElement) -> Tuning {
+    pub fn fokker_block_pitches(&self, n_pitches: Exponent) -> Tuning {
         self.fokker_block_steps(n_pitches)
             .iter()
             .cloned()
@@ -162,9 +162,9 @@ impl TETemperament {
 
 /// A maximally even d from n scale
 fn maximally_even(
-    d: FactorElement,
-    n: FactorElement,
-    rotation: FactorElement,
+    d: Exponent,
+    n: Exponent,
+    rotation: Exponent,
 ) -> ETMap {
     if d == 0 {
         return Vec::new();
@@ -178,7 +178,7 @@ fn maximally_even(
     raw_scale.map(|pitch| pitch - tonic).collect()
 }
 
-fn fokker_block(n_pitches: FactorElement, octaves: ETMap) -> Mapping {
+fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
     let scales: Mapping = octaves
         .iter()

@@ -3,7 +3,7 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::{Cents, ETMap, FactorElement, Mapping, PriorityQueue, Tuning};
+use super::{Cents, ETMap, Exponent, Mapping, PriorityQueue, Tuning};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament {
@@ -181,7 +181,7 @@ pub fn get_equal_temperaments(
 pub fn equal_temperament_badness(
     plimit: &[Cents],
     ek: Cents,
-    mapping: &[FactorElement],
+    mapping: &[Exponent],
 ) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
@@ -224,7 +224,7 @@ fn preliminary_badness(
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
     for size in 1..=(plimit.len() + n_results) {
-        let pmap = super::prime_mapping(&plimit, size as FactorElement);
+        let pmap = super::prime_mapping(&plimit, size as Exponent);
         let badness = equal_temperament_badness(&plimit, ek, &pmap);
         results.push(badness, pmap);
     }
@@ -247,7 +247,7 @@ fn preliminary_badness(
 /// Probably won't panic but will attempt to generate
 /// a huge vector of mappings if "bmax" is set too high.
 pub fn limited_mappings(
-    n_notes: FactorElement,
+    n_notes: Exponent,
     ek: Cents,
     bmax: Cents,
     plimit: &[Cents],
@@ -347,6 +347,6 @@ fn square(x: f64) -> f64 {
 }
 
 /// Range of integers between x and y
-fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<FactorElement> {
-    ((x.ceil() as FactorElement)..=(y.floor() as FactorElement))
+fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<Exponent> {
+    ((x.ceil() as Exponent)..=(y.floor() as Exponent))
 }
