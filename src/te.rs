@@ -5,6 +5,8 @@ use super::cangwu;
 use super::{Cents, ETMap, FactorElement, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
+pub type ETSlice = [FactorElement];
+
 pub struct TETemperament {
     plimit: DVector<Cents>,
     pub melody: Mapping,
@@ -109,7 +111,7 @@ impl TETemperament {
             .collect()
     }
 
-    pub fn generators_from_primes(&self, interval: &ETMap) -> ETMap {
+    pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
         self.melody
             .iter()
             .map(|mapping| {
@@ -122,7 +124,7 @@ impl TETemperament {
             .collect()
     }
 
-    pub fn pitch_from_steps(&self, interval: &ETMap) -> Cents {
+    pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
         self.tuning
             .iter()
             .zip(interval)
@@ -130,7 +132,7 @@ impl TETemperament {
             .sum()
     }
 
-    pub fn pitch_from_primes(&self, interval: &ETMap) -> Cents {
+    pub fn pitch_from_primes(&self, interval: &ETSlice) -> Cents {
         self.pitch_from_steps(&self.generators_from_primes(interval))
     }
 
