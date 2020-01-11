@@ -432,6 +432,8 @@ fn rt_fokker_block() {
             vec![22, 31, 41],
         ]
     );
+    let empty_scale: Mapping = Vec::new();
+    assert_eq!(marvel.fokker_block_steps(0), empty_scale);
 }
 
 #[test]
