@@ -14,6 +14,7 @@ pub type Harmonic = u16;
 pub type FactorElement = i32;
 /// Simplify type declarations, like types are intended for
 pub type ETMap = Vec<FactorElement>;
+pub type ETSlice = [FactorElement];
 pub type Tuning = Vec<Cents>;
 pub type Mapping = Vec<ETMap>;
 

@@ -2,10 +2,8 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 use super::cangwu;
-use super::{Cents, ETMap, FactorElement, Mapping, Tuning};
+use super::{Cents, ETMap, ETSlice, FactorElement, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
-
-pub type ETSlice = [FactorElement];
 
 pub struct TETemperament {
     plimit: DVector<Cents>,
