@@ -406,6 +406,48 @@ fn test_fokker_block() {
 }
 
 #[test]
+fn big_fokker_block() {
+    // Check that something sensible happens
+    // when simple maximally even sets won't do
+    assert_eq!(
+        fokker_block(12, vec![3, 6]),
+        vec![
+            vec![0, 1],
+            vec![0, 2],
+            vec![1, 1],
+            vec![1, 2],
+            vec![1, 3],
+            vec![1, 4],
+            vec![2, 3],
+            vec![2, 4],
+            vec![2, 5],
+            vec![2, 6],
+            vec![3, 5],
+            vec![3, 6],
+        ]
+    );
+
+    // This should be symmetrical
+    assert_eq!(
+        fokker_block(12, vec![6, 3]),
+        vec![
+            vec![1, 0],
+            vec![2, 0],
+            vec![1, 1],
+            vec![2, 1],
+            vec![3, 1],
+            vec![4, 1],
+            vec![3, 2],
+            vec![4, 2],
+            vec![5, 2],
+            vec![6, 2],
+            vec![5, 3],
+            vec![6, 3],
+        ]
+    );
+}
+
+#[test]
 fn rt_fokker_block() {
     let marvel = make_marvel();
     assert_eq!(
