@@ -507,10 +507,12 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     let button = accordion_button(&web, &rt, &tonic)?;
     let mut last_pitch = tonic;
     element_stack.push(button);
-    for pitch in rt.fokker_block_steps(rt.melody.iter().map(|m| m[0]).sum()) {
+    let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
+    let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
+    for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
         let button = accordion_button(&web, &rt, &pitch)?;
-        if pitch[0] != diatonic_steps {
-            diatonic_steps = pitch[0];
+        if pitch[diatonic_dimension] != diatonic_steps {
+            diatonic_steps = pitch[diatonic_dimension];
             let cell = web.document.create_element("td")?;
             while !element_stack.is_empty() {
                 if let Some(button) = element_stack.pop() {
