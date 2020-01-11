@@ -177,18 +177,13 @@ fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
 fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
     // Make the first coordinate special
-    let columns = octaves[0];
+    let columns = octaves.iter().cloned().min().unwrap();
     let scales: Mapping = octaves
         .iter()
         .map(|&m|
             if (m + columns) <= n_pitches && columns != m && columns > 0 {
-                let mut eff_m = m;
-                let mut correction = 0;
-                while eff_m + columns <= n_pitches {
-                    eff_m += columns;
-                    correction += 1;
-                    assert_eq!(eff_m, m + columns * correction);
-                }
+                let correction = (n_pitches - m) / columns;
+                let eff_m = m + columns * correction;
                 maximally_even(n_pitches, eff_m, 1)
                     .iter()
                     .zip(maximally_even(n_pitches, columns, 1))
