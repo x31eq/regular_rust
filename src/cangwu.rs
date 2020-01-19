@@ -141,7 +141,7 @@ pub fn higher_rank_search(
 
 pub fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
-    let gram = a.transpose().clone() * a;
+    let gram = a.transpose() * a;
     ((gram / dimension).determinant()).sqrt()
 }
 
