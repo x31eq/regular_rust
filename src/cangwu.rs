@@ -260,23 +260,35 @@ pub fn limited_mappings(
     let mut mapping = vec![n_notes; plimit.len()];
     let mut results = Vec::new();
 
-    MoreMappings {
-        cap,
-        epsilon2,
-        plimit,
-    }
-    .search(&mut mapping, 1, 0.0, 0.0, &mut results);
+    MoreMappings::new(cap, epsilon2, plimit).search(
+        &mut mapping,
+        1,
+        0.0,
+        0.0,
+        &mut results,
+    );
     results
 }
 
 /// Simple struct to hold global data for the mapping search
 struct MoreMappings<'a> {
     cap: Cents,          // the highest badness (squared) to keep
-    epsilon2: Cents,     // badness apaameter
+    epsilon2: Cents,     // badness parameter
     plimit: &'a [Cents], // sizes of prime intervals
+    lambda: Cents,       // alternative badness parameter
 }
 
-impl MoreMappings<'_> {
+impl<'a> MoreMappings<'a> {
+    fn new(cap: Cents, epsilon2: Cents, plimit: &'a [Cents]) -> Self {
+        let lambda = 1.0 - epsilon2;
+        MoreMappings {
+            cap,
+            epsilon2,
+            plimit,
+            lambda,
+        }
+    }
+
     /// mapping: the ET mapping with entries found so far
     ///
     /// i: the element to choose next
@@ -298,10 +310,9 @@ impl MoreMappings<'_> {
         let weighted_size = f64::from(mapping[i - 1]) / self.plimit[i - 1];
         let tot = tot + weighted_size;
         let tot2 = tot2 + square(weighted_size);
-        let lambda = 1.0 - self.epsilon2;
         debug_assert!(
             tot2 * (1.0 - 1e-10)
-                <= lambda * square(tot) / (i as f64) + self.cap
+                <= self.lambda * square(tot) / (i as f64) + self.cap
         );
         if i == self.plimit.len() {
             // Recursion stops here.
@@ -309,7 +320,7 @@ impl MoreMappings<'_> {
             // keeps changing
             results.push(mapping.clone());
         } else {
-            let toti = tot * lambda / ((i as f64) + self.epsilon2);
+            let toti = tot * self.lambda / ((i as f64) + self.epsilon2);
             let error2 = tot2 - tot * toti;
             if error2 < self.cap {
                 let target = self.plimit[i];
