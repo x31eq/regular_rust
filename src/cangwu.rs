@@ -260,83 +260,68 @@ pub fn limited_mappings(
     let mut mapping = vec![n_notes; plimit.len()];
     let mut results = Vec::new();
 
-    more_limited_mappings(
-        &mut mapping,
-        1,
-        0.0,
-        0.0,
+    MoreMappings {
         cap,
         epsilon2,
-        &plimit,
-        &mut results,
-    );
+        plimit,
+    }
+    .search(&mut mapping, 1, 0.0, 0.0, &mut results);
     results
 }
 
-/// Helper function for limited_mappings that can't be a closure
-/// because it's recursive and can't use a nested scope because
-/// functions don't do that, so may as well be at top level.
-///
-/// mapping: the ET mapping with entries found so far
-///
-/// i: the element to choose next
-///
-/// tot: running total of w
-///
-/// tot2: running total of w squared
-///
-/// cap: the highest badness(squared) to keep
-///
-/// epsilon2: badness parameter
-///
-/// plimit: sizes of prime intervals in cents
-///
-/// results: vector to store found mappings in
-fn more_limited_mappings(
-    mut mapping: &mut ETMap,
-    i: usize,
-    tot: Cents,
-    tot2: Cents,
-    cap: Cents,
-    epsilon2: Cents,
-    plimit: &[Cents],
-    mut results: &mut Mapping,
-) {
-    assert!(mapping.len() == plimit.len());
-    let weighted_size = f64::from(mapping[i - 1]) / plimit[i - 1];
-    let tot = tot + weighted_size;
-    let tot2 = tot2 + square(weighted_size);
-    let lambda = 1.0 - epsilon2;
-    debug_assert!(
-        tot2 * (1.0 - 1e-10) <= lambda * square(tot) / (i as f64) + cap
-    );
-    if i == plimit.len() {
-        // Recursion stops here.
-        // Clone the object to save as the one being worked on
-        // keeps changing
-        results.push(mapping.clone());
-    } else {
-        let toti = tot * lambda / ((i as f64) + epsilon2);
-        let error2 = tot2 - tot * toti;
-        if error2 < cap {
-            let target = plimit[i];
-            let deficit = ((i + 1) as f64 * (cap - error2)
-                / (i as f64 + epsilon2))
-                .sqrt();
-            let xmin = target * (toti - deficit);
-            let xmax = target * (toti + deficit);
-            for guess in intrange(xmin, xmax) {
-                mapping[i] = guess;
-                more_limited_mappings(
-                    &mut mapping,
-                    i + 1,
-                    tot,
-                    tot2,
-                    cap,
-                    epsilon2,
-                    &plimit,
-                    &mut results,
-                );
+/// Simple struct to hold global data for the mapping search
+struct MoreMappings<'a> {
+    cap: Cents,          // the highest badness (squared) to keep
+    epsilon2: Cents,     // badness apaameter
+    plimit: &'a [Cents], // sizes of prime intervals
+}
+
+impl MoreMappings<'_> {
+    /// mapping: the ET mapping with entries found so far
+    ///
+    /// i: the element to choose next
+    ///
+    /// tot: running total of w
+    ///
+    /// tot2: running total of w squared
+    ///
+    /// results: vector to store found mappings in
+    fn search(
+        &self,
+        mut mapping: &mut ETMap,
+        i: usize,
+        tot: Cents,
+        tot2: Cents,
+        mut results: &mut Mapping,
+    ) {
+        assert!(mapping.len() == self.plimit.len());
+        let weighted_size = f64::from(mapping[i - 1]) / self.plimit[i - 1];
+        let tot = tot + weighted_size;
+        let tot2 = tot2 + square(weighted_size);
+        let lambda = 1.0 - self.epsilon2;
+        debug_assert!(
+            tot2 * (1.0 - 1e-10)
+                <= lambda * square(tot) / (i as f64) + self.cap
+        );
+        if i == self.plimit.len() {
+            // Recursion stops here.
+            // Clone the object to save as the one being worked on
+            // keeps changing
+            results.push(mapping.clone());
+        } else {
+            let toti = tot * lambda / ((i as f64) + self.epsilon2);
+            let error2 = tot2 - tot * toti;
+            if error2 < self.cap {
+                let target = self.plimit[i];
+                let deficit = ((i + 1) as f64 * (self.cap - error2)
+                    / (i as f64 + self.epsilon2))
+                    .sqrt();
+                let xmin = target * (toti - deficit);
+                let xmax = target * (toti + deficit);
+                for guess in intrange(xmin, xmax) {
+                    mapping[i] = guess;
+                    self.search(&mut mapping, i + 1, tot, tot2, &mut results);
+                }
             }
         }
     }
