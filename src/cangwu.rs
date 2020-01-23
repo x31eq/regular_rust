@@ -253,10 +253,9 @@ pub fn limited_mappings(
     plimit: &[Cents],
 ) -> Mapping {
     // Call things Cents but turn them to octaves/dimensionless
-    let ek = ek / 12e2;
-    let bmax = bmax / 12e2;
-    let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
-    let mut searcher = MoreMappings::new(n_notes, cap, ek, plimit);
+    let cap =
+        square(bmax / 12e2) * (plimit.len() as Cents) / square(plimit[0]);
+    let mut searcher = MoreMappings::new(n_notes, cap, ek / 12e2, plimit);
     searcher.search(1, 0.0, 0.0);
     searcher.results
 }
