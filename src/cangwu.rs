@@ -266,15 +266,15 @@ pub fn limited_mappings(
 
 /// Simple struct to hold global data for the mapping search
 struct MoreMappings<'a> {
-    cap: Cents,          // the highest badness (squared) to keep
-    epsilon2: Cents,     // badness parameter
-    plimit: &'a [Cents], // sizes of prime intervals
-    lambda: Cents,       // alternative badness parameter
+    cap: f64,          // the highest badness (squared) to keep
+    epsilon2: f64,     // badness parameter
+    plimit: &'a [f64], // sizes of prime intervals
+    lambda: f64,       // alternative badness parameter
     results: Mapping,
 }
 
 impl<'a> MoreMappings<'a> {
-    fn new(cap: Cents, epsilon2: Cents, plimit: &'a [Cents]) -> Self {
+    fn new(cap: f64, epsilon2: f64, plimit: &'a [f64]) -> Self {
         let lambda = 1.0 - epsilon2;
         let results = Vec::new();
         MoreMappings {
@@ -297,8 +297,8 @@ impl<'a> MoreMappings<'a> {
         &mut self,
         mut mapping: &mut ETMap,
         i: usize,
-        tot: Cents,
-        tot2: Cents,
+        tot: f64,
+        tot2: f64,
     ) {
         assert!(mapping.len() == self.plimit.len());
         let weighted_size = f64::from(mapping[i - 1]) / self.plimit[i - 1];
