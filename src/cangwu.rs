@@ -256,9 +256,8 @@ pub fn limited_mappings(
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
     let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
-    let mut mapping = vec![n_notes; plimit.len()];
-    let mut searcher = MoreMappings::new(cap, ek, plimit);
-    searcher.search(&mut mapping, 1, 0.0, 0.0);
+    let mut searcher = MoreMappings::new(n_notes, cap, ek, plimit);
+    searcher.search(1, 0.0, 0.0);
     searcher.results
 }
 
@@ -268,39 +267,40 @@ struct MoreMappings<'a> {
     epsilon2: f64,     // badness parameter
     plimit: &'a [f64], // sizes of prime intervals
     lambda: f64,       // alternative badness parameter
-    results: Mapping,
+    mapping: ETMap,    // working result
+    results: Mapping,  // final results
 }
 
 impl<'a> MoreMappings<'a> {
-    fn new(cap: f64, ek: f64, plimit: &'a [f64]) -> Self {
+    fn new(
+        n_notes: FactorElement,
+        cap: f64,
+        ek: f64,
+        plimit: &'a [f64],
+    ) -> Self {
         let epsilon2 = square(ek) / (1.0 + square(ek));
         let lambda = 1.0 - epsilon2;
+        let mapping = vec![n_notes; plimit.len()];
         let results = Vec::new();
         MoreMappings {
             cap,
             epsilon2,
             plimit,
             lambda,
+            mapping,
             results,
         }
     }
 
-    /// mapping: the ET mapping with entries found so far
-    ///
     /// i: the element to choose next
     ///
     /// tot: running total of w
     ///
     /// tot2: running total of w squared
-    fn search(
-        &mut self,
-        mut mapping: &mut ETMap,
-        i: usize,
-        tot: f64,
-        tot2: f64,
-    ) {
-        assert!(mapping.len() == self.plimit.len());
-        let weighted_size = f64::from(mapping[i - 1]) / self.plimit[i - 1];
+    fn search(&mut self, i: usize, tot: f64, tot2: f64) {
+        assert!(self.mapping.len() == self.plimit.len());
+        let weighted_size =
+            f64::from(self.mapping[i - 1]) / self.plimit[i - 1];
         let tot = tot + weighted_size;
         let tot2 = tot2 + square(weighted_size);
         debug_assert!(
@@ -311,7 +311,7 @@ impl<'a> MoreMappings<'a> {
             // Recursion stops here.
             // Clone the object to save as the one being worked on
             // keeps changing
-            self.results.push(mapping.clone());
+            self.results.push(self.mapping.clone());
         } else {
             let toti = tot * self.lambda / ((i as f64) + self.epsilon2);
             let error2 = tot2 - tot * toti;
@@ -323,8 +323,8 @@ impl<'a> MoreMappings<'a> {
                 let xmin = target * (toti - deficit);
                 let xmax = target * (toti + deficit);
                 for guess in intrange(xmin, xmax) {
-                    mapping[i] = guess;
-                    self.search(&mut mapping, i + 1, tot, tot2);
+                    self.mapping[i] = guess;
+                    self.search(i + 1, tot, tot2);
                 }
             }
         }
