@@ -252,91 +252,77 @@ pub fn limited_mappings(
     bmax: Cents,
     plimit: &[Cents],
 ) -> Mapping {
-    // Call things Cents but turn them to octaves/dimensionless
-    let ek = ek / 12e2;
-    let bmax = bmax / 12e2;
-    let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
-    let epsilon2 = square(ek) / (1.0 + square(ek));
-    let mut mapping = vec![n_notes; plimit.len()];
-    let mut results = Vec::new();
-
-    more_limited_mappings(
-        &mut mapping,
-        1,
-        0.0,
-        0.0,
-        cap,
-        epsilon2,
-        &plimit,
-        &mut results,
-    );
-    results
+    let cap = square(bmax / 12e2) * (plimit.len() as f64) / square(plimit[0]);
+    let mut searcher = MoreMappings::new(n_notes, cap, ek / 12e2, plimit);
+    searcher.search(1, 0.0, 0.0);
+    searcher.results
 }
 
-/// Helper function for limited_mappings that can't be a closure
-/// because it's recursive and can't use a nested scope because
-/// functions don't do that, so may as well be at top level.
-///
-/// mapping: the ET mapping with entries found so far
-///
-/// i: the element to choose next
-///
-/// tot: running total of w
-///
-/// tot2: running total of w squared
-///
-/// cap: the highest badness(squared) to keep
-///
-/// epsilon2: badness parameter
-///
-/// plimit: sizes of prime intervals in cents
-///
-/// results: vector to store found mappings in
-fn more_limited_mappings(
-    mut mapping: &mut ETMap,
-    i: usize,
-    tot: Cents,
-    tot2: Cents,
-    cap: Cents,
-    epsilon2: Cents,
-    plimit: &[Cents],
-    mut results: &mut Mapping,
-) {
-    assert!(mapping.len() == plimit.len());
-    let weighted_size = f64::from(mapping[i - 1]) / plimit[i - 1];
-    let tot = tot + weighted_size;
-    let tot2 = tot2 + square(weighted_size);
-    let lambda = 1.0 - epsilon2;
-    debug_assert!(
-        tot2 * (1.0 - 1e-10) <= lambda * square(tot) / (i as f64) + cap
-    );
-    if i == plimit.len() {
-        // Recursion stops here.
-        // Clone the object to save as the one being worked on
-        // keeps changing
-        results.push(mapping.clone());
-    } else {
-        let toti = tot * lambda / ((i as f64) + epsilon2);
-        let error2 = tot2 - tot * toti;
-        if error2 < cap {
-            let target = plimit[i];
-            let deficit = ((i + 1) as f64 * (cap - error2)
-                / (i as f64 + epsilon2))
-                .sqrt();
-            let xmin = target * (toti - deficit);
-            let xmax = target * (toti + deficit);
-            for guess in intrange(xmin, xmax) {
-                mapping[i] = guess;
-                more_limited_mappings(
-                    &mut mapping,
-                    i + 1,
-                    tot,
-                    tot2,
-                    cap,
-                    epsilon2,
-                    &plimit,
-                    &mut results,
-                );
+/// Simple struct to hold global data for the mapping search
+struct MoreMappings<'a> {
+    cap: f64,          // the highest badness (squared) to keep
+    epsilon2: f64,     // badness parameter
+    plimit: &'a [f64], // sizes of prime intervals
+    lambda: f64,       // alternative badness parameter
+    mapping: ETMap,    // working result
+    results: Mapping,  // final results
+}
+
+impl<'a> MoreMappings<'a> {
+    fn new(
+        n_notes: FactorElement,
+        cap: f64,
+        ek: f64,
+        plimit: &'a [f64],
+    ) -> Self {
+        let epsilon2 = square(ek) / (1.0 + square(ek));
+        let lambda = 1.0 - epsilon2;
+        let mapping = vec![n_notes; plimit.len()];
+        let results = Vec::new();
+        MoreMappings {
+            cap,
+            epsilon2,
+            plimit,
+            lambda,
+            mapping,
+            results,
+        }
+    }
+
+    /// i: the element to choose next
+    ///
+    /// tot: running total of w
+    ///
+    /// tot2: running total of w squared
+    fn search(&mut self, i: usize, tot: f64, tot2: f64) {
+        assert!(self.mapping.len() == self.plimit.len());
+        let weighted_size =
+            f64::from(self.mapping[i - 1]) / self.plimit[i - 1];
+        let tot = tot + weighted_size;
+        let tot2 = tot2 + square(weighted_size);
+        debug_assert!(
+            tot2 * (1.0 - 1e-10)
+                <= self.lambda * square(tot) / (i as f64) + self.cap
+        );
+        if i == self.plimit.len() {
+            // Recursion stops here.
+            // Clone the object to save as the one being worked on
+            // keeps changing
+            self.results.push(self.mapping.clone());
+        } else {
+            let toti = tot * self.lambda / ((i as f64) + self.epsilon2);
+            let error2 = tot2 - tot * toti;
+            if error2 < self.cap {
+                let target = self.plimit[i];
+                let deficit = ((i + 1) as f64 * (self.cap - error2)
+                    / (i as f64 + self.epsilon2))
+                    .sqrt();
+                let xmin = target * (toti - deficit);
+                let xmax = target * (toti + deficit);
+                for guess in intrange(xmin, xmax) {
+                    self.mapping[i] = guess;
+                    self.search(i + 1, tot, tot2);
+                }
             }
         }
     }
