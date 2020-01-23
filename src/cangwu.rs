@@ -256,10 +256,8 @@ pub fn limited_mappings(
     let ek = ek / 12e2;
     let bmax = bmax / 12e2;
     let cap = square(bmax) * (plimit.len() as Cents) / square(plimit[0]);
-    let epsilon2 = square(ek) / (1.0 + square(ek));
     let mut mapping = vec![n_notes; plimit.len()];
-
-    let mut searcher = MoreMappings::new(cap, epsilon2, plimit);
+    let mut searcher = MoreMappings::new(cap, ek, plimit);
     searcher.search(&mut mapping, 1, 0.0, 0.0);
     searcher.results
 }
@@ -274,7 +272,8 @@ struct MoreMappings<'a> {
 }
 
 impl<'a> MoreMappings<'a> {
-    fn new(cap: f64, epsilon2: f64, plimit: &'a [f64]) -> Self {
+    fn new(cap: f64, ek: f64, plimit: &'a [f64]) -> Self {
+        let epsilon2 = square(ek) / (1.0 + square(ek));
         let lambda = 1.0 - epsilon2;
         let results = Vec::new();
         MoreMappings {
