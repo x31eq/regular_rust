@@ -506,13 +506,13 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
     let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
     for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
-        if pitch[diatonic_dimension] != diatonic_steps {
+        if pitch[diatonic_dimension] == diatonic_steps {
+            pitch_stack.push(pitch);
+        }
+        else {
             diatonic_steps = pitch[diatonic_dimension];
             grid.push(pitch_stack.clone());
             pitch_stack = vec![pitch];
-        }
-        else {
-            pitch_stack.push(pitch);
         }
     }
     grid.push(pitch_stack);
