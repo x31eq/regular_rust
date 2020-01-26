@@ -4,7 +4,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
-use super::{join, Cents, ETMap, Mapping, PrimeLimit};
+use super::{join, Cents, ETMap, Exponent, Mapping, PrimeLimit};
 use cangwu::TemperamentClass;
 
 type Exceptionable = Result<(), JsValue>;
@@ -562,7 +562,7 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
 fn accordion_button(
     web: &WebContext,
     rt: &te::TETemperament,
-    pitch: &ETMap,
+    pitch: &[Exponent],
 ) -> Result<Element, JsValue> {
     let button = web.document.create_element("button")?;
     button.set_attribute("data-steps", &join("_", &pitch))?;
