@@ -509,13 +509,13 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
         if pitch[diatonic_dimension] != diatonic_steps {
             diatonic_steps = pitch[diatonic_dimension];
             grid.push(pitch_stack.clone());
-            pitch_stack = vec![pitch.clone()];
+            pitch_stack = vec![pitch];
         }
         else if let Some(last_pitch) = pitch_stack.iter().last() {
             if pitch != *last_pitch {
                 // Filter out duplicate pitches.
                 // This means the fokker block calculation is suspect
-                pitch_stack.push(pitch.clone());
+                pitch_stack.push(pitch);
             }
         }
     }
