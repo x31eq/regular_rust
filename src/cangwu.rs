@@ -270,7 +270,7 @@ struct MoreMappings<'a> {
 
 impl<'a> MoreMappings<'a> {
     fn new(
-        n_notes: FactorElement,
+        n_notes: Exponent,
         cap: f64,
         ek: f64,
         plimit: &'a [f64],
