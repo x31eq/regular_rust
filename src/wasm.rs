@@ -511,17 +511,16 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
             grid.push(pitch_stack.clone());
             pitch_stack = vec![pitch];
         }
-        else if let Some(last_pitch) = pitch_stack.iter().last() {
-            if pitch != *last_pitch {
-                // Filter out duplicate pitches.
-                // This means the fokker block calculation is suspect
-                pitch_stack.push(pitch);
-            }
+        else {
+            pitch_stack.push(pitch);
         }
     }
     grid.push(pitch_stack);
     let row = web.document.create_element("tr")?;
-    for pitch_stack in grid {
+    for mut pitch_stack in grid {
+        // The Fokker block calculation might return duplicate pitches
+        // but they should at least be in the right order
+        pitch_stack.dedup();
         let column = web.document.create_element("td")?;
         // Buttons are added bottom-up
         for pitch in pitch_stack.iter().rev() {
