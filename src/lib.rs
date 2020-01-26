@@ -11,9 +11,10 @@ pub type Cents = f64;
 /// Integer partial
 pub type Harmonic = u16;
 /// Member of a "val" or ratio-lattice vector
-pub type FactorElement = i32;
+pub type Exponent = i32;
 /// Simplify type declarations, like types are intended for
-pub type ETMap = Vec<FactorElement>;
+pub type ETMap = Vec<Exponent>;
+pub type ETSlice = [Exponent];
 pub type Tuning = Vec<Cents>;
 pub type Mapping = Vec<ETMap>;
 
@@ -103,14 +104,11 @@ fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
-pub fn prime_mapping(
-    plimit: &[Cents],
-    n_notes: FactorElement,
-) -> Vec<FactorElement> {
+pub fn prime_mapping(plimit: &[Cents], n_notes: Exponent) -> Vec<Exponent> {
     let multiplier = Cents::from(n_notes) / plimit[0];
     plimit
         .iter()
-        .map(|&x| (x * multiplier).round() as FactorElement)
+        .map(|&x| (x * multiplier).round() as Exponent)
         .collect()
 }
 

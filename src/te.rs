@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 use super::cangwu;
-use super::{Cents, ETMap, FactorElement, Mapping, Tuning};
+use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
@@ -109,29 +109,29 @@ impl TETemperament {
             .collect()
     }
 
-    pub fn generators_from_primes(&self, interval: ETMap) -> ETMap {
+    pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
         self.melody
             .iter()
             .map(|mapping| {
                 mapping
                     .iter()
                     .zip(interval.iter())
-                    .map(|(&x, y)| x * y)
+                    .map(|(&x, &y)| x * y)
                     .sum()
             })
             .collect()
     }
 
-    pub fn pitch_from_steps(&self, interval: ETMap) -> Cents {
+    pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
         self.tuning
             .iter()
             .zip(interval)
-            .map(|(&x, y)| x * y as Cents)
+            .map(|(&x, &y)| x * y as Cents)
             .sum()
     }
 
-    pub fn pitch_from_primes(&self, interval: ETMap) -> Cents {
-        self.pitch_from_steps(self.generators_from_primes(interval))
+    pub fn pitch_from_primes(&self, interval: &ETSlice) -> Cents {
+        self.pitch_from_steps(&self.generators_from_primes(interval))
     }
 
     /// Strictly, pure equivalence interval TE
@@ -144,40 +144,55 @@ impl TETemperament {
     /// Fokker block as steps as integers, not pitches.
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
-    pub fn fokker_block_steps(&self, n_pitches: FactorElement) -> Mapping {
+    pub fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
         let octaves = self.melody.iter().map(|row| row[0]).collect();
         fokker_block(n_pitches, octaves)
     }
 
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
-    pub fn fokker_block_pitches(&self, n_pitches: FactorElement) -> Tuning {
+    pub fn fokker_block_pitches(&self, n_pitches: Exponent) -> Tuning {
         self.fokker_block_steps(n_pitches)
             .iter()
             .cloned()
-            .map(|interval| self.pitch_from_steps(interval))
+            .map(|interval| self.pitch_from_steps(&interval))
             .collect()
     }
 }
 
 /// A maximally even d from n scale
-fn maximally_even(
-    d: FactorElement,
-    n: FactorElement,
-    rotation: FactorElement,
-) -> ETMap {
+fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
+    if d == 0 {
+        return Vec::new();
+    }
     // Nothing can be negative because of the way / and % work
-    assert!(d >= 0);
-    assert!(n > 0);
+    assert!(d > 0);
+    assert!(n >= 0);
     assert!(rotation >= 0);
-    (1..=d).map(|i| (i * n + rotation % d) / d).collect()
+    let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
+    let tonic = raw_scale.next().unwrap();
+    raw_scale.map(|pitch| pitch - tonic).collect()
 }
 
-fn fokker_block(n_pitches: FactorElement, octaves: ETMap) -> Mapping {
+fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
+    // Make the first coordinate special
+    let columns = octaves.iter().cloned().min().unwrap();
     let scales: Mapping = octaves
         .iter()
-        .map(|&m| maximally_even(n_pitches, m, n_pitches - 1))
+        .map(|&m| {
+            if (m + columns) <= n_pitches && columns != m && columns > 0 {
+                let correction = (n_pitches - m) / columns;
+                let eff_m = m + columns * correction;
+                maximally_even(n_pitches, eff_m, 1)
+                    .iter()
+                    .zip(maximally_even(n_pitches, columns, 1))
+                    .map(|(&x, y)| x - correction * y)
+                    .collect()
+            } else {
+                maximally_even(n_pitches, m, 1)
+            }
+        })
         .collect();
     (0..n_pitches)
         .map(|pitch| {
@@ -342,8 +357,9 @@ fn mystery() {
 #[test]
 fn test_maximally_even() {
     assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
-    assert_eq!(maximally_even(7, 12, 5), vec![2, 4, 5, 7, 9, 11, 12]);
-    assert_eq!(maximally_even(5, 19, 3), vec![4, 8, 12, 15, 19]);
+    assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
+    assert_eq!(maximally_even(5, 19, 2), vec![4, 8, 12, 15, 19]);
+    assert_eq!(maximally_even(3, 0, 0), vec![0, 0, 0]);
     for i in 0..10 {
         assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
     }
@@ -357,7 +373,7 @@ fn test_fokker_block() {
         vec![
             vec![1, 2],
             vec![2, 4],
-            vec![3, 6],
+            vec![3, 5],
             vec![4, 7],
             vec![5, 9],
             vec![6, 11],
@@ -389,31 +405,73 @@ fn test_fokker_block() {
 }
 
 #[test]
+fn big_fokker_block() {
+    // Check that something sensible happens
+    // when simple maximally even sets won't do
+    assert_eq!(
+        fokker_block(12, vec![3, 6]),
+        vec![
+            vec![0, 1],
+            vec![0, 2],
+            vec![1, 1],
+            vec![1, 2],
+            vec![1, 3],
+            vec![1, 4],
+            vec![2, 3],
+            vec![2, 4],
+            vec![2, 5],
+            vec![2, 6],
+            vec![3, 5],
+            vec![3, 6],
+        ]
+    );
+
+    // This should be symmetrical
+    assert_eq!(
+        fokker_block(12, vec![6, 3]),
+        vec![
+            vec![1, 0],
+            vec![2, 0],
+            vec![1, 1],
+            vec![2, 1],
+            vec![3, 1],
+            vec![4, 1],
+            vec![3, 2],
+            vec![4, 2],
+            vec![5, 2],
+            vec![6, 2],
+            vec![5, 3],
+            vec![6, 3],
+        ]
+    );
+}
+
+#[test]
 fn rt_fokker_block() {
     let marvel = make_marvel();
     assert_eq!(
         marvel.fokker_block_steps(22),
         vec![
-            vec![1, 2, 2],
+            vec![1, 1, 2],
             vec![2, 3, 4],
-            vec![3, 5, 6],
+            vec![3, 4, 6],
             vec![4, 6, 8],
-            vec![5, 8, 10],
-            vec![6, 9, 12],
-            vec![7, 10, 14],
-            vec![8, 12, 15],
+            vec![5, 7, 10],
+            vec![6, 8, 12],
+            vec![7, 10, 13],
+            vec![8, 11, 15],
             vec![9, 13, 17],
-            vec![10, 15, 19],
-            vec![11, 16, 21],
+            vec![10, 14, 19],
+            vec![11, 15, 21],
             vec![12, 17, 23],
-            vec![13, 19, 25],
-            vec![14, 20, 27],
-            vec![15, 22, 28],
-            vec![16, 23, 30],
+            vec![13, 18, 25],
+            vec![14, 20, 26],
+            vec![15, 21, 28],
+            vec![16, 22, 30],
             vec![17, 24, 32],
-            vec![18, 26, 34],
+            vec![18, 25, 34],
             vec![19, 27, 36],
-            vec![20, 29, 38],
+            vec![20, 28, 38],
             vec![21, 30, 40],
             vec![22, 31, 41],
         ]
@@ -421,40 +479,51 @@ fn rt_fokker_block() {
     assert_eq!(
         marvel.fokker_block_steps(7),
         vec![
-            vec![4, 5, 6],
-            vec![7, 9, 12],
-            vec![10, 14, 18],
-            vec![13, 18, 24],
-            vec![16, 23, 30],
+            vec![3, 4, 6],
+            vec![6, 9, 12],
+            vec![9, 13, 18],
+            vec![12, 18, 24],
+            vec![15, 22, 30],
             vec![19, 27, 36],
             vec![22, 31, 41],
         ]
     );
+    let empty_scale: Mapping = Vec::new();
+    assert_eq!(marvel.fokker_block_steps(0), empty_scale);
 }
 
 #[test]
 fn tuned_block() {
     let block = make_marvel().fokker_block_pitches(22);
     let fmt_block = format_float_vec(&block, 3);
-    assert_eq!(fmt_block, "66.728 116.133 182.861 232.266 298.993 348.399 397.804 450.473 499.878 566.605 616.011 665.416 732.144 781.549 834.218 883.623 933.028 999.756 1049.161 1115.889 1165.294 1200.640")
+    let expected = format_float_vec(
+        &vec![
+            49.405, 116.133, 165.538, 232.266, 281.671, 331.076, 383.745,
+            433.150, 499.878, 549.283, 598.689, 665.416, 714.821, 767.490,
+            816.895, 866.301, 933.028, 982.434, 1049.161, 1098.566, 1165.294,
+            1200.640,
+        ],
+        3,
+    );
+    assert_eq!(fmt_block, expected);
 }
 
 #[test]
 fn generators() {
     let marvel = make_marvel();
-    let twotoe = marvel.generators_from_primes(vec![3, 0, 0, -1, 0]);
+    let twotoe = marvel.generators_from_primes(&vec![3, 0, 0, -1, 0]);
     assert_eq!(twotoe, vec![4, 6, 8]);
 }
 
 #[test]
 fn pitches() {
     let marvel = make_marvel();
-    let twotoe = marvel.pitch_from_steps(vec![4, 6, 8]);
+    let twotoe = marvel.pitch_from_steps(&vec![4, 6, 8]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
 
-    let twotoe = marvel.pitch_from_primes(vec![3, 0, 0, -1, 0]);
+    let twotoe = marvel.pitch_from_primes(&vec![3, 0, 0, -1, 0]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
-    let twotoe = marvel.pitch_from_primes(vec![-3, 0, 0, 0, 1]);
+    let twotoe = marvel.pitch_from_primes(&vec![-3, 0, 0, 0, 1]);
     assert_eq!(format!("{:.3}", twotoe), "549.283");
 }
 

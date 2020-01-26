@@ -45,6 +45,27 @@
             input#show-pote:checked ~ .pote {
                 display: block;
             }
+            .accordion td {
+                vertical-align: top;
+            }
+            .accordion button {
+                color: blue;
+                background-color: #EEE;
+                border-color: #CCC;
+                width: 3em;
+                height: 3em;
+                white-space: break-spaces;
+                float: left;
+                clear: left;
+            }
+            .accordion button.playing {
+                color: #EEE;
+                background-color: blue;
+                border-color: blue;
+            }
+            h4 {
+                clear: both;
+            }
         </style>
     </head>
     <body>
@@ -131,6 +152,7 @@
                 </tr>
             </table>
             <p><a id="rt-link">Server-side page for this result</a></p>
+            <div id="rt-accordion" class="accordion"></div>
         </div>
         <div id="temperament-list">
             Results will go here
@@ -156,5 +178,6 @@
 
             run()
         </script>
+        <script src="accordion.js"></script>
     </body>
 </html>

@@ -280,7 +280,7 @@ fn rt_row(
     mapping: &[ETMap],
     limit: &PrimeLimit,
     web: &WebContext,
-) -> Result<(Element), JsValue> {
+) -> Result<Element, JsValue> {
     let row = web.document.create_element("tr")?;
     let cell = web.document.create_element("td")?;
     let link = web.document.create_element("a")?;
@@ -458,6 +458,14 @@ fn show_rt(
         field.set_attribute("href", &rt_url(&rt, &limit.label))?;
     }
 
+    if show_accordion(&web, &rt).is_err() {
+        if let Some(accordion) = web.element("rt-accordion") {
+            // This is an optional feature,
+            // so hide it if something went wrong
+            accordion.set_inner_html("<!-- accordion went wrong -->");
+        }
+    }
+
     // Make another RT object to get the generator tunings
     let rt = te::TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
@@ -476,6 +484,94 @@ fn show_rt(
     }
 
     Ok(())
+}
+
+/// An accordion is an instrument with buttons
+fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
+    let accordion = match web.element("rt-accordion") {
+        Some(result) => result,
+        None => return Ok(()),
+    };
+    accordion.set_inner_html("");
+    let rank = rt.melody.len();
+    if rank != 2 {
+        return Ok(());
+    }
+    let tonic: ETMap = (0..rank).map(|_| 0).collect();
+    let mut diatonic_steps = 0;
+    let mut pitch_stack = vec![tonic.clone()];
+    let mut grid = Vec::new();
+    let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
+    let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
+    let chromatic_dimension = 1 - diatonic_dimension;
+    for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
+        if pitch[diatonic_dimension] == diatonic_steps {
+            pitch_stack.push(pitch);
+        } else {
+            diatonic_steps = pitch[diatonic_dimension];
+            grid.push(pitch_stack.clone());
+            pitch_stack = vec![pitch];
+        }
+    }
+    grid.push(pitch_stack);
+
+    let drift = (octaves[chromatic_dimension] as f64)
+        / (octaves[diatonic_dimension] as f64);
+    let margin_for_pitch = |pitch: &ETMap| {
+        drift * (pitch[diatonic_dimension] as f64)
+            - pitch[chromatic_dimension] as f64
+    };
+    let mut min_margin = 1e99;
+    for pitch_stack in grid.iter() {
+        if let Some(pitch) = pitch_stack.iter().last() {
+            let margin = margin_for_pitch(pitch);
+            if margin < min_margin {
+                min_margin = margin;
+            }
+        }
+    }
+
+    // give up on styling and use a table
+    let table = web.document.create_element("table")?;
+    let row = web.document.create_element("tr")?;
+    for mut pitch_stack in grid {
+        // The Fokker block calculation might return duplicate pitches
+        // but they should at least be in the right order
+        pitch_stack.dedup();
+        let column = web.document.create_element("td")?;
+        // Buttons are added top-down
+        for (i, pitch) in pitch_stack.iter().rev().enumerate() {
+            let button = accordion_button(&web, &rt, &pitch)?;
+            if i == 0 {
+                let button_height = 3.0;
+                let margin = margin_for_pitch(pitch) - min_margin;
+                button.set_attribute(
+                    "style",
+                    &format!("margin-top: {:.1}em", margin * button_height),
+                )?;
+            }
+            column.append_child(&button)?;
+        }
+        row.append_child(&column)?;
+    }
+    table.append_child(&row)?;
+    accordion.append_child(&table)?;
+    Ok(())
+}
+
+fn accordion_button(
+    web: &WebContext,
+    rt: &te::TETemperament,
+    pitch: &ETMap,
+) -> Result<Element, JsValue> {
+    let button = web.document.create_element("button")?;
+    button.set_attribute("data-steps", &join("_", &pitch))?;
+    button.set_text_content(Some(&join(", ", &pitch)));
+    let pitch = rt.pitch_from_steps(&pitch);
+    // Tonic is middle C for now
+    let freq = 264.0 * 2.0_f64.powf(pitch / 12e2);
+    button.set_attribute("data-freq", &format!("{:.6}", freq))?;
+    Ok(button)
 }
 
 fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {

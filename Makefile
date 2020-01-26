@@ -14,6 +14,10 @@ regular_bg.wasm: pkg/regular_bg.wasm
 doc:
 	cargo doc --target wasm32-unknown-unknown
 
+.PHONY: lint
+lint:
+	cargo clippy --target wasm32-unknown-unknown
+
 .PHONY: test
 test:
 	cargo test
