@@ -501,41 +501,36 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     let table = web.document.create_element("table")?;
     let tonic: ETMap = (0..rank).map(|_| 0).collect();
     let mut diatonic_steps = 0;
-    let row = web.document.create_element("tr")?;
-    // Buttons are added bottom-up
-    let mut element_stack = Vec::new();
     let button = accordion_button(&web, &rt, &tonic)?;
     let mut last_pitch = tonic;
-    element_stack.push(button);
+    let mut element_stack = vec![button];
+    let mut grid = Vec::new();
     let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
     let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
     for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
         let button = accordion_button(&web, &rt, &pitch)?;
         if pitch[diatonic_dimension] != diatonic_steps {
             diatonic_steps = pitch[diatonic_dimension];
-            let cell = web.document.create_element("td")?;
-            while !element_stack.is_empty() {
-                if let Some(button) = element_stack.pop() {
-                    cell.append_child(&button)?;
-                }
-            }
-            row.append_child(&cell)?;
-            element_stack = Vec::new();
+            grid.push(element_stack.clone());
+            element_stack = vec![button];
         }
-        if pitch != last_pitch {
+        else if pitch != last_pitch {
             // Filter out duplicate pitches.
-            // This means the fokker block calculation is wrong
+            // This means the fokker block calculation is suspect
             element_stack.push(button);
             last_pitch = pitch;
         }
     }
-    let cell = web.document.create_element("td")?;
-    while !element_stack.is_empty() {
-        if let Some(button) = element_stack.pop() {
-            cell.append_child(&button)?;
+    grid.push(element_stack);
+    let row = web.document.create_element("tr")?;
+    for element_stack in grid {
+        let column = web.document.create_element("td")?;
+        // Buttons are added bottom-up
+        for button in element_stack.iter().rev() {
+            column.append_child(&button)?;
         }
+        row.append_child(&column)?;
     }
-    row.append_child(&cell)?;
     table.append_child(&row)?;
     accordion.append_child(&table)?;
     Ok(())
