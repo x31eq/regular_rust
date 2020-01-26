@@ -269,12 +269,7 @@ struct MoreMappings<'a> {
 }
 
 impl<'a> MoreMappings<'a> {
-    fn new(
-        n_notes: Exponent,
-        cap: f64,
-        ek: f64,
-        plimit: &'a [f64],
-    ) -> Self {
+    fn new(n_notes: Exponent, cap: f64, ek: f64, plimit: &'a [f64]) -> Self {
         let epsilon2 = square(ek) / (1.0 + square(ek));
         let lambda = 1.0 - epsilon2;
         let mapping = vec![n_notes; plimit.len()];
