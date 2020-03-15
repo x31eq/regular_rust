@@ -90,9 +90,8 @@ impl fmt::Display for ParseLimitError {
 }
 
 fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
-    let strings: Vec<String> = items.iter()
-        .map(|item| item.to_string())
-        .collect();
+    let strings: Vec<String> =
+        items.iter().map(|item| item.to_string()).collect();
     strings.join(joiner)
 }
 

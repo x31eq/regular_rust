@@ -329,5 +329,5 @@ fn square(x: f64) -> f64 {
 
 /// Range of integers between x and y
 fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<Exponent> {
-    ((x.ceil() as Exponent)..=(y.floor() as Exponent))
+    (x.ceil() as Exponent)..=(y.floor() as Exponent)
 }
