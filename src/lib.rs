@@ -4,6 +4,7 @@
 
 use std::fmt;
 use std::str::FromStr;
+use num_integer::div_floor;
 
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
@@ -144,10 +145,8 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
                 if s == 0 {
                     continue;
                 }
-                // emulate flooring division
-                let m = if s > 0 { s / n } else { -((n - 1 - s) / n) };
                 for (x, y) in scol.iter_mut().zip(top_col.iter()) {
-                    *x -= m * y;
+                    *x -= div_floor(s, n) * y;
                 }
                 assert!(scol[row] >= 0);
                 assert!(scol[row] < n);
