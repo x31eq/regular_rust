@@ -12,7 +12,7 @@ regular_bg.wasm: pkg/regular_bg.wasm
 
 .PHONY: doc
 doc:
-	cargo doc --target wasm32-unknown-unknown
+	cargo doc --all-features --target wasm32-unknown-unknown
 
 .PHONY: lint
 lint:
