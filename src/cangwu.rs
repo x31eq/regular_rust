@@ -142,7 +142,10 @@ pub fn higher_rank_search(
 pub fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
     let gram = a.transpose() * a;
-    ((gram / dimension).determinant()).sqrt()
+    let gram_dim = gram / dimension;
+    eprintln!("gram matrix: {:?}", gram_dim);
+    eprintln!("gram deteminant: {:?}", gram_dim.determinant());
+    gram_dim.determinant().sqrt()
 }
 
 /// Get the best equal temperament mappings for the given prime limit
