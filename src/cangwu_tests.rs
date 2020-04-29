@@ -94,6 +94,33 @@ fn mystery() {
     assert!(mystery.badness(0.1) < 2.52620);
 }
 
+#[rustfmt::skip]
+#[test]
+fn ragismic() {
+    let ragismic_vector = vec![
+        vec![171, 271, 397, 480],
+        vec![270, 428, 627, 758],
+        vec![494, 783, 1147, 1387],
+    ];
+    let limit7 = PrimeLimit::new(7);
+    let ragismic =
+        cangwu::CangwuTemperament::new(&limit7.pitches, &ragismic_vector);
+    assert_eq!(ragismic.key(), vec![
+                                 1, -4,
+                              1, 0, 7,
+                           1, 0, 0, 1,
+    ]);
+    assert_eq!(ragismic.rank(), 3);
+    assert!(0.17 < ragismic.badness(1.0));
+    assert!(ragismic.badness(1.0) < 0.18);
+    assert!(0.01 < ragismic.badness(0.1));
+    assert!(ragismic.badness(0.1) < 0.02);
+    let ragismic =
+        super::te::TETemperament::new(&limit7.pitches, &ragismic_vector);
+    assert!(0.179 < ragismic.complexity());
+    assert!(ragismic.complexity() < 1.8);
+}
+
 #[test]
 fn expected_limited_mappings() {
     let limit7 = PrimeLimit::new(7).pitches;
