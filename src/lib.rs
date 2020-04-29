@@ -2,9 +2,9 @@
 //!
 //! Utilties for regular temperament finding
 
+use num_integer::div_floor;
 use std::fmt;
 use std::str::FromStr;
-use num_integer::div_floor;
 
 pub type Cents = f64;
 // Human hearing covers about 10 octaves,
