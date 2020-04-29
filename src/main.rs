@@ -24,7 +24,11 @@ fn main() {
     let ek: regular::Cents = args[2].parse().unwrap();
 
     let dimension = limit.pitches.len();
-    let safety = 4 * (dimension as f64).sqrt().floor() as usize;
+    let safety = if dimension < 100 {
+        40
+    } else {
+        4 * (dimension as f64).sqrt().floor() as usize
+    };
     let mappings = regular::cangwu::get_equal_temperaments(
         &limit.pitches,
         ek,

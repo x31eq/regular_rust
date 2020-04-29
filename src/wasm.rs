@@ -35,7 +35,11 @@ pub fn regular_temperament_search(
 ) -> SearchResult {
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
-    let safety = 4 * (dimension as f64).sqrt().floor() as usize;
+    let safety = if dimension < 100 {
+        40
+    } else {
+        4 * (dimension as f64).sqrt().floor() as usize
+    };
     let mappings = cangwu::get_equal_temperaments(
         &limit.pitches,
         ek,
