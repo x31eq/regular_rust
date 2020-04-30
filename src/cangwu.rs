@@ -50,21 +50,30 @@ pub trait TenneyWeighted {
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
         let plimit = self.plimit();
-        let rank = melody.len();
-        let dimension = plimit.len();
-        let flattened =
-            melody.iter().flat_map(|mapping| mapping.iter()).cloned();
-        let melody = DMatrix::from_iterator(dimension, rank, flattened);
-        let weighting_vec: Vec<f64> =
-            plimit.iter().map(|x| 1200.0 / x).collect();
-        let mut weighting =
-            DMatrix::from_vec(dimension, 1, weighting_vec.clone());
-        assert!(rank > 0);
-        for _ in 1..rank {
-            weighting.extend(weighting_vec.clone());
-        }
-        melody.map(f64::from).component_mul(&weighting)
+        weight_mapping(&melody, &plimit)
     }
+
+    fn weighted_reduced_mapping(&self) -> DMatrix<f64> {
+        let melody = super::hermite_normal_form(&self.mapping());
+        let plimit = self.plimit();
+        weight_mapping(&melody, &plimit)
+    }
+}
+
+fn weight_mapping(mapping: &Mapping, plimit: &DVector<Cents>)
+-> DMatrix<f64> {
+    let rank = mapping.len();
+    let dimension = plimit.len();
+    let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
+    let mapping = DMatrix::from_iterator(dimension, rank, flattened);
+    let weighting_vec: Vec<f64> = plimit.iter().map(|x| 1200.0 / x).collect();
+    let mut weighting =
+        DMatrix::from_vec(dimension, 1, weighting_vec.clone());
+    assert!(rank > 0);
+    for _ in 1..rank {
+        weighting.extend(weighting_vec.clone());
+    }
+    mapping.map(f64::from).component_mul(&weighting)
 }
 
 impl CangwuTemperament {

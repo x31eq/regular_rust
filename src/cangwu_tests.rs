@@ -117,7 +117,7 @@ fn ragismic() {
     assert!(ragismic.badness(0.1) < 0.02);
     let ragismic =
         super::te::TETemperament::new(&limit7.pitches, &ragismic_vector);
-    assert!(0.179 < ragismic.complexity());
+    assert!(0.17 < ragismic.complexity());
     assert!(ragismic.complexity() < 1.8);
 }
 
