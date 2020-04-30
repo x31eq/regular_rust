@@ -64,7 +64,7 @@ impl TETemperament {
     pub fn badness(&self) -> Cents {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let m = self.weighted_mapping();
+        let m = self.weighted_reduced_mapping();
         let offset_vec: Vec<f64> = m.row_mean().iter().cloned().collect();
         let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
         assert!(dimension > 0);
