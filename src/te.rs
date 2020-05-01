@@ -49,7 +49,7 @@ impl TETemperament {
     }
 
     pub fn complexity(&self) -> f64 {
-        rms_of_matrix(&self.weighted_reduced_mapping())
+        rms_of_matrix(&self.weighted_mapping())
     }
 
     pub fn adjusted_error(&self) -> f64 {

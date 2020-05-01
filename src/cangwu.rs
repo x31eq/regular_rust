@@ -52,12 +52,6 @@ pub trait TenneyWeighted {
         let plimit = self.plimit();
         weight_mapping(&melody, &plimit)
     }
-
-    fn weighted_reduced_mapping(&self) -> DMatrix<f64> {
-        let melody = super::hermite_normal_form(&self.mapping());
-        let plimit = self.plimit();
-        weight_mapping(&melody, &plimit)
-    }
 }
 
 fn weight_mapping(mapping: &Mapping, plimit: &DVector<Cents>)
