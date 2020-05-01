@@ -145,7 +145,10 @@ pub fn higher_rank_search(
 pub fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
     let dimension = a.nrows() as f64;
     let gram = (a.transpose() * a) / dimension;
-    (gram.lu().determinant()).sqrt()
+    // The LU decomposition stops the determinant overflowing
+    // for rank 3 temperament classes defined by big ETs.
+    // (For rank above 3 the LU decomposition is used by default.)
+    gram.lu().determinant().sqrt()
 }
 
 /// Get the best equal temperament mappings for the given prime limit
