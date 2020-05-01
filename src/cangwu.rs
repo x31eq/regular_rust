@@ -55,7 +55,7 @@ pub trait TenneyWeighted {
 }
 
 fn weight_mapping(
-    mapping: &Mapping,
+    mapping: &[ETMap],
     plimit: &DVector<Cents>,
 ) -> DMatrix<f64> {
     let rank = mapping.len();
