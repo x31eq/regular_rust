@@ -90,7 +90,7 @@ impl CangwuTemperament {
         let ek = ek / 1200.0;
         let epsilon = ek / (1.0 + square(ek)).sqrt();
         let scaling = 1.0 - epsilon;
-        let m = self.weighted_reduced_mapping();
+        let m = self.weighted_mapping();
         let offset = scaling * m.row_mean();
         let offset_vec: Vec<f64> = offset.iter().cloned().collect();
         let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
