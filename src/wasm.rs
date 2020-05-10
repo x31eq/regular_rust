@@ -517,6 +517,10 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
             pitch_stack = vec![pitch];
         }
     }
+    if diatonic_steps > 100 {
+        // Don't show an overly complex accordion
+        return Ok(());
+    }
     grid.push(pitch_stack);
 
     let drift = (octaves[chromatic_dimension] as f64)
