@@ -6,8 +6,8 @@ use na::DMatrix;
 use super::{Cents, ETMap, Exponent, Mapping, PriorityQueue, Tuning};
 use std::collections::HashSet;
 
-pub struct CangwuTemperament {
-    plimit: Vec<Cents>,
+pub struct CangwuTemperament<'a> {
+    plimit: &'a [Cents],
     melody: Mapping,
 }
 
@@ -69,10 +69,9 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     mapping.map(f64::from).component_mul(&weighting)
 }
 
-impl CangwuTemperament {
+impl<'a> CangwuTemperament<'a> {
     /// Upgrade vectors into a struct of nalgebra objects
-    pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
-        let plimit = plimit.to_vec();
+    pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
     }
@@ -95,13 +94,13 @@ impl CangwuTemperament {
     }
 }
 
-impl TemperamentClass for CangwuTemperament {
+impl TemperamentClass for CangwuTemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
     }
 }
 
-impl TenneyWeighted for CangwuTemperament {
+impl TenneyWeighted for CangwuTemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
     }

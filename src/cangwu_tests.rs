@@ -2,35 +2,34 @@ use super::cangwu;
 use super::PrimeLimit;
 use cangwu::TemperamentClass;
 
-fn make_marvel() -> cangwu::CangwuTemperament {
+fn make_marvel(limit11: &super::PrimeLimit) -> cangwu::CangwuTemperament {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    let limit11 = PrimeLimit::new(11);
     cangwu::CangwuTemperament::new(&limit11.pitches, &marvel_vector)
 }
 
-fn make_jove() -> cangwu::CangwuTemperament {
+fn make_jove(limit11: &super::PrimeLimit) -> cangwu::CangwuTemperament {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    let limit11 = PrimeLimit::new(11);
     cangwu::CangwuTemperament::new(&limit11.pitches, &jove_vector)
 }
 
 #[test]
 fn badness() {
-    let marvel = make_marvel();
+    let limit11 = PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     assert!(0.16948 < marvel.badness(1.0));
     assert!(marvel.badness(1.0) < 0.16949);
     assert!(0.06882 < marvel.badness(0.1));
     assert!(marvel.badness(0.1) < 0.06883);
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     assert!(0.18269 < jove.badness(1.0));
     assert!(jove.badness(1.0) < 0.18270);
     assert!(0.05606 < jove.badness(0.1));
@@ -40,14 +39,15 @@ fn badness() {
 #[rustfmt::skip]
 #[test]
 fn hermite() {
-    let marvel = make_marvel();
+    let limit11 = PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let marvel_hermite =
         vec![[1, 0, 0, -5, 12],
              [0, 1, 0, 2, -1],
              [0, 0, 1, 2, -3]];
     assert_eq!(marvel.reduced_mapping(), marvel_hermite);
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let jove_hermite = vec![[1, 1, 1, 2, 2],
                             [0, 2, 1, 1, 5],
                             [0, 0, 2, 1, 0]];
@@ -57,22 +57,24 @@ fn hermite() {
 #[rustfmt::skip]
 #[test]
 fn key() {
+    let limit11 = PrimeLimit::new(11);
     assert_eq!(
-        make_marvel().key(),
+        make_marvel(&limit11).key(),
         vec![1, 2, -3,
           1, 0, 2, -1,
        1, 0, 0, -5, 12]
     );
 
-    assert_eq!(make_jove().key(), vec![2, 1, 0,
+    assert_eq!(make_jove(&limit11).key(), vec![2, 1, 0,
                                     2, 1, 1, 5,
                                  1, 1, 1, 2, 2]);
 }
 
 #[test]
 fn rank() {
-    assert_eq!(make_marvel().rank(), 3);
-    assert_eq!(make_jove().rank(), 3);
+    let limit11 = PrimeLimit::new(11);
+    assert_eq!(make_marvel(&limit11).rank(), 3);
+    assert_eq!(make_jove(&limit11).rank(), 3);
 }
 
 #[rustfmt::skip]
