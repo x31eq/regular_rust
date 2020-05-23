@@ -54,7 +54,7 @@ pub trait TenneyWeighted {
     }
 }
 
-fn weight_mapping(mapping: &Mapping, plimit: &[Cents]) -> DMatrix<f64> {
+fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     let rank = mapping.len();
     let dimension = plimit.len();
     let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
