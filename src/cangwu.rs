@@ -45,7 +45,7 @@ pub trait TemperamentClass {
 
 pub trait TenneyWeighted {
     fn mapping(&self) -> &Mapping;
-    fn plimit(&self) -> &Vec<Cents>;
+    fn plimit(&self) -> &[Cents];
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
@@ -106,7 +106,7 @@ impl TenneyWeighted for CangwuTemperament {
         &self.melody
     }
 
-    fn plimit(&self) -> &Vec<Cents> {
+    fn plimit(&self) -> &[Cents] {
         &self.plimit
     }
 }
