@@ -12,17 +12,17 @@ pub struct TETemperament {
 }
 
 impl cangwu::TemperamentClass for TETemperament {
-    fn mapping(&'_ self) -> &'_ Mapping {
+    fn mapping(&self) -> &Mapping {
         &self.melody
     }
 }
 
 impl cangwu::TenneyWeighted for TETemperament {
-    fn mapping(&'_ self) -> &'_ Mapping {
+    fn mapping(&self) -> &Mapping {
         &self.melody
     }
 
-    fn plimit(&'_ self) -> &'_ Vec<Cents> {
+    fn plimit(&self) -> &Vec<Cents> {
         &self.plimit
     }
 }

@@ -13,7 +13,7 @@ pub struct CangwuTemperament {
 
 /// This isn't specific to TE/Cangwu but sits here for now.
 pub trait TemperamentClass {
-    fn mapping(&'_ self) -> &'_ Mapping;
+    fn mapping(&self) -> &Mapping;
 
     /// Unique identifier for the mapping
     /// (hermite normal form flattened and
@@ -44,8 +44,8 @@ pub trait TemperamentClass {
 }
 
 pub trait TenneyWeighted {
-    fn mapping(&'_ self) -> &'_ Mapping;
-    fn plimit(&'_ self) -> &'_ Vec<Cents>;
+    fn mapping(&self) -> &Mapping;
+    fn plimit(&self) -> &Vec<Cents>;
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
@@ -96,17 +96,17 @@ impl CangwuTemperament {
 }
 
 impl TemperamentClass for CangwuTemperament {
-    fn mapping(&'_ self) -> &'_ Mapping {
+    fn mapping(&self) -> &Mapping {
         &self.melody
     }
 }
 
 impl TenneyWeighted for CangwuTemperament {
-    fn mapping(&'_ self) -> &'_ Mapping {
+    fn mapping(&self) -> &Mapping {
         &self.melody
     }
 
-    fn plimit(&'_ self) -> &'_ Vec<Cents> {
+    fn plimit(&self) -> &Vec<Cents> {
         &self.plimit
     }
 }
