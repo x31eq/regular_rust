@@ -203,34 +203,33 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
 }
 
 #[cfg(test)]
-fn make_marvel() -> TETemperament {
+fn make_marvel(limit11: &super::PrimeLimit) -> TETemperament {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    let limit11 = super::PrimeLimit::new(11);
     TETemperament::new(&limit11.pitches, &marvel_vector)
 }
 
 #[cfg(test)]
-fn make_jove() -> TETemperament {
+fn make_jove(limit11: &super::PrimeLimit) -> TETemperament {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    let limit11 = super::PrimeLimit::new(11);
     TETemperament::new(&limit11.pitches, &jove_vector)
 }
 
 #[test]
 fn complexity() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     assert!(0.155663 < marvel.complexity());
     assert!(marvel.complexity() < 0.155664);
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     // Less precision here because it disagrees with Python.
     assert!(0.17475 < jove.complexity());
     assert!(jove.complexity() < 0.174755);
@@ -238,23 +237,25 @@ fn complexity() {
 
 #[test]
 fn error() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     assert!(0.43069 < marvel.error());
     assert!(marvel.error() < 0.43070);
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     assert!(0.30486 < jove.error());
     assert!(jove.error() < 0.30487);
 }
 
 #[test]
 fn tuning() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "3.96487 17.32226 14.05909";
     let fmt_tuning = format_float_vec(&marvel.tuning, 5);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "6.00023 17.78766 11.87013";
     let fmt_tuning = format_float_vec(&jove.tuning, 5);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -262,12 +263,13 @@ fn tuning() {
 
 #[test]
 fn tuning_map() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "1200.640 1901.403 2785.025 3369.655 4151.204";
     let fmt_tuning = format_float_vec(&marvel.tuning_map(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "1200.099 1901.163 2786.388 3368.609 4152.859";
     let fmt_tuning = format_float_vec(&jove.tuning_map(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -275,12 +277,13 @@ fn tuning_map() {
 
 #[test]
 fn mistunings() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "0.640 -0.552 -1.288 0.829 -0.114";
     let fmt_tuning = format_float_vec(&marvel.mistunings(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "0.099 -0.792 0.074 -0.217 1.541";
     let fmt_tuning = format_float_vec(&jove.mistunings(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -288,12 +291,13 @@ fn mistunings() {
 
 #[test]
 fn pote_tuning() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "3.96276 17.31303 14.05160";
     let fmt_tuning = format_float_vec(&marvel.pote_tuning(), 5);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "5.99973 17.78620 11.86915";
     let fmt_tuning = format_float_vec(&jove.pote_tuning(), 5);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -301,12 +305,13 @@ fn pote_tuning() {
 
 #[test]
 fn pote_tuning_map() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "1200.000 1900.389 2783.540 3367.858 4148.990";
     let fmt_tuning = format_float_vec(&marvel.pote_tuning_map(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "1200.000 1901.007 2786.159 3368.331 4152.517";
     let fmt_tuning = format_float_vec(&jove.pote_tuning_map(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -314,12 +319,13 @@ fn pote_tuning_map() {
 
 #[test]
 fn pote_mistunings() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let expected = "0.000 -1.566 -2.773 -0.968 -2.328";
     let fmt_tuning = format_float_vec(&marvel.pote_mistunings(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
 
-    let jove = make_jove();
+    let jove = make_jove(&limit11);
     let expected = "0.000 -0.948 -0.155 -0.495 1.199";
     let fmt_tuning = format_float_vec(&jove.pote_mistunings(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
@@ -448,7 +454,8 @@ fn big_fokker_block() {
 
 #[test]
 fn rt_fokker_block() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     assert_eq!(
         marvel.fokker_block_steps(22),
         vec![
@@ -494,7 +501,8 @@ fn rt_fokker_block() {
 
 #[test]
 fn tuned_block() {
-    let block = make_marvel().fokker_block_pitches(22);
+    let limit11 = super::PrimeLimit::new(11);
+    let block = make_marvel(&limit11).fokker_block_pitches(22);
     let fmt_block = format_float_vec(&block, 3);
     let expected = format_float_vec(
         &vec![
@@ -510,14 +518,16 @@ fn tuned_block() {
 
 #[test]
 fn generators() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let twotoe = marvel.generators_from_primes(&vec![3, 0, 0, -1, 0]);
     assert_eq!(twotoe, vec![4, 6, 8]);
 }
 
 #[test]
 fn pitches() {
-    let marvel = make_marvel();
+    let limit11 = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
     let twotoe = marvel.pitch_from_steps(&vec![4, 6, 8]);
     assert_eq!(format!("{:.3}", twotoe), "232.266");
 
