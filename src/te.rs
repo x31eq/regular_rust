@@ -6,7 +6,7 @@ use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament {
-    plimit: DVector<Cents>,
+    plimit: Vec<Cents>,
     pub melody: Mapping,
     pub tuning: Tuning,
 }
@@ -22,7 +22,7 @@ impl cangwu::TenneyWeighted for TETemperament {
         &self.melody
     }
 
-    fn plimit(&'_ self) -> &'_ DVector<Cents> {
+    fn plimit(&'_ self) -> &'_ Vec<Cents> {
         &self.plimit
     }
 }
@@ -30,7 +30,7 @@ impl cangwu::TenneyWeighted for TETemperament {
 impl TETemperament {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
-        let plimit = DVector::from_vec(plimit.to_vec());
+        let plimit = plimit.to_vec();
         let melody = melody.to_vec();
         let mut rt = TETemperament {
             plimit,

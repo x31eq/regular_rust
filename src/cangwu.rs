@@ -1,13 +1,13 @@
 //! Temperament finding with Cangwu badness
 
 extern crate nalgebra as na;
-use na::{DMatrix, DVector};
+use na::DMatrix;
 
 use super::{Cents, ETMap, Exponent, Mapping, PriorityQueue, Tuning};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament {
-    plimit: DVector<Cents>,
+    plimit: Vec<Cents>,
     melody: Mapping,
 }
 
@@ -45,7 +45,7 @@ pub trait TemperamentClass {
 
 pub trait TenneyWeighted {
     fn mapping(&'_ self) -> &'_ Mapping;
-    fn plimit(&'_ self) -> &'_ DVector<Cents>;
+    fn plimit(&'_ self) -> &'_ Vec<Cents>;
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
@@ -54,10 +54,7 @@ pub trait TenneyWeighted {
     }
 }
 
-fn weight_mapping(
-    mapping: &[ETMap],
-    plimit: &DVector<Cents>,
-) -> DMatrix<f64> {
+fn weight_mapping(mapping: &Mapping, plimit: &[Cents]) -> DMatrix<f64> {
     let rank = mapping.len();
     let dimension = plimit.len();
     let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
@@ -75,7 +72,7 @@ fn weight_mapping(
 impl CangwuTemperament {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &[Cents], melody: &[ETMap]) -> Self {
-        let plimit = DVector::from_vec(plimit.to_vec());
+        let plimit = plimit.to_vec();
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
     }
@@ -109,7 +106,7 @@ impl TenneyWeighted for CangwuTemperament {
         &self.melody
     }
 
-    fn plimit(&'_ self) -> &'_ DVector<Cents> {
+    fn plimit(&'_ self) -> &'_ Vec<Cents> {
         &self.plimit
     }
 }
