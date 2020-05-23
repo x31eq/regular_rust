@@ -91,9 +91,11 @@ impl fmt::Display for ParseLimitError {
 }
 
 fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
-    let strings: Vec<String> =
-        items.iter().map(ToString::to_string).collect();
-    strings.join(joiner)
+    items
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<String>>()
+        .join(joiner)
 }
 
 /// Equal temperament mapping with each prime rounded
