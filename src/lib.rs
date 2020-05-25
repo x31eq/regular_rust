@@ -256,10 +256,10 @@ impl<T> PriorityQueue<T> {
         self.items.len()
     }
 
-    pub fn extract(&mut self) -> Vec<T> {
+    pub fn extract(self) -> Vec<T> {
         // Could return the iterator but that's
         // harder to get the type of
-        self.items.drain(..).map(|(_, item)| item).collect()
+        self.items.into_iter().map(|(_, item)| item).collect()
     }
 
     fn sort(&mut self) {
