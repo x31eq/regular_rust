@@ -48,9 +48,7 @@ fn main() {
             ek,
             eff_n_results,
         );
-        if rts.len() > n_results {
-            rts.split_off(n_results);
-        }
+        rts.truncate(n_results);
         if print_return_closed(&rts) {
             // Return silently if stdout is closed
             return;
