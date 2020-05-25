@@ -137,7 +137,7 @@ pub fn higher_rank_search(
             }
         }
     }
-    results.extract()
+    results.extract().collect()
 }
 
 pub fn rms_of_matrix(a: &DMatrix<f64>) -> f64 {
@@ -179,7 +179,7 @@ pub fn get_equal_temperaments(
     }
 
     debug_assert!(results.len() == n_results);
-    results.extract()
+    results.extract().collect()
 }
 
 pub fn equal_temperament_badness(
