@@ -192,6 +192,7 @@ fn show_equal_temperaments<'a>(
     web.list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping")?;
+    table.set_attribute("class", "bra")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
     web.list.append_child(&table)?;
     Ok(())
