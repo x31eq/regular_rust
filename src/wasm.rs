@@ -204,6 +204,7 @@ fn write_mapping_matrix<'a>(
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     write_headings(&web, &table, &limit)?;
+    let body = web.document.create_element("tbody")?;
     for vector in values {
         let row = web.document.create_element("tr")?;
         for element in vector {
@@ -211,8 +212,9 @@ fn write_mapping_matrix<'a>(
             cell.set_text_content(Some(&element.to_string()));
             row.append_child(&cell)?;
         }
-        table.append_child(&row)?;
+        body.append_child(&row)?;
     }
+    table.append_child(&body)?;
     Ok(())
 }
 
@@ -222,13 +224,15 @@ fn write_headings(
     limit: &PrimeLimit,
 ) -> Exceptionable {
     table.set_inner_html("");
+    let head = web.document.create_element("thead")?;
     let row = web.document.create_element("tr")?;
     for heading in limit.headings.iter() {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(&heading));
         row.append_child(&cell)?;
     }
-    table.append_child(&row)?;
+    head.append_child(&row)?;
+    table.append_child(&head)?;
     Ok(())
 }
 
@@ -238,6 +242,7 @@ fn write_float_row(
     pitches: &[Cents],
     precision: usize,
 ) -> Exceptionable {
+    let body = web.document.create_element("tbody")?;
     let row = web.document.create_element("tr")?;
     for element in pitches {
         let cell = web.document.create_element("td")?;
@@ -245,7 +250,8 @@ fn write_float_row(
         cell.set_text_content(Some(&formatted));
         row.append_child(&cell)?;
     }
-    table.append_child(&row)?;
+    body.append_child(&row)?;
+    table.append_child(&body)?;
     Ok(())
 }
 

@@ -7,8 +7,18 @@
             table.mapping {
                 margin-bottom: 1em;
             }
+            .mapping thead tr::before {
+                content: " ";
+            }
             .mapping th, .mapping td {
+                padding-left: 0.6em;
                 padding-right: 0.6em;
+            }
+            .mapping tbody tr::before {
+                content: "⟨";
+            }
+            .mapping tbody tr::after {
+                content: "]";
             }
             .mapping td {
                 text-align: right;
