@@ -191,8 +191,7 @@ fn show_equal_temperaments<'a>(
     heading.set_text_content(Some("Equal Temperaments"));
     web.list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
-    table.set_attribute("class", "mapping")?;
-    table.set_attribute("class", "bra")?;
+    table.set_attribute("class", "mapping bra")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
     web.list.append_child(&table)?;
     Ok(())
