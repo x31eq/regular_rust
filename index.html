@@ -20,16 +20,22 @@
                 padding-right: 0.5em;
             }
             .bra tbody tr::before {
-                content: "⟨";
+                content: "\2002 \27e8";
             }
             .bra tbody tr::after {
-                content: "]";
+                content: "] \2002";
+            }
+            .bra.matrix tbody tr:first-of-type::before {
+                content: "[ \27e8";
+            }
+            .bra.matrix tbody tr:last-of-type::after {
+                content: "] \27e9";
             }
             .ket tbody tr::before {
                 content: "[";
             }
             .ket tbody tr::after {
-                content: "⟩";
+                content: "\27e9";
             }
             .mapping th {
                 text-align: center;
@@ -139,10 +145,10 @@
         </p>
         <div id="regular-temperament">
             <h3 id="rt-name">A result will go here</h3>
-            <table id="rt-etmap" class="mapping bra">
+            <table id="rt-etmap" class="mapping bra matrix">
                 <caption>Equal Temperament Mappings</caption>
             </table>
-            <table id="rt-redmap" class="mapping bra">
+            <table id="rt-redmap" class="mapping bra matrix">
                 <caption>Reduced Mapping</caption>
             </table>
             Tuning type:
