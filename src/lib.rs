@@ -256,7 +256,7 @@ impl<T> PriorityQueue<T> {
         self.items.len()
     }
 
-    pub fn extract(self) -> impl Iterator<Item=T> {
+    pub fn extract(self) -> impl Iterator<Item = T> {
         self.items.into_iter().map(|(_, item)| item)
     }
 

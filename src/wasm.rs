@@ -155,6 +155,21 @@ impl WebContext {
         .value()
     }
 
+    fn new_or_emptied_element(
+        &self,
+        parent: &Element,
+        name: &str,
+    ) -> Result<Element, JsValue> {
+        if let Some(existing) = parent.query_selector(name)? {
+            existing.set_inner_html("");
+            Ok(existing)
+        } else {
+            let child = self.document.create_element(name)?;
+            parent.append_child(&child)?;
+            Ok(child)
+        }
+    }
+
     /// Unwrap a value with the potential of an exception
     pub fn unwrap<T, U>(&self, result: Result<T, U>, message: &str) -> T {
         match result {
@@ -204,7 +219,7 @@ fn write_mapping_matrix<'a>(
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     write_headings(&web, &table, &limit)?;
-    let body = web.document.create_element("tbody")?;
+    let body = web.new_or_emptied_element(&table, "tbody")?;
     for vector in values {
         let row = web.document.create_element("tr")?;
         for element in vector {
@@ -214,7 +229,6 @@ fn write_mapping_matrix<'a>(
         }
         body.append_child(&row)?;
     }
-    table.append_child(&body)?;
     Ok(())
 }
 
@@ -223,8 +237,7 @@ fn write_headings(
     table: &Element,
     limit: &PrimeLimit,
 ) -> Exceptionable {
-    table.set_inner_html("");
-    let head = web.document.create_element("thead")?;
+    let head = web.new_or_emptied_element(&table, "thead")?;
     let row = web.document.create_element("tr")?;
     for heading in limit.headings.iter() {
         let cell = web.document.create_element("th")?;
@@ -242,7 +255,7 @@ fn write_float_row(
     pitches: &[Cents],
     precision: usize,
 ) -> Exceptionable {
-    let body = web.document.create_element("tbody")?;
+    let body = web.new_or_emptied_element(&table, "tbody")?;
     let row = web.document.create_element("tr")?;
     for element in pitches {
         let cell = web.document.create_element("td")?;
@@ -422,12 +435,10 @@ fn show_rt(
     }
 
     if let Some(table) = web.element("rt-steps") {
-        table.set_inner_html("");
         write_float_row(&web, &table, &rt.tuning, 4)?;
     }
 
     if let Some(table) = web.element("rt-pote-steps") {
-        table.set_inner_html("");
         write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
@@ -479,12 +490,10 @@ fn show_rt(
     // Make another RT object to get the generator tunings
     let rt = te::TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
-        table.set_inner_html("");
         write_float_row(&web, &table, &rt.tuning, 4)?;
     }
 
     if let Some(table) = web.element("rt-pote-generators") {
-        table.set_inner_html("");
         write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
