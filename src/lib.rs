@@ -90,7 +90,10 @@ impl fmt::Display for ParseLimitError {
     }
 }
 
-fn join<T: ToString + Copy>(joiner: &str, items: &[T]) -> String {
+fn join<T>(joiner: &str, items: &[T]) -> String
+where
+    T: ToString + Copy,
+{
     items
         .iter()
         .map(ToString::to_string)
