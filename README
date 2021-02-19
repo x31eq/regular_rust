@@ -8,7 +8,7 @@ code in Rust.
 Native-code application
 -----------------------
 
-The standard targe finds regular temperaments and shows the results
+The standard target finds regular temperaments and shows the results
 in a machine-readable format that is JSON-consistent, and works
 with the latest Python library: https://bitbucket.org/x31eq/regular
 Supply the number of results for each rank, the cangwu parameter
