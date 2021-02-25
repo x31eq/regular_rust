@@ -231,7 +231,7 @@ dependencies = [
 
 [[package]]
 name = "regular"
-version = "0.3.0"
+version = "0.2.0"
 dependencies = [
  "nalgebra 0.18.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
