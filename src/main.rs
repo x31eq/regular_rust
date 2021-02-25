@@ -36,7 +36,7 @@ fn main() {
         let new_rts = regular::cangwu::higher_rank_search(
             &limit.pitches, &mappings, &rts, ek, eff_n_results);
         if rts.len() > n_results {
-            rts.split_off(n_results);
+            rts.truncate(n_results);
         }
         println!("{:?}", rts);
         rts = new_rts;
