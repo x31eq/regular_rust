@@ -182,7 +182,7 @@ pub fn get_equal_temperaments(
         });
         children.push(child);
     }
-    for child in children {
+    for child in children.drain(..) {
         child.join().expect("Threading error");
     }
 
