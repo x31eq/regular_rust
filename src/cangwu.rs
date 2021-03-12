@@ -3,7 +3,7 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::{Cents, ETMap, Exponent, Mapping, PriorityQueue, Tuning};
+use super::{map, Cents, ETMap, Exponent, Mapping, PriorityQueue};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {
@@ -59,7 +59,7 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     let dimension = plimit.len();
     let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
     let mapping = DMatrix::from_iterator(dimension, rank, flattened);
-    let weighting_vec: Vec<_> = plimit.iter().map(|x| 1200.0 / x).collect();
+    let weighting_vec = map(|x| 1200.0 / x, &plimit);
     let mut weighting =
         DMatrix::from_vec(dimension, 1, weighting_vec.clone());
     assert!(rank > 0);
@@ -162,8 +162,7 @@ pub fn get_equal_temperaments(
     n_results: usize,
 ) -> Mapping {
     // Stop weird things happening for non-standard units
-    let plimit: Tuning =
-        plimit.iter().map(|p| 12e2 * (p / plimit[0])).collect();
+    let plimit = map(|p| 12e2 * (p / plimit[0]), &plimit);
 
     let mut results = PriorityQueue::new(n_results);
     let bmax = preliminary_badness(&plimit, ek, n_results);
@@ -189,7 +188,7 @@ pub fn equal_temperament_badness(
 ) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
-    let plimit: Vec<_> = plimit.iter().map(|p| p / 12e2).collect();
+    let plimit = map(|p| p / 12e2, &plimit);
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();

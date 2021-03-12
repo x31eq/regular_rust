@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
 use super::cangwu;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
+use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 use cangwu::{rms_of_matrix, TenneyWeighted};
 
 pub struct TETemperament<'a> {
@@ -97,28 +97,25 @@ impl<'a> TETemperament<'a> {
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning(&self) -> Tuning {
-        self.tuning.iter().map(|x| x / self.stretch()).collect()
+        map(|x| x / self.stretch(), &self.tuning)
     }
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
-        self.tuning_map()
-            .iter()
-            .map(|x| x / self.stretch())
-            .collect()
+        map(|x| x / self.stretch(), &self.tuning_map())
     }
 
     pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
-        self.melody
-            .iter()
-            .map(|mapping| {
+        map(
+            |mapping| {
                 mapping
                     .iter()
                     .zip(interval.iter())
                     .map(|(&x, &y)| x * y)
                     .sum()
-            })
-            .collect()
+            },
+            &self.melody,
+        )
     }
 
     pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
@@ -144,7 +141,7 @@ impl<'a> TETemperament<'a> {
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
     pub fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
-        let octaves = self.melody.iter().map(|row| row[0]).collect();
+        let octaves = map(|row| row[0], &self.melody);
         fokker_block(n_pitches, octaves)
     }
 
@@ -177,9 +174,8 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     assert!(!octaves.is_empty());
     // Make the first coordinate special
     let columns = octaves.iter().cloned().min().unwrap();
-    let scales: Mapping = octaves
-        .iter()
-        .map(|&m| {
+    let scales = map(
+        |&m| {
             if (m + columns) <= n_pitches && columns != m && columns > 0 {
                 let correction = (n_pitches - m) / columns;
                 let eff_m = m + columns * correction;
@@ -191,12 +187,13 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
             } else {
                 maximally_even(n_pitches, m, 1)
             }
-        })
-        .collect();
+        },
+        &octaves,
+    );
     (0..n_pitches)
         .map(|pitch| {
             assert!(pitch >= 0);
-            scales.iter().map(|scale| scale[pitch as usize]).collect()
+            map(|scale| scale[pitch as usize], &scales)
         })
         .collect()
 }

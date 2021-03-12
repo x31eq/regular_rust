@@ -43,11 +43,9 @@ impl PrimeLimit {
     /// Explicit specification for non-consecutive prime limits
     /// (with no check for numbers being prime).
     pub fn explicit(prime_numbers: Vec<Harmonic>) -> Self {
-        let pitches =
-            prime_numbers.iter().map(|p| cents(f64::from(*p))).collect();
+        let pitches = map(|p| cents(f64::from(*p)), &prime_numbers);
         let label = join(".", &prime_numbers);
-        let headings =
-            prime_numbers.iter().map(Harmonic::to_string).collect();
+        let headings = map(Harmonic::to_string, &prime_numbers);
         PrimeLimit {
             label,
             pitches,
@@ -57,7 +55,7 @@ impl PrimeLimit {
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
-        let headings = pitches.iter().map(Cents::to_string).collect();
+        let headings = map(Cents::to_string, &pitches);
         PrimeLimit {
             label: "inharmonic".to_string(),
             pitches,
@@ -90,25 +88,23 @@ impl fmt::Display for ParseLimitError {
     }
 }
 
+/// Some generic utilities
+fn map<T, U>(f: impl FnMut(&T) -> U, v: &[T]) -> Vec<U> {
+    v.iter().map(f).collect()
+}
+
 fn join<T>(joiner: &str, items: &[T]) -> String
 where
     T: ToString + Copy,
 {
-    items
-        .iter()
-        .map(ToString::to_string)
-        .collect::<Vec<String>>()
-        .join(joiner)
+    map(ToString::to_string, &items).join(joiner)
 }
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
 pub fn prime_mapping(plimit: &[Cents], n_notes: Exponent) -> Vec<Exponent> {
     let multiplier = Cents::from(n_notes) / plimit[0];
-    plimit
-        .iter()
-        .map(|&x| (x * multiplier).round() as Exponent)
-        .collect()
+    map(|&x| (x * multiplier).round() as Exponent, &plimit)
 }
 
 /// Convert a frequency ratio to cents
@@ -175,7 +171,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
             if *first_non_zero < 0 {
-                *column = column.iter().map(|&x| -x).collect();
+                *column = map(|&x| -x, &column);
             }
         }
     }

@@ -4,7 +4,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
-use super::{join, Cents, ETMap, Exponent, Mapping, PrimeLimit};
+use super::{join, map, Cents, ETMap, Exponent, Mapping, PrimeLimit};
 use cangwu::TemperamentClass;
 
 type Exceptionable = Result<(), JsValue>;
@@ -81,10 +81,7 @@ pub fn regular_temperament_search(
         "Programming Error: Failed to store pitches",
     );
 
-    let mut rts: Vec<_> = mappings
-        .iter()
-        .map(|mapping| vec![mapping.clone()])
-        .collect();
+    let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..dimension {
         let eff_n_results =
             n_results + if rank == dimension - 1 { 0 } else { safety };
@@ -320,7 +317,7 @@ fn rt_row(
         link.set_attribute(&key, &value)?;
     }
 
-    let octaves: ETMap = mapping.iter().map(|m| m[0]).collect();
+    let octaves = map(|m| m[0], &mapping);
     let text = join(" & ", &octaves);
     link.set_text_content(Some(&text));
     cell.append_child(&link)?;
@@ -338,7 +335,7 @@ fn rt_row(
 }
 
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
-    let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
+    let octaves = map(|m| m[0], &rt.melody);
     format!(
         "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
         &join("_", &octaves),
@@ -421,7 +418,7 @@ fn show_rt(
     let rt = te::TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        let octaves: ETMap = mapping.iter().map(|m| m[0]).collect();
+        let octaves = map(|m| m[0], &mapping);
         name_field.set_text_content(Some(&join(" & ", &octaves)));
     }
 
@@ -520,7 +517,7 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
     let mut diatonic_steps = 0;
     let mut pitch_stack = vec![tonic.clone()];
     let mut grid = Vec::new();
-    let octaves: ETMap = rt.melody.iter().map(|m| m[0]).collect();
+    let octaves: ETMap = map(|m| m[0], &rt.melody);
     let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
     let chromatic_dimension = 1 - diatonic_dimension;
     for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
