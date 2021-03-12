@@ -64,7 +64,7 @@ impl<'a> TETemperament<'a> {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
         let m = self.weighted_mapping();
-        let offset_vec: Vec<f64> = m.row_mean().iter().cloned().collect();
+        let offset_vec: Vec<_> = m.row_mean().iter().cloned().collect();
         let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
         assert!(dimension > 0);
         for _ in 1..dimension {

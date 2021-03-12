@@ -59,7 +59,7 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     let dimension = plimit.len();
     let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
     let mapping = DMatrix::from_iterator(dimension, rank, flattened);
-    let weighting_vec: Vec<f64> = plimit.iter().map(|x| 1200.0 / x).collect();
+    let weighting_vec: Vec<_> = plimit.iter().map(|x| 1200.0 / x).collect();
     let mut weighting =
         DMatrix::from_vec(dimension, 1, weighting_vec.clone());
     assert!(rank > 0);
@@ -84,7 +84,7 @@ impl<'a> CangwuTemperament<'a> {
         let scaling = 1.0 - epsilon;
         let m = self.weighted_mapping();
         let offset = scaling * m.row_mean();
-        let offset_vec: Vec<f64> = offset.iter().cloned().collect();
+        let offset_vec: Vec<_> = offset.iter().cloned().collect();
         let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
         assert!(dimension > 0);
         for _ in 1..dimension {
@@ -189,16 +189,16 @@ pub fn equal_temperament_badness(
 ) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
-    let plimit: Vec<f64> = plimit.iter().map(|p| p / 12e2).collect();
+    let plimit: Vec<_> = plimit.iter().map(|p| p / 12e2).collect();
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
-    let weighted_mapping: Vec<f64> = mapping
+    let weighted_mapping: Vec<_> = mapping
         .iter()
         .zip(plimit.into_iter())
         .map(|(&m, p)| f64::from(m) / p)
         .collect();
-    let mean = |items: &Vec<f64>| {
+    let mean = |items: &Vec<_>| {
         let mut sum = 0.0;
         for item in items.iter() {
             sum += item;

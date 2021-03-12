@@ -81,7 +81,7 @@ pub fn regular_temperament_search(
         "Programming Error: Failed to store pitches",
     );
 
-    let mut rts: Vec<Mapping> = mappings
+    let mut rts: Vec<_> = mappings
         .iter()
         .map(|mapping| vec![mapping.clone()])
         .collect();
