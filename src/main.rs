@@ -4,11 +4,11 @@ use std::io::{self, stdout, BufRead, Write};
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let limit = match args.len() {
-        0 | 1 | 2 | 3 => panic!(format!(
+        0 | 1 | 2 | 3 => panic!(
             "{} {}",
             "Supply the number of results, badness parameter,",
             "and prime limit as command line arguments",
-        )),
+        ),
         4 => {
             if args[3] == "cents" {
                 read_cents()
