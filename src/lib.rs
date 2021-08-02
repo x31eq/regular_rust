@@ -97,14 +97,14 @@ fn join<T>(joiner: &str, items: &[T]) -> String
 where
     T: ToString + Copy,
 {
-    map(ToString::to_string, &items).join(joiner)
+    map(ToString::to_string, items).join(joiner)
 }
 
 /// Equal temperament mapping with each prime rounded
 /// to the nearest division of the equivalence interval
 pub fn prime_mapping(plimit: &[Cents], n_notes: Exponent) -> Vec<Exponent> {
     let multiplier = Cents::from(n_notes) / plimit[0];
-    map(|&x| (x * multiplier).round() as Exponent, &plimit)
+    map(|&x| (x * multiplier).round() as Exponent, plimit)
 }
 
 /// Convert a frequency ratio to cents
@@ -171,7 +171,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
     for column in working.iter_mut() {
         if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
             if *first_non_zero < 0 {
-                *column = map(|&x| -x, &column);
+                *column = map(|&x| -x, column);
             }
         }
     }

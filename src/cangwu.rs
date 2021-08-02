@@ -28,7 +28,7 @@ pub trait TemperamentClass {
     }
 
     fn reduced_mapping(&self) -> Mapping {
-        super::hermite_normal_form(&self.mapping())
+        super::hermite_normal_form(self.mapping())
     }
 
     /// Actual rank of the mapping matrix
@@ -50,7 +50,7 @@ pub trait TenneyWeighted {
     fn weighted_mapping(&self) -> DMatrix<f64> {
         let melody = self.mapping();
         let plimit = self.plimit();
-        weight_mapping(&melody, &plimit)
+        weight_mapping(melody, plimit)
     }
 }
 
@@ -59,7 +59,7 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     let dimension = plimit.len();
     let flattened = mapping.iter().flat_map(|m| m.iter()).cloned();
     let mapping = DMatrix::from_iterator(dimension, rank, flattened);
-    let weighting_vec = map(|x| 1200.0 / x, &plimit);
+    let weighting_vec = map(|x| 1200.0 / x, plimit);
     let mut weighting =
         DMatrix::from_vec(dimension, 1, weighting_vec.clone());
     assert!(rank > 0);
@@ -106,7 +106,7 @@ impl TenneyWeighted for CangwuTemperament<'_> {
     }
 
     fn plimit(&self) -> &[Cents] {
-        &self.plimit
+        self.plimit
     }
 }
 
@@ -124,7 +124,7 @@ pub fn higher_rank_search(
         for et in ets {
             let mut new_rt = rt.clone();
             new_rt.push(et.clone());
-            let rt_obj = CangwuTemperament::new(&plimit, &new_rt);
+            let rt_obj = CangwuTemperament::new(plimit, &new_rt);
             if rt_obj.rank() == rank {
                 let badness = rt_obj.badness(ek);
                 if badness < results.cap {
@@ -162,7 +162,7 @@ pub fn get_equal_temperaments(
     n_results: usize,
 ) -> Mapping {
     // Stop weird things happening for non-standard units
-    let plimit = map(|p| 12e2 * (p / plimit[0]), &plimit);
+    let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
     let mut results = PriorityQueue::new(n_results);
     let bmax = preliminary_badness(&plimit, ek, n_results);
@@ -188,7 +188,7 @@ pub fn equal_temperament_badness(
 ) -> Cents {
     assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
-    let plimit = map(|p| p / 12e2, &plimit);
+    let plimit = map(|p| p / 12e2, plimit);
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
@@ -227,8 +227,8 @@ fn preliminary_badness(
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
     for size in 1..=(plimit.len() + n_results) {
-        let pmap = super::prime_mapping(&plimit, size as Exponent);
-        let badness = equal_temperament_badness(&plimit, ek, &pmap);
+        let pmap = super::prime_mapping(plimit, size as Exponent);
+        let badness = equal_temperament_badness(plimit, ek, &pmap);
         results.push(badness, pmap);
     }
     results.cap
