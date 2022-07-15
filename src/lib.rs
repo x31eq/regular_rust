@@ -136,21 +136,22 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
         let mut col_iter = echelon[..=col].iter_mut().rev();
         // Getting top_col from the mutable iterator
         // ensures "echelon" is consistently borrowed
-        let top_col = col_iter.next().unwrap();
-        if let Some((row, &n)) =
-            top_col.iter().enumerate().find(|(_i, &n)| n != 0)
-        {
-            assert!(n > 0);
-            for scol in col_iter {
-                let s = scol[row];
-                if s == 0 {
-                    continue;
+        if let Some(top_col) = col_iter.next() {
+            if let Some((row, &n)) =
+                top_col.iter().enumerate().find(|(_i, &n)| n != 0)
+            {
+                assert!(n > 0);
+                for scol in col_iter {
+                    let s = scol[row];
+                    if s == 0 {
+                        continue;
+                    }
+                    for (x, y) in scol.iter_mut().zip(top_col.iter()) {
+                        *x -= div_floor(s, n) * y;
+                    }
+                    assert!(scol[row] >= 0);
+                    assert!(scol[row] < n);
                 }
-                for (x, y) in scol.iter_mut().zip(top_col.iter()) {
-                    *x -= div_floor(s, n) * y;
-                }
-                assert!(scol[row] >= 0);
-                assert!(scol[row] < n);
             }
         }
     }
