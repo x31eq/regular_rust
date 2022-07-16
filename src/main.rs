@@ -58,8 +58,10 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
             read_cents()
         } else {
             let limit1: Harmonic = limit1.parse().unwrap();
-            let mut harmonics: Vec<Harmonic> =
-                args.map(|m| m.parse().unwrap()).collect();
+            let mut harmonics = args
+                .map(|m| m.parse())
+                .collect::<Result<Vec<Harmonic>, _>>()
+                .map_err(|_| "Harmonics should all be numbers".to_string())?;
             if harmonics.is_empty() {
                 PrimeLimit::new(limit1)
             } else {
