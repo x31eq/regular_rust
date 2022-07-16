@@ -57,7 +57,8 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
             assert!(args.next() == None);
             read_cents()?
         } else {
-            let limit1: Harmonic = limit1.parse()
+            let limit1: Harmonic = limit1
+                .parse()
                 .map_err(|_| "Harmonics should all be numbers".to_string())?;
             let mut harmonics = args
                 .map(|m| m.parse())

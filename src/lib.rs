@@ -118,10 +118,10 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
     (2..n)
         .filter(|&i| {
             let mut multiples = sieve.iter_mut().rev().step_by(i as usize);
-            if *multiples.next().unwrap() {
+            if *multiples.next().expect("Eratosthenes sieve underrun") {
                 multiples.for_each(|multiple| *multiple = false);
             }
-            sieve.pop().unwrap()
+            sieve.pop().expect("Leaky Eratosthenes sieve")
         })
         .collect()
 }
@@ -136,7 +136,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
         let mut col_iter = echelon[..=col].iter_mut().rev();
         // Getting top_col from the mutable iterator
         // ensures "echelon" is consistently borrowed
-        let top_col = col_iter.next().unwrap();
+        let top_col = col_iter.next().expect("No columns for hermite");
         if let Some((row, &n)) =
             top_col.iter().enumerate().find(|(_i, &n)| n != 0)
         {
@@ -202,7 +202,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
             }
         });
         let mut workings = working.iter_mut();
-        let pivot = workings.next().unwrap();
+        let pivot = workings.next().expect("No pivot for echelon reduction");
         let pivot_element = pivot[row];
         // pivot_element must be non-zero or it would be in reduced
         assert!(pivot_element != 0);
@@ -261,7 +261,8 @@ impl<T> PriorityQueue<T> {
 
     fn sort(&mut self) {
         self.items.sort_unstable_by(|(bad1, _), (bad2, _)| {
-            bad1.partial_cmp(bad2).unwrap()
+            bad1.partial_cmp(bad2)
+                .expect("Bad comparison: NaN or something")
         });
     }
 
