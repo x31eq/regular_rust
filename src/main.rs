@@ -55,7 +55,7 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
 
         let limit = if limit1 == "cents" {
             assert!(args.next() == None);
-            read_cents()
+            read_cents()?
         } else {
             let limit1: Harmonic = limit1.parse().unwrap();
             let mut harmonics = args
@@ -78,17 +78,18 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
     }
 }
 
-fn read_cents() -> PrimeLimit {
+fn read_cents() -> Result<PrimeLimit, String> {
     println!("List your partials in cents, one to a line");
     let mut result = Vec::new();
     for line in io::stdin().lock().lines() {
-        let text = line.unwrap();
-        match text.parse() {
-            Ok(partial) => result.push(partial),
-            Err(_) => println!("Failed to parse {}", text),
-        };
+        let text = line.expect("Error reading stdin");
+        result.push(
+            text.parse().map_err(|_| {
+                format!("Failed to parse {} as a number", text)
+            })?,
+        );
     }
-    PrimeLimit::inharmonic(result)
+    Ok(PrimeLimit::inharmonic(result))
 }
 
 /// Print debug to stdout or return true if stdout is closed
