@@ -1,40 +1,8 @@
-use regular::{Harmonic, PrimeLimit};
+use regular::{Cents, Harmonic, PrimeLimit};
 use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
-    let mut args = std::env::args();
-
-    let (n_results, ek, limit) = {
-        if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
-            (args.next(), args.next(), args.next(), args.next())
-        {
-            let n_results: usize = n_results.parse().unwrap();
-            let ek: regular::Cents = ek.parse().unwrap();
-
-            let limit = if limit1 == "cents" {
-                assert!(args.next() == None);
-                read_cents()
-            } else {
-                let limit1: Harmonic = limit1.parse().unwrap();
-                let mut harmonics: Vec<Harmonic> =
-                    args.map(|m| m.parse().unwrap()).collect();
-                if harmonics.len() == 0 {
-                    PrimeLimit::new(limit1)
-                } else {
-                    harmonics.insert(0, limit1);
-                    PrimeLimit::explicit(harmonics)
-                }
-            };
-            (n_results, ek, limit)
-        } else {
-            panic!(
-                "{} {}",
-                "Supply the number of results, badness parameter,",
-                "and prime limit as command line arguments",
-            )
-        }
-    };
-
+    let (n_results, ek, limit) = command_line_args();
     let dimension = limit.pitches.len();
     let safety = if dimension < 100 {
         40
@@ -68,6 +36,39 @@ fn main() {
         rts = new_rts;
     }
     print_return_closed(&rts);
+}
+
+fn command_line_args() -> (usize, Cents, PrimeLimit) {
+    let mut args = std::env::args();
+
+    if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
+        (args.next(), args.next(), args.next(), args.next())
+    {
+        let n_results: usize = n_results.parse().unwrap();
+        let ek: regular::Cents = ek.parse().unwrap();
+
+        let limit = if limit1 == "cents" {
+            assert!(args.next() == None);
+            read_cents()
+        } else {
+            let limit1: Harmonic = limit1.parse().unwrap();
+            let mut harmonics: Vec<Harmonic> =
+                args.map(|m| m.parse().unwrap()).collect();
+            if harmonics.len() == 0 {
+                PrimeLimit::new(limit1)
+            } else {
+                harmonics.insert(0, limit1);
+                PrimeLimit::explicit(harmonics)
+            }
+        };
+        (n_results, ek, limit)
+    } else {
+        panic!(
+            "{} {}",
+            "Supply the number of results, badness parameter,",
+            "and prime limit as command line arguments",
+        )
+    }
 }
 
 fn read_cents() -> PrimeLimit {
