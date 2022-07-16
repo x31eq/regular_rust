@@ -54,7 +54,7 @@ fn command_line_args() -> (usize, Cents, PrimeLimit) {
             let limit1: Harmonic = limit1.parse().unwrap();
             let mut harmonics: Vec<Harmonic> =
                 args.map(|m| m.parse().unwrap()).collect();
-            if harmonics.len() == 0 {
+            if harmonics.is_empty() {
                 PrimeLimit::new(limit1)
             } else {
                 harmonics.insert(0, limit1);
