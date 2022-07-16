@@ -2,43 +2,44 @@ use regular::{Cents, Harmonic, PrimeLimit};
 use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
-    let (n_results, ek, limit) = command_line_args();
-    let dimension = limit.pitches.len();
-    let safety = if dimension < 100 {
-        40
-    } else {
-        4 * (dimension as f64).sqrt().floor() as usize
-    };
-    let mappings = regular::cangwu::get_equal_temperaments(
-        &limit.pitches,
-        ek,
-        n_results + safety,
-    );
-    let mut rts = Vec::with_capacity(mappings.len());
-    for mapping in mappings.iter() {
-        rts.push(vec![mapping.clone()]);
-    }
-    for rank in 2..dimension {
-        let eff_n_results =
-            n_results + if rank == dimension - 1 { 0 } else { safety };
-        let new_rts = regular::cangwu::higher_rank_search(
+    if let Some((n_results, ek, limit)) = command_line_args() {
+        let dimension = limit.pitches.len();
+        let safety = if dimension < 100 {
+            40
+        } else {
+            4 * (dimension as f64).sqrt().floor() as usize
+        };
+        let mappings = regular::cangwu::get_equal_temperaments(
             &limit.pitches,
-            &mappings,
-            &rts,
             ek,
-            eff_n_results,
+            n_results + safety,
         );
-        rts.truncate(n_results);
-        if print_return_closed(&rts) {
-            // Return silently if stdout is closed
-            return;
+        let mut rts = Vec::with_capacity(mappings.len());
+        for mapping in mappings.iter() {
+            rts.push(vec![mapping.clone()]);
         }
-        rts = new_rts;
+        for rank in 2..dimension {
+            let eff_n_results =
+                n_results + if rank == dimension - 1 { 0 } else { safety };
+            let new_rts = regular::cangwu::higher_rank_search(
+                &limit.pitches,
+                &mappings,
+                &rts,
+                ek,
+                eff_n_results,
+            );
+            rts.truncate(n_results);
+            if print_return_closed(&rts) {
+                // Return silently if stdout is closed
+                return;
+            }
+            rts = new_rts;
+        }
+        print_return_closed(&rts);
     }
-    print_return_closed(&rts);
 }
 
-fn command_line_args() -> (usize, Cents, PrimeLimit) {
+fn command_line_args() -> Option<(usize, Cents, PrimeLimit)> {
     let mut args = std::env::args();
 
     if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
@@ -61,13 +62,14 @@ fn command_line_args() -> (usize, Cents, PrimeLimit) {
                 PrimeLimit::explicit(harmonics)
             }
         };
-        (n_results, ek, limit)
+        Some((n_results, ek, limit))
     } else {
-        panic!(
+        eprintln!(
             "{} {}",
             "Supply the number of results, badness parameter,",
             "and prime limit as command line arguments",
-        )
+        );
+        None
     }
 }
 
