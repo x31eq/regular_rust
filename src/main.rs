@@ -46,8 +46,19 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
     if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
         (args.next(), args.next(), args.next(), args.next())
     {
-        let n_results: usize = n_results.parse().unwrap();
-        let ek: regular::Cents = ek.parse().unwrap();
+        let n_results: usize = match n_results.parse() {
+            Ok(n_results) => n_results,
+            Err(_) => {
+                return Err("First argument must be an integer".to_string())
+            }
+        };
+        let ek: regular::Cents = match ek.parse() {
+            Ok(ek) => ek,
+            Err(_) => {
+                return Err("Specify badness parameter as a number in cents"
+                    .to_string())
+            }
+        };
 
         let limit = if limit1 == "cents" {
             assert!(args.next() == None);
