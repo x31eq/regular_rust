@@ -1,7 +1,7 @@
 use regular::{Cents, Harmonic, PrimeLimit};
 use std::io::{self, stdout, BufRead, Write};
 
-fn main() -> Result<(), ()> {
+fn main() -> Result<(), String> {
     let (n_results, ek, limit) = command_line_args()?;
 
     let dimension = limit.pitches.len();
@@ -40,7 +40,7 @@ fn main() -> Result<(), ()> {
     Ok(())
 }
 
-fn command_line_args() -> Result<(usize, Cents, PrimeLimit), ()> {
+fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
     let mut args = std::env::args();
 
     if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
@@ -65,10 +65,10 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), ()> {
         };
         Ok((n_results, ek, limit))
     } else {
-        eprintln!(
-            "Supply the number of results, badness parameter, and prime limit as command line arguments",
-        );
-        Err(())
+        Err(
+            "Supply the number of results, badness parameter, and prime limit as command line arguments"
+            .to_string(),
+        )
     }
 }
 
