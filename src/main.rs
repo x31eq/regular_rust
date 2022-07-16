@@ -1,27 +1,39 @@
-use regular::PrimeLimit;
+use regular::{Harmonic, PrimeLimit};
 use std::io::{self, stdout, BufRead, Write};
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let limit = match args.len() {
-        0 | 1 | 2 | 3 => panic!(
-            "{} {}",
-            "Supply the number of results, badness parameter,",
-            "and prime limit as command line arguments",
-        ),
-        4 => {
-            if args[3] == "cents" {
+    let mut args = std::env::args();
+
+    let (n_results, ek, limit) = {
+        if let (Some(_), Some(n_results), Some(ek), Some(limit1)) =
+            (args.next(), args.next(), args.next(), args.next())
+        {
+            let n_results: usize = n_results.parse().unwrap();
+            let ek: regular::Cents = ek.parse().unwrap();
+
+            let limit = if limit1 == "cents" {
+                assert!(args.next() == None);
                 read_cents()
             } else {
-                args[3].parse().unwrap()
-            }
+                let limit1: Harmonic = limit1.parse().unwrap();
+                let mut harmonics: Vec<Harmonic> =
+                    args.map(|m| m.parse().unwrap()).collect();
+                if harmonics.len() == 0 {
+                    PrimeLimit::new(limit1)
+                } else {
+                    harmonics.insert(0, limit1);
+                    PrimeLimit::explicit(harmonics)
+                }
+            };
+            (n_results, ek, limit)
+        } else {
+            panic!(
+                "{} {}",
+                "Supply the number of results, badness parameter,",
+                "and prime limit as command line arguments",
+            )
         }
-        _ => PrimeLimit::explicit(
-            args[3..].iter().map(|m| m.parse().unwrap()).collect(),
-        ),
     };
-    let n_results: usize = args[1].parse().unwrap();
-    let ek: regular::Cents = args[2].parse().unwrap();
 
     let dimension = limit.pitches.len();
     let safety = if dimension < 100 {
