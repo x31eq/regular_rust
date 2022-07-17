@@ -21,7 +21,8 @@ fn non_consecutive_limit() {
 #[test]
 fn limit_from_str() {
     let label = "7";
-    let limit: PrimeLimit = label.parse().unwrap();
+    let limit: PrimeLimit =
+        label.parse().expect("Failed to parse integer prime limit");
     assert_eq!(&limit.label, label);
     assert_eq!(limit.headings, vec!["2", "3", "5", "7"]);
 }
@@ -29,7 +30,8 @@ fn limit_from_str() {
 #[test]
 fn non_consecutive_limit_from_str() {
     let label = "2.3.7";
-    let limit: PrimeLimit = label.parse().unwrap();
+    let limit: PrimeLimit =
+        label.parse().expect("Failed to parse dotted prime limit");
     assert_eq!(&limit.label, label);
     assert_eq!(limit.headings, vec!["2", "3", "7"]);
 }
