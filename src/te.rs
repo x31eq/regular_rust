@@ -55,8 +55,8 @@ impl<'a> TETemperament<'a> {
         let max_harmonic = self
             .plimit
             .iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap();
+            .max_by(|a, b| a.partial_cmp(b).expect("Incomparable harmonic"))
+            .expect("No max harmonic");
         self.error() * max_harmonic / 12e2
     }
 
@@ -166,14 +166,15 @@ fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
     assert!(n >= 0);
     assert!(rotation >= 0);
     let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
-    let tonic = raw_scale.next().unwrap();
+    let tonic = raw_scale
+        .next()
+        .expect("Empty maximally even scale: check assertions");
     raw_scale.map(|pitch| pitch - tonic).collect()
 }
 
 fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
-    assert!(!octaves.is_empty());
     // Make the first coordinate special
-    let columns = octaves.iter().cloned().min().unwrap();
+    let columns = octaves.iter().cloned().min().expect("Empty ET map");
     let scales = map(
         |&m| {
             if (m + columns) <= n_pitches && columns != m && columns > 0 {
