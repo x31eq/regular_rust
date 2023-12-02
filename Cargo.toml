@@ -5,7 +5,7 @@ authors = ["Graham Breed <gbreed@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-nalgebra = "0.21.0"
+nalgebra = "0.32.3"
 num-integer = "0.1.42"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
