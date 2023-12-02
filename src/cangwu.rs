@@ -194,7 +194,7 @@ pub fn equal_temperament_badness(
     let epsilon = ek / (1.0 + square(ek)).sqrt();
     let weighted_mapping: Vec<_> = mapping
         .iter()
-        .zip(plimit.into_iter())
+        .zip(plimit)
         .map(|(&m, p)| f64::from(m) / p)
         .collect();
     let mean = |items: &Vec<_>| {

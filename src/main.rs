@@ -54,7 +54,7 @@ fn command_line_args() -> Result<(usize, Cents, PrimeLimit), String> {
         })?;
 
         let limit = if limit1 == "cents" {
-            assert!(args.next() == None);
+            assert!(args.next().is_none());
             read_cents()?
         } else {
             let limit1: Harmonic = limit1
