@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 nalgebra = "0.32.3"
-num-integer = "0.1.42"
+num-integer = "0.1.45"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2.60"
