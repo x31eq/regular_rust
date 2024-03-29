@@ -16,7 +16,7 @@ pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
     sq[(0, 0)] = 1.0;
     let det = sq.clone().determinant();
     let adjoint = sq.clone().try_inverse()? * det;
-    Some(adjoint.row(0).iter().map(|&x| x as Exponent).collect())
+    Some(adjoint.row(0).iter().map(|&x| x.round() as Exponent).collect())
 }
 
 #[test]
