@@ -1,6 +1,7 @@
 //! Utilities for dealing with vectors as ratios
 
 use super::PrimeLimit;
+use std::num::ParseIntError;
 
 /// Integers in ratios can get bigger than partials
 type Length = i128;
@@ -8,7 +9,7 @@ type Length = i128;
 /// Reverse engineer a prime limit object into a list of integers
 fn integer_partials(
     limit: &PrimeLimit,
-) -> Result<Vec<Length>, std::num::ParseIntError> {
+) -> Result<Vec<Length>, ParseIntError> {
     limit.headings.iter().map(|m| m.parse()).collect()
 }
 
