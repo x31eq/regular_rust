@@ -53,3 +53,13 @@ fn marvel7_from_reduced() {
     let expected = vec![-5, 2, 2, -1];
     assert_eq!(Some(expected), only_unison_vector(mapping));
 }
+
+#[test]
+fn meantone7() {
+    let mapping = vec![
+        vec![31, 49, 72, 87],
+        vec![19, 30, 44, 53],
+    ];
+    assert_eq!(None, only_unison_vector(mapping));
+}
+
