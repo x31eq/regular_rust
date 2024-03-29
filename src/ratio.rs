@@ -54,55 +54,55 @@ fn integer_partials(
 
 #[test]
 fn get_syntonic_comma() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio, Some((81, 80)));
 }
 
 #[test]
 fn get_syntonic_comma_string() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio_string = get_ratio_string(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio_string, Some("81:80".to_string()));
 }
 
 #[test]
 fn get_syntonic_comma_string_or_ket() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio_string = get_ratio_or_ket_string(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio_string, "81:80");
 }
 
 #[test]
 fn stringify_syntonic_comma() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]).expect("ratio overflow");
     assert_eq!(stringify(ratio), "81:80");
 }
 
 #[test]
 fn get_major_third() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-2, 0, 1]);
     assert_eq!(ratio, Some((5, 4)));
 }
 
 #[test]
 fn get_huge_interval() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![1000, -1000, 0]);
     assert_eq!(ratio, None);
 }
 
 #[test]
 fn get_huge_interval_ket() {
-    let limit5 = super::PrimeLimit::new(5);
+    let limit5 = PrimeLimit::new(5);
     let ratio = get_ratio_or_ket_string(&limit5, &vec![1000, -1000, 0]);
     assert_eq!(ratio, "[1000, -1000, 0⟩");
 }
 
 #[test]
 fn parse_7limit() {
-    let limit7 = super::PrimeLimit::new(7);
+    let limit7 = PrimeLimit::new(7);
     assert_eq!(integer_partials(&limit7), Ok(vec![2, 3, 5, 7]));
 }

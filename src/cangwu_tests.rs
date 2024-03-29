@@ -1,7 +1,7 @@
 use super::{cangwu, PrimeLimit};
 use cangwu::TemperamentClass;
 
-fn make_marvel(limit11: &super::PrimeLimit) -> cangwu::CangwuTemperament {
+fn make_marvel(limit11: &PrimeLimit) -> cangwu::CangwuTemperament {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
@@ -10,7 +10,7 @@ fn make_marvel(limit11: &super::PrimeLimit) -> cangwu::CangwuTemperament {
     cangwu::CangwuTemperament::new(&limit11.pitches, &marvel_vector)
 }
 
-fn make_jove(limit11: &super::PrimeLimit) -> cangwu::CangwuTemperament {
+fn make_jove(limit11: &PrimeLimit) -> cangwu::CangwuTemperament {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
