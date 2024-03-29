@@ -19,7 +19,7 @@ pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
         return None;
     }
     let det = sq.clone().determinant();
-    let adjoint = sq.clone().try_inverse()? * det;
+    let adjoint = sq.try_inverse()? * det;
     Some(
         adjoint
             .row(0)
