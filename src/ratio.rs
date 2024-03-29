@@ -3,7 +3,7 @@
 use super::{join, ETMap, PrimeLimit};
 
 /// Integers in ratios can get bigger than partials
-type Length = i128;
+type Length = u128;
 
 /// Turn the ratio-space vector (typed as a mapping) into a ratio-string
 pub fn get_ratio_string(limit: &PrimeLimit, rsvec: &ETMap) -> Option<String> {
