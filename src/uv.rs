@@ -33,7 +33,9 @@ pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
 fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
     let expected = vec![-4, 4, -1];
-    assert_eq!(Some(expected), only_unison_vector(mapping));
+    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = super::normalize_positive(&super::PrimeLimit::new(5), uv);
+    assert_eq!(expected, uv);
 }
 
 #[test]
@@ -44,7 +46,9 @@ fn marvel7() {
         vec![19, 30, 44, 53],
     ];
     let expected = vec![-5, 2, 2, -1];
-    assert_eq!(Some(expected), only_unison_vector(mapping));
+    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = super::normalize_positive(&super::PrimeLimit::new(7), uv);
+    assert_eq!(expected, uv);
 }
 
 #[test]
