@@ -42,3 +42,14 @@ fn marvel7() {
     let expected = vec![-5, 2, 2, -1];
     assert_eq!(Some(expected), only_unison_vector(mapping));
 }
+
+#[test]
+fn marvel7_from_reduced() {
+    let mapping = vec![
+        vec![1, 0, 0, -5],
+        vec![0, 1, 0, 2],
+        vec![0, 0, 1, 2],
+    ];
+    let expected = vec![-5, 2, 2, -1];
+    assert_eq!(Some(expected), only_unison_vector(mapping));
+}
