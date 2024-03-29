@@ -1,6 +1,6 @@
 //! # Regular Temperament Utilities
 //!
-//! Utilties for regular temperament finding
+//! Utilities for regular temperament finding
 
 use num_integer::div_floor;
 use std::fmt;
@@ -272,6 +272,8 @@ impl<T> PriorityQueue<T> {
         }
     }
 }
+
+pub mod ratio;
 
 pub mod cangwu;
 

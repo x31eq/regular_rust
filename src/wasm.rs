@@ -135,7 +135,8 @@ impl WebContext {
 
     pub fn set_body_class(&self, value: &str) {
         let body = self.document.body().expect("no body");
-        body.set_attribute("class", value).expect("failed to set class");
+        body.set_attribute("class", value)
+            .expect("failed to set class");
     }
 
     pub fn element(&self, id: &str) -> Option<Element> {
