@@ -1,6 +1,6 @@
 //! Utilities for dealing with vectors as ratios
 
-use super::{ETMap, PrimeLimit};
+use super::{join, ETMap, PrimeLimit};
 
 /// Integers in ratios can get bigger than partials
 type Length = i128;
@@ -31,6 +31,15 @@ pub fn get_ratio(
     Some((numerator, denominator))
 }
 
+/// Turn the ratio-space vector (typed as a mapping) into a ratio-string
+/// or a ket if this is not possible
+pub fn get_ratio_or_ket_string(limit: &PrimeLimit, rsvec: &ETMap) -> String {
+    match get_ratio(limit, rsvec) {
+        Some(ratio) => stringify(ratio),
+        None => format!("[{}>", join(", ", rsvec)),
+    }
+}
+
 pub fn stringify(ratio: (Length, Length)) -> String {
     let (numerator, denominator) = ratio;
     format!("{}:{}", numerator, denominator)
@@ -58,6 +67,13 @@ fn get_syntonic_comma_string() {
 }
 
 #[test]
+fn get_syntonic_comma_string_or_ket() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio_string = get_ratio_or_ket_string(&limit5, &vec![-4, 4, -1]);
+    assert_eq!(ratio_string, "81:80");
+}
+
+#[test]
 fn stringify_syntonic_comma() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]).expect("ratio overflow");
@@ -76,6 +92,13 @@ fn get_huge_interval() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![1000, -1000, 0]);
     assert_eq!(ratio, None);
+}
+
+#[test]
+fn get_huge_interval_ket() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio = get_ratio_or_ket_string(&limit5, &vec![1000, -1000, 0]);
+    assert_eq!(ratio, "[1000, -1000, 0>");
 }
 
 #[test]
