@@ -9,11 +9,7 @@ type Length = i128;
 fn integer_partials(
     limit: &PrimeLimit,
 ) -> Result<Vec<Length>, std::num::ParseIntError> {
-    limit
-        .headings
-        .iter()
-        .map(|m| m.parse())
-        .collect::<Result<Vec<Length>, _>>()
+    limit.headings.iter().map(|m| m.parse()).collect()
 }
 
 #[test]
