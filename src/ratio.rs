@@ -5,6 +5,11 @@ use super::{ETMap, PrimeLimit};
 /// Integers in ratios can get bigger than partials
 type Length = i128;
 
+/// Turn the ratio-space vector (typed as a mapping) into a ratio-string
+pub fn get_ratio_string(limit: &PrimeLimit, rsvec: &ETMap) -> Option<String> {
+    Some(stringify(get_ratio(limit, rsvec)?))
+}
+
 /// Turn the ratio-space vector (typed as a mapping) into a ratio
 pub fn get_ratio(
     limit: &PrimeLimit,
@@ -43,6 +48,13 @@ fn get_syntonic_comma() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio, Some((81, 80)));
+}
+
+#[test]
+fn get_syntonic_comma_string() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio_string = get_ratio_string(&limit5, &vec![-4, 4, -1]);
+    assert_eq!(ratio_string, Some("81:80".to_string()));
 }
 
 #[test]
