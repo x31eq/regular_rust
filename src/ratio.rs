@@ -5,7 +5,7 @@ use super::{ETMap, PrimeLimit};
 /// Integers in ratios can get bigger than partials
 type Length = i128;
 
-/// Turn the ratios-space vector (typed as a mapping) into a ratio
+/// Turn the ratio-space vector (typed as a mapping) into a ratio
 pub fn get_ratio(
     limit: &PrimeLimit,
     rsvec: &ETMap,
@@ -15,10 +15,12 @@ pub fn get_ratio(
     let harmonics = integer_partials(limit).ok()?;
     for (&harmonic, &el) in harmonics.iter().zip(rsvec.iter()) {
         if el > 0 {
-            numerator *= harmonic.checked_pow(el as u32)?;
+            numerator =
+                numerator.checked_mul(harmonic.checked_pow(el as u32)?)?;
         }
         if el < 0 {
-            denominator *= harmonic.checked_pow(-el as u32)?;
+            denominator =
+                denominator.checked_mul(harmonic.checked_pow(-el as u32)?)?;
         }
     }
     Some((numerator, denominator))
@@ -36,6 +38,13 @@ fn get_syntonic_comma() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio, Some((81, 80)));
+}
+
+#[test]
+fn get_huge_interval() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio = get_ratio(&limit5, &vec![1000, -1000, 0]);
+    assert_eq!(ratio, None);
 }
 
 #[test]
