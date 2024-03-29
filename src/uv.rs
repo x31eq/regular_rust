@@ -14,6 +14,9 @@ pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
     let fmap = DMatrix::from_iterator(dimension, rank, fiter);
     let mut sq = fmap.insert_column(0, 0.0);
     sq[(0, 0)] = 1.0;
+    if !sq.is_square() {
+        return None;
+    }
     let det = sq.clone().determinant();
     let adjoint = sq.clone().try_inverse()? * det;
     Some(
