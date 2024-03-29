@@ -26,6 +26,11 @@ pub fn get_ratio(
     Some((numerator, denominator))
 }
 
+pub fn stringify(ratio: (Length, Length)) -> String {
+    let (numerator, denominator) = ratio;
+    format!("{}:{}", numerator, denominator)
+}
+
 /// Reverse engineer a prime limit object into a list of integers
 fn integer_partials(
     limit: &PrimeLimit,
@@ -38,6 +43,13 @@ fn get_syntonic_comma() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
     assert_eq!(ratio, Some((81, 80)));
+}
+
+#[test]
+fn stringify_syntonic_comma() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio = get_ratio(&limit5, &vec![-4, 4, -1]).expect("ratio overflow");
+    assert_eq!(stringify(ratio), "81:80");
 }
 
 #[test]
