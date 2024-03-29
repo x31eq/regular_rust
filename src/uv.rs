@@ -66,3 +66,12 @@ fn meantone7() {
     assert_eq!(None, only_unison_vector(mapping));
 }
 
+#[test]
+fn meantone7_redundant() {
+    let mapping = vec![
+        vec![31, 49, 72, 87],
+        vec![19, 30, 44, 53],
+        vec![12, 19, 28, 34],
+    ];
+    assert_eq!(None, only_unison_vector(mapping));
+}
