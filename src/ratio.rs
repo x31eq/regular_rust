@@ -1,7 +1,6 @@
 //! Utilities for dealing with vectors as ratios
 
 use super::{ETMap, PrimeLimit};
-use std::num::ParseIntError;
 
 /// Integers in ratios can get bigger than partials
 type Length = i128;
@@ -10,25 +9,25 @@ type Length = i128;
 pub fn get_ratio(
     limit: &PrimeLimit,
     rsvec: &ETMap,
-) -> Result<(Length, Length), ParseIntError> {
+) -> Option<(Length, Length)> {
     let mut numerator: Length = 1;
     let mut denominator: Length = 1;
-    let harmonics = integer_partials(limit)?;
+    let harmonics = integer_partials(limit).ok()?;
     for (&harmonic, &el) in harmonics.iter().zip(rsvec.iter()) {
         if el > 0 {
-            numerator *= harmonic.pow(el as u32);
+            numerator *= harmonic.checked_pow(el as u32)?;
         }
         if el < 0 {
-            denominator *= harmonic.pow(-el as u32);
+            denominator *= harmonic.checked_pow(-el as u32)?;
         }
     }
-    Ok((numerator, denominator))
+    Some((numerator, denominator))
 }
 
 /// Reverse engineer a prime limit object into a list of integers
 fn integer_partials(
     limit: &PrimeLimit,
-) -> Result<Vec<Length>, ParseIntError> {
+) -> Result<Vec<Length>, std::num::ParseIntError> {
     limit.headings.iter().map(|m| m.parse()).collect()
 }
 
@@ -36,7 +35,7 @@ fn integer_partials(
 fn get_syntonic_comma() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
-    assert_eq!(ratio, Ok((81, 80)));
+    assert_eq!(ratio, Some((81, 80)));
 }
 
 #[test]
