@@ -31,3 +31,14 @@ fn meantone5() {
     let expected = vec![-4, 4, -1];
     assert_eq!(Some(expected), only_unison_vector(mapping));
 }
+
+#[test]
+fn marvel7() {
+    let mapping = vec![
+        vec![41, 65, 95, 115],
+        vec![31, 49, 72, 87],
+        vec![19, 30, 44, 53],
+    ];
+    let expected = vec![-5, 2, 2, -1];
+    assert_eq!(Some(expected), only_unison_vector(mapping));
+}
