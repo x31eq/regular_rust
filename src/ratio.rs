@@ -41,6 +41,13 @@ fn get_syntonic_comma() {
 }
 
 #[test]
+fn get_major_third() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio = get_ratio(&limit5, &vec![-2, 0, 1]);
+    assert_eq!(ratio, Some((5, 4)));
+}
+
+#[test]
 fn get_huge_interval() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio(&limit5, &vec![1000, -1000, 0]);
