@@ -55,7 +55,9 @@ fn marvel7_reordered() {
         vec![31, 49, 72, 87],
     ];
     let expected = vec![-5, 2, 2, -1];
-    assert_eq!(Some(expected), only_unison_vector(mapping));
+    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = super::normalize_positive(&super::PrimeLimit::new(7), uv);
+    assert_eq!(expected, uv);
 }
 
 #[test]
