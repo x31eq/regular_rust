@@ -6,13 +6,14 @@ use super::PrimeLimit;
 type Length = i128;
 
 /// Reverse engineer a prime limit object into a list of integers
-fn integer_partials(limit: &PrimeLimit) -> Result<Vec<Length>, String> {
+fn integer_partials(
+    limit: &PrimeLimit,
+) -> Result<Vec<Length>, std::num::ParseIntError> {
     limit
         .headings
         .iter()
         .map(|m| m.parse())
         .collect::<Result<Vec<Length>, _>>()
-        .map_err(|_| "Harmonics should all be numbers".to_string())
 }
 
 #[test]
