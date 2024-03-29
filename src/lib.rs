@@ -88,7 +88,7 @@ impl fmt::Display for ParseLimitError {
     }
 }
 
-pub fn normalize_positive(limit: &PrimeLimit, rsvec: &ETMap) -> ETMap {
+pub fn normalize_positive(limit: &PrimeLimit, rsvec: ETMap) -> ETMap {
     let pitch_width = limit
         .pitches
         .iter()

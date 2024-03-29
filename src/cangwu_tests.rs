@@ -167,7 +167,8 @@ fn nofives() {
 fn normalize_already_positive() {
     let limit5 = PrimeLimit::new(5);
     let comma = vec![-4, 4, -1];
-    assert_eq!(comma, super::normalize_positive(&limit5, &comma));
+    let expected = comma.clone();
+    assert_eq!(expected, super::normalize_positive(&limit5, comma));
 }
 
 #[test]
@@ -175,7 +176,7 @@ fn normalize_negative() {
     let limit5 = PrimeLimit::new(5);
     let comma = vec![4, -4, 1];
     let expected = vec![-4, 4, -1];
-    assert_eq!(expected, super::normalize_positive(&limit5, &comma));
+    assert_eq!(expected, super::normalize_positive(&limit5, comma));
 }
 
 fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
