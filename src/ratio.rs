@@ -36,7 +36,7 @@ pub fn get_ratio(
 pub fn get_ratio_or_ket_string(limit: &PrimeLimit, rsvec: &ETMap) -> String {
     match get_ratio(limit, rsvec) {
         Some(ratio) => stringify(ratio),
-        None => format!("[{}>", join(", ", rsvec)),
+        None => format!("[{}⟩", join(", ", rsvec)),
     }
 }
 
@@ -98,7 +98,7 @@ fn get_huge_interval() {
 fn get_huge_interval_ket() {
     let limit5 = super::PrimeLimit::new(5);
     let ratio = get_ratio_or_ket_string(&limit5, &vec![1000, -1000, 0]);
-    assert_eq!(ratio, "[1000, -1000, 0>");
+    assert_eq!(ratio, "[1000, -1000, 0⟩");
 }
 
 #[test]
