@@ -1,16 +1,42 @@
 //! Utilities for dealing with vectors as ratios
 
-use super::PrimeLimit;
+use super::{ETMap, PrimeLimit};
 use std::num::ParseIntError;
 
 /// Integers in ratios can get bigger than partials
 type Length = i128;
+
+/// Turn the ratios-space vector (typed as a mapping) into a ratio
+pub fn get_ratio(
+    limit: &PrimeLimit,
+    rsvec: &ETMap,
+) -> Result<(Length, Length), ParseIntError> {
+    let mut numerator: Length = 1;
+    let mut denominator: Length = 1;
+    let harmonics = integer_partials(limit)?;
+    for (&harmonic, &el) in harmonics.iter().zip(rsvec.iter()) {
+        if el > 0 {
+            numerator *= harmonic.pow(el as u32);
+        }
+        if el < 0 {
+            denominator *= harmonic.pow(-el as u32);
+        }
+    }
+    Ok((numerator, denominator))
+}
 
 /// Reverse engineer a prime limit object into a list of integers
 fn integer_partials(
     limit: &PrimeLimit,
 ) -> Result<Vec<Length>, ParseIntError> {
     limit.headings.iter().map(|m| m.parse()).collect()
+}
+
+#[test]
+fn get_syntonic_comma() {
+    let limit5 = super::PrimeLimit::new(5);
+    let ratio = get_ratio(&limit5, &vec![-4, 4, -1]);
+    assert_eq!(ratio, Ok((81, 80)));
 }
 
 #[test]
