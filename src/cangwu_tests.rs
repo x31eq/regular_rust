@@ -170,6 +170,14 @@ fn normalize_already_positive() {
     assert_eq!(comma, super::normalize_positive(&limit5, &comma));
 }
 
+#[test]
+fn normalize_negative() {
+    let limit5 = PrimeLimit::new(5);
+    let comma = vec![4, -4, 1];
+    let expected = vec![-4, 4, -1];
+    assert_eq!(expected, super::normalize_positive(&limit5, &comma));
+}
+
 fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
     mappings.iter().map(|m| m[0]).collect()
 }
