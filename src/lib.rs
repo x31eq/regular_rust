@@ -275,6 +275,8 @@ impl<T> PriorityQueue<T> {
 
 pub mod ratio;
 
+pub mod uv;
+
 pub mod cangwu;
 
 pub mod te;
