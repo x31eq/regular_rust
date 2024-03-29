@@ -88,6 +88,19 @@ impl fmt::Display for ParseLimitError {
     }
 }
 
+pub fn normalize_positive(limit: &PrimeLimit, rsvec: &ETMap) -> ETMap {
+    let pitch_width = limit
+        .pitches
+        .iter()
+        .zip(rsvec.iter())
+        .fold(0.0, |acc, (&x, &y)| acc + x * (y as Cents));
+    if pitch_width < 0.0 {
+        rsvec.iter().map(|x| -x).collect()
+    } else {
+        rsvec.clone()
+    }
+}
+
 /// Some generic utilities
 fn map<T, U>(f: impl FnMut(&T) -> U, v: &[T]) -> Vec<U> {
     v.iter().map(f).collect()
