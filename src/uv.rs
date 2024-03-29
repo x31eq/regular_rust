@@ -3,7 +3,8 @@ use na::DMatrix;
 
 use super::{ETMap, Exponent, Mapping};
 
-/// Return the commatic unison vector for a mapping with only one dimension short
+/// Return the commatic unison vector for a mapping with
+/// only one dimension short
 pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
     let rank = mapping.len();
     if rank == 0 {
@@ -48,21 +49,14 @@ fn marvel7() {
 
 #[test]
 fn marvel7_from_reduced() {
-    let mapping = vec![
-        vec![1, 0, 0, -5],
-        vec![0, 1, 0, 2],
-        vec![0, 0, 1, 2],
-    ];
+    let mapping = vec![vec![1, 0, 0, -5], vec![0, 1, 0, 2], vec![0, 0, 1, 2]];
     let expected = vec![-5, 2, 2, -1];
     assert_eq!(Some(expected), only_unison_vector(mapping));
 }
 
 #[test]
 fn meantone7() {
-    let mapping = vec![
-        vec![31, 49, 72, 87],
-        vec![19, 30, 44, 53],
-    ];
+    let mapping = vec![vec![31, 49, 72, 87], vec![19, 30, 44, 53]];
     assert_eq!(None, only_unison_vector(mapping));
 }
 
