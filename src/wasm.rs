@@ -3,11 +3,14 @@ use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
+use super::ratio::get_ratio_or_ket_string;
 use super::te;
-use super::{join, map, normalize_positive, Cents, ETMap, Exponent, Mapping, PrimeLimit};
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
-use super::ratio::get_ratio_or_ket_string;
+use super::{
+    join, map, normalize_positive, Cents, ETMap, Exponent, Mapping,
+    PrimeLimit,
+};
 
 type Exceptionable = Result<(), JsValue>;
 
@@ -325,13 +328,11 @@ fn rt_row(
 
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
-    }
-    else if let Some(uv) = only_unison_vector(&rt.melody) {
+    } else if let Some(uv) = only_unison_vector(&rt.melody) {
         let norm_uv = normalize_positive(&limit, uv);
         let name = get_ratio_or_ket_string(&limit, &norm_uv);
         link.set_text_content(Some(&name));
-    }
-    else {
+    } else {
         link.set_text_content(Some(&ets));
     }
 
@@ -439,8 +440,7 @@ fn show_rt(
     if let Some(name_field) = web.element("rt-name") {
         if let Some(name) = rt.name(&limit) {
             name_field.set_text_content(Some(&name));
-        }
-        else {
+        } else {
             let octaves = map(|m| m[0], &mapping);
             name_field.set_text_content(Some(&join(" & ", &octaves)));
         }
