@@ -5,6 +5,7 @@ authors = ["Graham Breed <gbreed@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+lazy_static = "1.4.0"
 nalgebra = "0.32.5"
 num-integer = "0.1.46"
 
