@@ -138,6 +138,14 @@ fn bad_limit_name() {
 }
 
 #[test]
+fn unlisted_name() {
+    let limit5 = PrimeLimit::new(5);
+    let melody = vec![vec![1, 2, 3], vec![4, 5, 6]];
+    let tc = StubTemperamentClass { melody };
+    assert_eq!(tc.name(&limit5), None);
+}
+
+#[test]
 fn rank() {
     assert_eq!(make_marvel().rank(), 3);
     assert_eq!(make_jove().rank(), 3);
