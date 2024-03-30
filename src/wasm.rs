@@ -5,7 +5,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 use super::cangwu;
 use super::te;
 use super::{join, map, Cents, ETMap, Exponent, Mapping, PrimeLimit};
-use cangwu::TemperamentClass;
+use super::temperament_class::TemperamentClass;
 
 type Exceptionable = Result<(), JsValue>;
 
