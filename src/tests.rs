@@ -117,6 +117,22 @@ fn hermite_reduction() {
     assert_eq!(hermite_normal_form(&jove_neg_hermite), jove_hermite);
 }
 
+#[test]
+fn normalize_already_positive() {
+    let limit5 = PrimeLimit::new(5);
+    let comma = vec![-4, 4, -1];
+    let expected = comma.clone();
+    assert_eq!(expected, super::normalize_positive(&limit5, comma));
+}
+
+#[test]
+fn normalize_negative() {
+    let limit5 = PrimeLimit::new(5);
+    let comma = vec![4, -4, 1];
+    let expected = vec![-4, 4, -1];
+    assert_eq!(expected, super::normalize_positive(&limit5, comma));
+}
+
 fn near_enough_equal(x: f64, y: f64) -> bool {
     (x / y - 1.0).abs() < 1e-15
 }
