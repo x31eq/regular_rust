@@ -32,6 +32,7 @@ pub trait TemperamentClass {
     }
 
     fn name(&self, limit: &PrimeLimit) -> Option<&'static str> {
+        // It would be easier if the headings were already &str...
         let limit_key: Vec<&str> =
             limit.headings.iter().map(|s| s.as_str()).collect();
         match NAMES_BY_LIMIT.get(&limit_key) {
@@ -126,6 +127,14 @@ fn meantone_name() {
     let limit5 = PrimeLimit::new(5);
     let meantone = make_meantone();
     assert_eq!(meantone.name(&limit5), Some("Meantone"));
+}
+
+#[test]
+fn bad_limit_name() {
+    let mut limit5 = PrimeLimit::new(5);
+    limit5.headings[0] = "octave".to_string();
+    let meantone = make_meantone();
+    assert_eq!(meantone.name(&limit5), None);
 }
 
 #[test]
