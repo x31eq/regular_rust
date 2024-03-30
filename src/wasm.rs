@@ -419,8 +419,13 @@ fn show_rt(
     let rt = te::TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        let octaves = map(|m| m[0], &mapping);
-        name_field.set_text_content(Some(&join(" & ", &octaves)));
+        if let Some(name) = rt.name(&limit) {
+            name_field.set_text_content(Some(name));
+        }
+        else {
+            let octaves = map(|m| m[0], &mapping);
+            name_field.set_text_content(Some(&join(" & ", &octaves)));
+        }
     }
 
     if let Some(table) = web.element("rt-etmap") {
