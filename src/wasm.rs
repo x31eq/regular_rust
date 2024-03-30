@@ -4,7 +4,7 @@ use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::te;
-use super::{join, map, Cents, ETMap, Exponent, Mapping, PrimeLimit};
+use super::{join, map, normalize_positive, Cents, ETMap, Exponent, Mapping, PrimeLimit};
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
 use super::ratio::get_ratio_or_ket_string;
@@ -327,7 +327,9 @@ fn rt_row(
         link.set_text_content(Some(&name));
     }
     else if let Some(uv) = only_unison_vector(&rt.melody) {
-        link.set_text_content(Some(&get_ratio_or_ket_string(&limit, &uv)));
+        let norm_uv = normalize_positive(&limit, uv);
+        let name = get_ratio_or_ket_string(&limit, &norm_uv);
+        link.set_text_content(Some(&name));
     }
     else {
         link.set_text_content(Some(&ets));
