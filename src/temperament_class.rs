@@ -130,6 +130,20 @@ fn meantone_name() {
 }
 
 #[test]
+fn marvel_name() {
+    let limit11 = PrimeLimit::new(11);
+    let marvel = make_marvel();
+    assert_eq!(marvel.name(&limit11), Some("Marvel"));
+}
+
+#[test]
+fn jove_name() {
+    let limit11 = PrimeLimit::new(11);
+    let jove = make_jove();
+    assert_eq!(jove.name(&limit11), Some("Jove"));
+}
+
+#[test]
 fn bad_limit_name() {
     let mut limit5 = PrimeLimit::new(5);
     limit5.headings[0] = "octave".to_string();
