@@ -281,7 +281,7 @@ fn show_regular_temperaments<'a>(
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for column_heading in &["Name", "complexity", "error"] {
+    for column_heading in &["Name", "ETs", "complexity", "error"] {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(column_heading));
         row.append_child(&cell)?;
@@ -318,17 +318,21 @@ fn rt_row(
         link.set_attribute(&key, &value)?;
     }
 
-    if let Some(name_field) = web.element("rt-name") {
-        if let Some(name) = rt.name(&limit) {
-            link.set_text_content(Some(&name));
-        }
-        else {
-            let octaves = map(|m| m[0], &mapping);
-            let text = join(" & ", &octaves);
-            link.set_text_content(Some(&text));
-        }
+    let octaves = map(|m| m[0], &mapping);
+    let ets = join(" & ", &octaves);
+
+    if let Some(name) = rt.name(&limit) {
+        link.set_text_content(Some(&name));
     }
+    else {
+        link.set_text_content(Some(&ets));
+    }
+
     cell.append_child(&link)?;
+    row.append_child(&cell)?;
+
+    let cell = web.document.create_element("td")?;
+    cell.set_text_content(Some(&ets));
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
