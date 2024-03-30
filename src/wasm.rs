@@ -496,10 +496,6 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
-    if let Some(field) = web.element("rt-link") {
-        field.set_attribute("href", &rt_url(&rt, &limit.label))?;
-    }
-
     if show_accordion(&web, &rt).is_err() {
         if let Some(accordion) = web.element("rt-accordion") {
             // This is an optional feature,
