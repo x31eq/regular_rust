@@ -17,16 +17,21 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     let fiter = mapping.iter().flat_map(|m| m.iter()).map(|&x| x as f64);
     let fmap = DMatrix::from_iterator(dimension, rank, fiter);
     let mut sq = fmap.insert_column(0, 0.0);
-    sq[(0, 0)] = 1.0;
-    let det = sq.clone().determinant();
-    let adjoint = sq.try_inverse()? * det;
-    Some(
-        adjoint
-            .row(0)
-            .iter()
-            .map(|&x| x.round() as Exponent)
-            .collect(),
-    )
+    for i in 0..dimension {
+        sq[(0, i)] = 1.0;
+        if let Some(inverse) = sq.clone().try_inverse() {
+            let adjoint = inverse * sq.clone().determinant();
+            return Some(
+                adjoint
+                    .row(0)
+                    .iter()
+                    .map(|&x| x.round() as Exponent)
+                    .collect(),
+            );
+        }
+        sq[(0, i)] = 0.0;
+    }
+    None
 }
 
 #[test]
@@ -85,4 +90,20 @@ fn meantone7_redundant() {
         vec![12, 19, 28, 34],
     ];
     assert_eq!(None, only_unison_vector(&mapping));
+}
+
+#[test]
+fn uv_1575_1573() {
+    // This failed with the initial implementation
+    let mapping = vec![
+        vec![72, 114, 167, 202, 249, 266],
+        vec![58, 92, 135, 163, 201, 215],
+        vec![87, 138, 202, 244, 301, 322],
+        vec![31, 49, 72, 87, 107, 115],
+        vec![121, 192, 281, 340, 419, 448],
+    ];
+    let expected = vec![0, 2, 2, 1, -2, -1];
+    let uv = only_unison_vector(&mapping).expect("no UV");
+    let uv = super::normalize_positive(&super::PrimeLimit::new(13), uv);
+    assert_eq!(expected, uv);
 }
