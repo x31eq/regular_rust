@@ -22,7 +22,13 @@ panic = 'abort'
 strip = true
 incremental = true
 
-[target.'cfg(target_arch = "wasm32")'.package.metadata]
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.release]
 wasm-opt = false
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
