@@ -5,7 +5,7 @@ use super::{ETMap, Exponent, Mapping};
 
 /// Return the commatic unison vector for a mapping with
 /// only one dimension short
-pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
+pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     let rank = mapping.len();
     if rank == 0 {
         return None;
@@ -33,7 +33,7 @@ pub fn only_unison_vector(mapping: Mapping) -> Option<ETMap> {
 fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
     let expected = vec![-4, 4, -1];
-    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = only_unison_vector(&mapping).expect("no UV");
     let uv = super::normalize_positive(&super::PrimeLimit::new(5), uv);
     assert_eq!(expected, uv);
 }
@@ -46,7 +46,7 @@ fn marvel7() {
         vec![19, 30, 44, 53],
     ];
     let expected = vec![-5, 2, 2, -1];
-    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = only_unison_vector(&mapping).expect("no UV");
     let uv = super::normalize_positive(&super::PrimeLimit::new(7), uv);
     assert_eq!(expected, uv);
 }
@@ -59,7 +59,7 @@ fn marvel7_reordered() {
         vec![31, 49, 72, 87],
     ];
     let expected = vec![-5, 2, 2, -1];
-    let uv = only_unison_vector(mapping).expect("no UV");
+    let uv = only_unison_vector(&mapping).expect("no UV");
     let uv = super::normalize_positive(&super::PrimeLimit::new(7), uv);
     assert_eq!(expected, uv);
 }
@@ -68,13 +68,13 @@ fn marvel7_reordered() {
 fn marvel7_from_reduced() {
     let mapping = vec![vec![1, 0, 0, -5], vec![0, 1, 0, 2], vec![0, 0, 1, 2]];
     let expected = vec![-5, 2, 2, -1];
-    assert_eq!(Some(expected), only_unison_vector(mapping));
+    assert_eq!(Some(expected), only_unison_vector(&mapping));
 }
 
 #[test]
 fn meantone7() {
     let mapping = vec![vec![31, 49, 72, 87], vec![19, 30, 44, 53]];
-    assert_eq!(None, only_unison_vector(mapping));
+    assert_eq!(None, only_unison_vector(&mapping));
 }
 
 #[test]
@@ -84,5 +84,5 @@ fn meantone7_redundant() {
         vec![19, 30, 44, 53],
         vec![12, 19, 28, 34],
     ];
-    assert_eq!(None, only_unison_vector(mapping));
+    assert_eq!(None, only_unison_vector(&mapping));
 }

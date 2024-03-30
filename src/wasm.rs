@@ -6,6 +6,8 @@ use super::cangwu;
 use super::te;
 use super::{join, map, Cents, ETMap, Exponent, Mapping, PrimeLimit};
 use super::temperament_class::TemperamentClass;
+use super::uv::only_unison_vector;
+use super::ratio::get_ratio_or_ket_string;
 
 type Exceptionable = Result<(), JsValue>;
 
@@ -323,6 +325,9 @@ fn rt_row(
 
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
+    }
+    else if let Some(uv) = only_unison_vector(&rt.melody) {
+        link.set_text_content(Some(&get_ratio_or_ket_string(&limit, &uv)));
     }
     else {
         link.set_text_content(Some(&ets));
