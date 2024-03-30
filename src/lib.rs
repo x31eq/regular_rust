@@ -286,13 +286,12 @@ impl<T> PriorityQueue<T> {
     }
 }
 
-pub mod ratio;
-
-pub mod uv;
-
 pub mod cangwu;
-
+pub mod names;
+pub mod ratio;
 pub mod te;
+pub mod temperament_class;
+pub mod uv;
 
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;

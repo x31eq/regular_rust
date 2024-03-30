@@ -1,22 +1,23 @@
 use super::{cangwu, PrimeLimit};
-use cangwu::TemperamentClass;
+use cangwu::CangwuTemperament;
+use super::temperament_class::TemperamentClass;
 
-fn make_marvel(limit11: &PrimeLimit) -> cangwu::CangwuTemperament {
+fn make_marvel(limit11: &PrimeLimit) -> CangwuTemperament {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    cangwu::CangwuTemperament::new(&limit11.pitches, &marvel_vector)
+    CangwuTemperament::new(&limit11.pitches, &marvel_vector)
 }
 
-fn make_jove(limit11: &PrimeLimit) -> cangwu::CangwuTemperament {
+fn make_jove(limit11: &PrimeLimit) -> CangwuTemperament {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    cangwu::CangwuTemperament::new(&limit11.pitches, &jove_vector)
+    CangwuTemperament::new(&limit11.pitches, &jove_vector)
 }
 
 #[test]
@@ -37,47 +38,6 @@ fn badness() {
 
 #[rustfmt::skip]
 #[test]
-fn hermite() {
-    let limit11 = PrimeLimit::new(11);
-    let marvel = make_marvel(&limit11);
-    let marvel_hermite =
-        vec![[1, 0, 0, -5, 12],
-             [0, 1, 0, 2, -1],
-             [0, 0, 1, 2, -3]];
-    assert_eq!(marvel.reduced_mapping(), marvel_hermite);
-
-    let jove = make_jove(&limit11);
-    let jove_hermite = vec![[1, 1, 1, 2, 2],
-                            [0, 2, 1, 1, 5],
-                            [0, 0, 2, 1, 0]];
-    assert_eq!(jove.reduced_mapping(), jove_hermite);
-}
-
-#[rustfmt::skip]
-#[test]
-fn key() {
-    let limit11 = PrimeLimit::new(11);
-    assert_eq!(
-        make_marvel(&limit11).key(),
-        vec![1, 2, -3,
-          1, 0, 2, -1,
-       1, 0, 0, -5, 12]
-    );
-
-    assert_eq!(make_jove(&limit11).key(), vec![2, 1, 0,
-                                    2, 1, 1, 5,
-                                 1, 1, 1, 2, 2]);
-}
-
-#[test]
-fn rank() {
-    let limit11 = PrimeLimit::new(11);
-    assert_eq!(make_marvel(&limit11).rank(), 3);
-    assert_eq!(make_jove(&limit11).rank(), 3);
-}
-
-#[rustfmt::skip]
-#[test]
 fn mystery() {
     let mystery_vector = vec![
         vec![29, 46, 67, 81, 100, 107],
@@ -85,7 +45,7 @@ fn mystery() {
     ];
     let limit13 = PrimeLimit::new(13);
     let mystery =
-        cangwu::CangwuTemperament::new(&limit13.pitches, &mystery_vector);
+        CangwuTemperament::new(&limit13.pitches, &mystery_vector);
     assert_eq!(mystery.key(), vec![0, 1, 1, 1, 1,
                              29, 46, 0, 14, 33, 40]);
     assert_eq!(mystery.rank(), 2);
@@ -105,7 +65,7 @@ fn ragismic() {
     ];
     let limit7 = PrimeLimit::new(7);
     let ragismic =
-        cangwu::CangwuTemperament::new(&limit7.pitches, &ragismic_vector);
+        CangwuTemperament::new(&limit7.pitches, &ragismic_vector);
     assert_eq!(ragismic.key(), vec![
                                  1, -4,
                               1, 0, 7,

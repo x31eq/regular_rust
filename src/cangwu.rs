@@ -4,43 +4,12 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::{map, Cents, ETMap, Exponent, Mapping, PriorityQueue};
+use super::temperament_class::TemperamentClass;
 use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {
     plimit: &'a [Cents],
     melody: Mapping,
-}
-
-/// This isn't specific to TE/Cangwu but sits here for now.
-pub trait TemperamentClass {
-    fn mapping(&self) -> &Mapping;
-
-    /// Unique identifier for the mapping
-    /// (hermite normal form flattened and
-    /// with always-zero entries removed)
-    fn key(&self) -> ETMap {
-        self.reduced_mapping()
-            .iter()
-            .enumerate()
-            .rev()
-            .flat_map(|(i, col)| col[i..].iter().cloned())
-            .collect()
-    }
-
-    fn reduced_mapping(&self) -> Mapping {
-        super::hermite_normal_form(self.mapping())
-    }
-
-    /// Actual rank of the mapping matrix
-    fn rank(&self) -> usize {
-        let mut result = 0;
-        for col in self.reduced_mapping().iter() {
-            if col.iter().any(|&x| x != 0) {
-                result += 1;
-            }
-        }
-        result
-    }
 }
 
 pub trait TenneyWeighted {

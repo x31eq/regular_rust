@@ -1,9 +1,9 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::cangwu;
 use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
-use cangwu::{rms_of_matrix, TenneyWeighted};
+use super::cangwu::{rms_of_matrix, TenneyWeighted};
+use super::temperament_class::TemperamentClass;
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
@@ -11,13 +11,13 @@ pub struct TETemperament<'a> {
     pub tuning: Tuning,
 }
 
-impl cangwu::TemperamentClass for TETemperament<'_> {
+impl TemperamentClass for TETemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
     }
 }
 
-impl cangwu::TenneyWeighted for TETemperament<'_> {
+impl TenneyWeighted for TETemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
     }
