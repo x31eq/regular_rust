@@ -18,7 +18,7 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     let fmap = DMatrix::from_iterator(dimension, rank, fiter);
     let mut sq = fmap.insert_column(0, 0.0);
     for i in 0..dimension {
-        sq[(0, i)] = 1.0;
+        sq[(i, 0)] = 1.0;
         if let Some(inverse) = sq.clone().try_inverse() {
             let adjoint = inverse * sq.clone().determinant();
             return Some(
@@ -29,7 +29,7 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
                     .collect(),
             );
         }
-        sq[(0, i)] = 0.0;
+        sq[(i, 0)] = 0.0;
     }
     None
 }
