@@ -1,6 +1,6 @@
+use super::temperament_class::TemperamentClass;
 use super::{cangwu, PrimeLimit};
 use cangwu::CangwuTemperament;
-use super::temperament_class::TemperamentClass;
 
 fn make_marvel(limit11: &PrimeLimit) -> CangwuTemperament {
     let marvel_vector = vec![

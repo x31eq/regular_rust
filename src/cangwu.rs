@@ -3,8 +3,8 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::{map, Cents, ETMap, Exponent, Mapping, PriorityQueue};
 use super::temperament_class::TemperamentClass;
+use super::{map, Cents, ETMap, Exponent, Mapping, PriorityQueue};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {

@@ -1,5 +1,5 @@
-use super::{ETMap, Mapping, PrimeLimit};
 use super::names::NAMES_BY_LIMIT;
+use super::{ETMap, Mapping, PrimeLimit};
 
 pub trait TemperamentClass {
     fn mapping(&self) -> &Mapping;
@@ -32,9 +32,12 @@ pub trait TemperamentClass {
     }
 
     fn name(&self, limit: &PrimeLimit) -> Option<&'static str> {
-        let limit_key: Vec<&str> = limit.headings.iter().map(|s| s.as_str()).collect();
+        let limit_key: Vec<&str> =
+            limit.headings.iter().map(|s| s.as_str()).collect();
         match NAMES_BY_LIMIT.get(&limit_key) {
-            Some(names_by_linmap) => names_by_linmap.get(&self.key()).copied(),
+            Some(names_by_linmap) => {
+                names_by_linmap.get(&self.key()).copied()
+            }
             None => None,
         }
     }
@@ -55,32 +58,35 @@ impl TemperamentClass for StubTemperamentClass {
 }
 
 #[cfg(test)]
-fn make_meantone() -> StubTemperamentClass{
-    let meantone_vector = vec![
-        vec![19, 30, 44],
-        vec![31, 49, 72],
-    ];
-    StubTemperamentClass{melody: meantone_vector}
+fn make_meantone() -> StubTemperamentClass {
+    let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
+    StubTemperamentClass {
+        melody: meantone_vector,
+    }
 }
 
 #[cfg(test)]
-fn make_marvel() -> StubTemperamentClass{
+fn make_marvel() -> StubTemperamentClass {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    StubTemperamentClass{melody: marvel_vector}
+    StubTemperamentClass {
+        melody: marvel_vector,
+    }
 }
 
 #[cfg(test)]
-fn make_jove() -> StubTemperamentClass{
+fn make_jove() -> StubTemperamentClass {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    StubTemperamentClass {melody: jove_vector}
+    StubTemperamentClass {
+        melody: jove_vector,
+    }
 }
 
 #[rustfmt::skip]

@@ -1,9 +1,9 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 use super::cangwu::{rms_of_matrix, TenneyWeighted};
 use super::temperament_class::TemperamentClass;
+use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
