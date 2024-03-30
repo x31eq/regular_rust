@@ -70,7 +70,6 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
 }
 
 impl<'a> CangwuTemperament<'a> {
-    /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
