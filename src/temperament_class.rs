@@ -1,5 +1,5 @@
 use super::names::NAMES_BY_LIMIT;
-use super::{ETMap, Mapping, PrimeLimit};
+use super::{ETMap, ETSlice, Mapping, PrimeLimit};
 
 pub trait TemperamentClass {
     fn mapping(&self) -> &Mapping;
@@ -42,16 +42,19 @@ pub trait TemperamentClass {
             None => None,
         }
     }
+
+    fn et_belongs(&self, et: &ETSlice) -> bool {
+        let mut melody = self.mapping().clone();
+        melody.insert(0, et.to_vec());
+        let new_rt = StubTemperamentClass { melody };
+        self.rank() == new_rt.rank()
+    }
 }
 
-// The rest of this file is for testing
-
-#[cfg(test)]
 struct StubTemperamentClass {
     pub melody: Mapping,
 }
 
-#[cfg(test)]
 impl TemperamentClass for StubTemperamentClass {
     fn mapping(&self) -> &Mapping {
         &self.melody
@@ -157,6 +160,34 @@ fn unlisted_name() {
     let melody = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let tc = StubTemperamentClass { melody };
     assert_eq!(tc.name(&limit5), None);
+}
+
+#[test]
+fn meantone_has_12() {
+    let meantone = make_meantone();
+    let et = vec![12, 19, 28];
+    assert!(meantone.et_belongs(&et));
+}
+
+#[test]
+fn meantone_has_41() {
+    let meantone = make_meantone();
+    let et = vec![41, 65, 95];
+    assert!(!meantone.et_belongs(&et));
+}
+
+#[test]
+fn marvel_has_27() {
+    let marvel = make_marvel();
+    let et = vec![27, 43, 63, 76, 94];
+    assert!(!marvel.et_belongs(&et));
+}
+
+#[test]
+fn marvel_has_72() {
+    let marvel = make_marvel();
+    let et = vec![72, 114, 167, 202, 249];
+    assert!(marvel.et_belongs(&et));
 }
 
 #[test]
