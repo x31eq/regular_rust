@@ -34,6 +34,14 @@ pub fn form_submit(evt: Event) -> SearchResult {
     regular_temperament_search(limit, eka, nresults)
 }
 
+#[wasm_bindgen(start)]
+fn main() -> Result<(), JsValue> {
+    let web = WebContext::new();
+    web.log("New page load");
+    web.log(&format!("URL params {:?}", web.get_url_params()));
+    Ok(())
+}
+
 pub fn regular_temperament_search(
     limit: PrimeLimit,
     ek_adjusted: Cents,
