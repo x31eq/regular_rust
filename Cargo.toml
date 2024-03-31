@@ -35,12 +35,14 @@ wasm-opt = false
 version = "0.3.37"
 
 features = [
+  'console',
   'Document',
   'Element',
   'Event',
   'EventTarget',
   'HtmlElement',
   'HtmlInputElement',
+  'Location',
   'Node',
   'Window',
 ]

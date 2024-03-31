@@ -380,6 +380,11 @@ fn rt_click_handler(evt: Event) {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
+            let location = web.document.location().expect("no location");
+            if let Some((_, params)) = location.href().expect("no href").split_once("&") {
+                web_sys::console::log_1(&params.into());
+            }
+            web_sys::console::log_1(&location.href().expect("no href").into());
             let limit = web.expect(
                 load_limit(&web.list),
                 "Programming Error: failed to load prime limit",
