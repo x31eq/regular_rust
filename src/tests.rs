@@ -88,6 +88,13 @@ fn suboptimal_prime_mapping() {
 }
 
 #[test]
+fn nonoctave_prime_mapping() {
+    let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
+    let et = prime_mapping(&limit.pitches, 19);
+    assert_eq!(et, vec![19, 28, 34, 41, 44]);
+}
+
+#[test]
 fn small_primes() {
     let from_pari = vec![
         2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,

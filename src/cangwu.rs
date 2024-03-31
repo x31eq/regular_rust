@@ -4,7 +4,7 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::temperament_class::TemperamentClass;
-use super::{map, Cents, ETMap, Exponent, Mapping, PriorityQueue};
+use super::{map, prime_mapping, Cents, ETMap, Exponent, Mapping, PriorityQueue};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {
@@ -195,7 +195,7 @@ fn preliminary_badness(
     // Find a large enough badness cap
     let mut results = PriorityQueue::new(n_results);
     for size in 1..=(plimit.len() + n_results) {
-        let pmap = super::prime_mapping(plimit, size as Exponent);
+        let pmap = prime_mapping(plimit, size as Exponent);
         let badness = equal_temperament_badness(plimit, ek, &pmap);
         results.push(badness, pmap);
     }
