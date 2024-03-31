@@ -65,13 +65,16 @@ impl<'a> CangwuTemperament<'a> {
         let pet = prime_mapping(self.plimit, size);
         let ek = self.badness(0.0);
         let mut bmax = Self::new(self.plimit, &vec![pet]).badness(ek);
-        loop {
+        for _ in 0..100 {
             let ets = limited_mappings(size, ek, bmax, self.plimit);
             if ets.len() > 0 {
                 return ets;
             }
             bmax *= 0.1;
         }
+        // Return an empty result if we couldn't find anything
+        // in a reasonable amount of time
+        vec![]
     }
 }
 
