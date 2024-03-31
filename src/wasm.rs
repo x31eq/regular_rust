@@ -173,6 +173,18 @@ impl WebContext {
         }
     }
 
+    /// Get the URL-supplied parameters
+    pub fn get_url_params(&self) -> String {
+        if let Some(location) = self.document.location() {
+            if let Ok(url) = location.href() {
+                if let Some((_, params)) = url.split_once("?") {
+                    return params.to_string();
+                }
+            }
+        }
+        "".to_string()
+    }
+
     pub fn log(&self, message: &str) {
         console::log_1(&message.into());
     }
@@ -384,10 +396,7 @@ fn rt_click_handler(evt: Event) {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-            let location = web.document.location().expect("no location");
-            if let Some((_, params)) = location.href().expect("no href").split_once("&") {
-                web.log(params);
-            }
+            web.log(&web.get_url_params());
             let limit = web.expect(
                 load_limit(&web.list),
                 "Programming Error: failed to load prime limit",
