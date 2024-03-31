@@ -4,7 +4,9 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::temperament_class::TemperamentClass;
-use super::{map, prime_mapping, Cents, ETMap, Exponent, Mapping, PriorityQueue};
+use super::{
+    map, prime_mapping, Cents, ETMap, Exponent, Mapping, PriorityQueue,
+};
 use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {

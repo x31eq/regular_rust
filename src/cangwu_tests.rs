@@ -25,9 +25,7 @@ fn et_from_marvel() {
     let limit11 = PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let ets31 = marvel.ets_of_size(31);
-    let expected = vec![
-        vec![31, 49, 72, 87, 107],
-    ];
+    let expected = vec![vec![31, 49, 72, 87, 107]];
     assert_eq!(ets31, expected);
 }
 
@@ -36,9 +34,7 @@ fn et_from_jove() {
     let limit11 = PrimeLimit::new(11);
     let jove = make_marvel(&limit11);
     let ets31 = jove.ets_of_size(31);
-    let expected = vec![
-        vec![31, 49, 72, 87, 107],
-    ];
+    let expected = vec![vec![31, 49, 72, 87, 107]];
     assert_eq!(ets31, expected);
 }
 
