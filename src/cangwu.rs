@@ -63,6 +63,8 @@ impl<'a> CangwuTemperament<'a> {
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
     }
 
+    /// Get equal temperaments of a specific size belonging to the class.
+    /// If more than one match is legal, they might not all be found.
     pub fn ets_of_size(&self, size: Exponent) -> Mapping {
         let pet = prime_mapping(self.plimit, size);
         let ek = self.badness(0.0);
