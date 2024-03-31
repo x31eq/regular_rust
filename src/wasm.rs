@@ -379,7 +379,7 @@ fn rt_row(
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
     let octaves = map(|m| m[0], &rt.melody);
     format!(
-        "?ets={}&limit={}&key={}",
+        "?page=rt&ets={}&limit={}&key={}",
         &join("_", &octaves),
         &label,
         &join("_", &rt.key()),
