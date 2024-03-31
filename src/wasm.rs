@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
-use web_sys::{Element, Event, HtmlElement, HtmlInputElement};
+use web_sys::{console, Element, Event, HtmlElement, HtmlInputElement};
 
 use super::cangwu;
 use super::ratio::get_ratio_or_ket_string;
@@ -171,6 +171,10 @@ impl WebContext {
             parent.append_child(&child)?;
             Ok(child)
         }
+    }
+
+    pub fn log(&self, message: &str) {
+        console::log_1(&message.into());
     }
 
     /// Unwrap a value with the potential of an exception
@@ -382,9 +386,8 @@ fn rt_click_handler(evt: Event) {
             let web = WebContext::new();
             let location = web.document.location().expect("no location");
             if let Some((_, params)) = location.href().expect("no href").split_once("&") {
-                web_sys::console::log_1(&params.into());
+                web.log(params);
             }
-            web_sys::console::log_1(&location.href().expect("no href").into());
             let limit = web.expect(
                 load_limit(&web.list),
                 "Programming Error: failed to load prime limit",
