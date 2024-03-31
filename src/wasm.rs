@@ -357,7 +357,7 @@ fn rt_row(
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
     let octaves = map(|m| m[0], &rt.melody);
     format!(
-        "/cgi-bin/rt.cgi?ets={}&limit={}&key={}",
+        "?ets={}&limit={}&key={}",
         &join("_", &octaves),
         &label,
         &join("_", &rt.key()),
