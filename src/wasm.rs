@@ -396,6 +396,7 @@ pub struct SearchResult {
 /// Function to call when a temperament link is "clicked"
 /// (which includes in-page activation)
 fn rt_click_handler(evt: Event) {
+    WebContext::new().log("Click handler called");
     if let Some(target) = evt.target() {
         let target = target
             .dyn_ref::<Element>()
