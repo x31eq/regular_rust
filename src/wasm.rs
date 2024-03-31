@@ -44,6 +44,10 @@ fn main() -> Result<(), JsValue> {
         web.log("Regular temperament display");
         if let (Some(ets), Some(limit)) = params.get("ets") {
             if let Some(limit) = params.get("limit") {
+                // Note: the "key" format is the old way of
+                // doing it, and it would be easier not to support
+                // it, but only the warted ET names.
+                // The trouble is, I haven't coded them either yet
                 if let Some(key) = params.get("key") {
                     web.log(&ets);
                     web.log(&limit);
