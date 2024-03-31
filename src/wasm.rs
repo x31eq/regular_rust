@@ -37,8 +37,21 @@ pub fn form_submit(evt: Event) -> SearchResult {
 #[wasm_bindgen(start)]
 fn main() -> Result<(), JsValue> {
     let web = WebContext::new();
+    let params = web.get_url_params();
     web.log("New page load");
-    web.log(&format!("URL params {:?}", web.get_url_params()));
+    web.log(&format!("URL params {:?}", params));
+    if params.get("page") == Some(&"rt".to_string()) {
+        web.log("Regular temperament display");
+        if let (Some(ets), Some(limit)) = params.get("ets") {
+            if let Some(limit) = params.get("limit") {
+                if let Some(key) = params.get("key") {
+                    web.log(&ets);
+                    web.log(&limit);
+                    web.log(&key);
+                }
+            }
+        }
+    }
     Ok(())
 }
 
