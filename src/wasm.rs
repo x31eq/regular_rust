@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{console, Element, Event, HtmlElement, HtmlInputElement};
@@ -174,15 +175,20 @@ impl WebContext {
     }
 
     /// Get the URL-supplied parameters
-    pub fn get_url_params(&self) -> String {
+    pub fn get_url_params(&self) -> HashMap<String, String> {
+        let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(url) = location.href() {
-                if let Some((_, params)) = url.split_once("?") {
-                    return params.to_string();
+                if let Some((_, tokens)) = url.split_once('?') {
+                    for param in tokens.split('&') {
+                        if let Some((k, v)) = param.split_once('=') {
+                            params.insert(k.to_string(), v.to_string());
+                        }
+                    }
                 }
             }
         }
-        "".to_string()
+        params
     }
 
     pub fn log(&self, message: &str) {
@@ -396,7 +402,7 @@ fn rt_click_handler(evt: Event) {
             .expect("Target isn't an Element");
         if target.has_attribute("href") {
             let web = WebContext::new();
-            web.log(&web.get_url_params());
+            web.log(&format!("{:?}", web.get_url_params()));
             let limit = web.expect(
                 load_limit(&web.list),
                 "Programming Error: failed to load prime limit",
