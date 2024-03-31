@@ -21,6 +21,17 @@ fn make_jove(limit11: &PrimeLimit) -> CangwuTemperament {
 }
 
 #[test]
+fn et_from_marvel() {
+    let limit11 = PrimeLimit::new(11);
+    let marvel = make_marvel(&limit11);
+    let ets31 = marvel.ets_of_size(31);
+    let expected = vec![
+        vec![31, 49, 72, 87, 107],
+    ];
+    assert_eq!(ets31, expected);
+}
+
+#[test]
 fn badness() {
     let limit11 = PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);

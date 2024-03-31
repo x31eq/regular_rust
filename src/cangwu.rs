@@ -60,6 +60,19 @@ impl<'a> CangwuTemperament<'a> {
         }
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
     }
+
+    pub fn ets_of_size(&self, size: Exponent) -> Mapping {
+        let pet = prime_mapping(self.plimit, size);
+        let ek = self.badness(0.0);
+        let mut bmax = Self::new(self.plimit, &vec![pet]).badness(ek);
+        loop {
+            let ets = limited_mappings(size, ek, bmax, self.plimit);
+            if ets.len() > 0 {
+                return ets;
+            }
+            bmax *= 0.1;
+        }
+    }
 }
 
 impl TemperamentClass for CangwuTemperament<'_> {
