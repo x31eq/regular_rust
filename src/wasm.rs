@@ -42,7 +42,7 @@ fn main() -> Result<(), JsValue> {
     web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
         web.log("Regular temperament display");
-        if let (Some(ets), Some(limit)) = params.get("ets") {
+        if let Some(ets) = params.get("ets") {
             if let Some(limit) = params.get("limit") {
                 // Note: the "key" format is the old way of
                 // doing it, and it would be easier not to support
