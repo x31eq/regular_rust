@@ -204,7 +204,7 @@ impl WebContext {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(url) = location.href() {
-                if let Some((_, tokens)) = url.split_once('#') {
+                if let Some((_, tokens)) = url.split_once('?') {
                     for param in tokens.split('&') {
                         if let Some((k, v)) = param.split_once('=') {
                             params.insert(k.to_string(), v.to_string());
@@ -404,7 +404,7 @@ fn rt_row(
 fn rt_url(rt: &te::TETemperament, label: &str) -> String {
     let octaves = map(|m| m[0], &rt.melody);
     format!(
-        "#page=rt&ets={}&limit={}&key={}",
+        "?page=rt&ets={}&limit={}&key={}",
         &join("_", &octaves),
         &label,
         &join("_", &rt.key()),
