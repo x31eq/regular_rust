@@ -67,12 +67,16 @@ fn main() -> Result<(), JsValue> {
                             if let Ok(limit) = limit.parse::<PrimeLimit>() {
                                 if let Some(rt) =
                                     CangwuTemperament::from_ets_and_key(
-                                        &limit.pitches,
+                                        &limit.pitches.clone(),
                                         &ets,
                                         &key,
                                     )
                                 {
                                     web.log(&format!("rt: {:?}", rt.melody));
+                                    web.unwrap(
+                                        show_rt(&web, limit, rt.melody),
+                                        "Failed to show the regular temperament",
+                                    );
                                 } else {
                                     web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                                 }
