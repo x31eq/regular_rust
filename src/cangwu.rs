@@ -406,6 +406,15 @@ fn et22_from_porcupine() {
 }
 
 #[test]
+fn et15_from_porcupine() {
+    let limit11 = super::PrimeLimit::new(11);
+    let porcupine = make_porcupine(&limit11);
+    let ets15 = porcupine.ets_of_size(15);
+    let expected = vec![vec![15, 24, 35, 42, 52]];
+    assert_eq!(ets15, expected);
+}
+
+#[test]
 fn badness() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
