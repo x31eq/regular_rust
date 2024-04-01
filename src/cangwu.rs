@@ -369,6 +369,15 @@ fn make_jove(limit11: &super::PrimeLimit) -> CangwuTemperament {
     CangwuTemperament::new(&limit11.pitches, &jove_vector)
 }
 
+#[cfg(test)]
+fn make_porcupine(limit11: &super::PrimeLimit) -> CangwuTemperament {
+    let porcupine_vector = vec![
+        vec![22, 35, 51, 62, 76],
+        vec![15, 24, 35, 42, 52],
+    ];
+    CangwuTemperament::new(&limit11.pitches, &porcupine_vector)
+}
+
 #[test]
 fn et_from_marvel() {
     let limit11 = super::PrimeLimit::new(11);
@@ -385,6 +394,15 @@ fn et_from_jove() {
     let ets31 = jove.ets_of_size(31);
     let expected = vec![vec![31, 49, 72, 87, 107]];
     assert_eq!(ets31, expected);
+}
+
+#[test]
+fn et22_from_porcupine() {
+    let limit11 = super::PrimeLimit::new(11);
+    let porcupine = make_porcupine(&limit11);
+    let ets22 = porcupine.ets_of_size(22);
+    let expected = vec![vec![22, 35, 51, 62, 76]];
+    assert_eq!(ets22, expected);
 }
 
 #[test]
