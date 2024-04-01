@@ -51,6 +51,24 @@ pub trait TemperamentClass {
     }
 }
 
+/// Reverse engineer a key to get a mapping suitable for
+/// constructing a temperament class object
+pub fn key_to_mapping(n_primes: usize, key: &ETSlice) -> Option<Mapping> {
+    let mut result = vec![];
+    let mut remaining = key.to_vec();
+    while !remaining.is_empty() {
+        let mut new_vec = vec![];
+        for _ in 0..(n_primes - result.len()) {
+            new_vec.insert(0, remaining.pop()?);
+        }
+        for _ in 0..result.len() {
+            new_vec.insert(0, 0);
+        }
+        result.push(new_vec);
+    }
+    Some(result)
+}
+
 struct StubTemperamentClass {
     pub melody: Mapping,
 }
@@ -188,6 +206,36 @@ fn marvel_has_72() {
     let marvel = make_marvel();
     let et = vec![72, 114, 167, 202, 249];
     assert!(marvel.et_belongs(&et));
+}
+
+#[test]
+fn marvel_key_to_mapping() {
+    let marvel = make_marvel();
+    let key = marvel.key();
+    let redmap = marvel.reduced_mapping();
+    let dimension = redmap[0].len();
+    let poss_mapping = key_to_mapping(dimension, &key);
+    assert_eq!(Some(redmap), poss_mapping);
+}
+
+#[test]
+fn meantone_key_to_mapping() {
+    let meantone = make_meantone();
+    let key = meantone.key();
+    let redmap = meantone.reduced_mapping();
+    let dimension = redmap[0].len();
+    let poss_mapping = key_to_mapping(dimension, &key);
+    assert_eq!(Some(redmap), poss_mapping);
+}
+
+#[test]
+fn jove_key_to_mapping() {
+    let jove = make_jove();
+    let key = jove.key();
+    let redmap = jove.reduced_mapping();
+    let dimension = redmap[0].len();
+    let poss_mapping = key_to_mapping(dimension, &key);
+    assert_eq!(Some(redmap), poss_mapping);
 }
 
 #[test]
