@@ -141,6 +141,36 @@ fn nofives() {
     assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
 }
 
+#[test]
+fn marvel_from_key() {
+    let limit11 = PrimeLimit::new(11);
+    let original = make_marvel(&limit11);
+    let clone = CangwuTemperament::from_ets_and_key(
+        &limit11.pitches,
+        &[22, 31, 41],
+        &original.key(),
+    );
+    assert!(clone.is_some());
+    if let Some(clone) = clone {
+        assert_eq!(original.mapping(), clone.mapping());
+    }
+}
+
+#[test]
+fn jove_from_key() {
+    let limit11 = PrimeLimit::new(11);
+    let original = make_jove(&limit11);
+    let clone = CangwuTemperament::from_ets_and_key(
+        &limit11.pitches,
+        &[27, 31, 41],
+        &original.key(),
+    );
+    assert!(clone.is_some());
+    if let Some(clone) = clone {
+        assert_eq!(original.mapping(), clone.mapping());
+    }
+}
+
 fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
     mappings.iter().map(|m| m[0]).collect()
 }

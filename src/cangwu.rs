@@ -3,9 +3,10 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::temperament_class::TemperamentClass;
+use super::temperament_class::{key_to_mapping, TemperamentClass};
 use super::{
-    map, prime_mapping, Cents, ETMap, Exponent, Mapping, PriorityQueue,
+    map, prime_mapping, Cents, ETMap, ETSlice, Exponent, Mapping,
+    PriorityQueue,
 };
 use std::collections::HashSet;
 
@@ -44,6 +45,31 @@ impl<'a> CangwuTemperament<'a> {
     pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
+    }
+
+    pub fn from_ets_and_key(
+        plimit: &'a [Cents],
+        ets: &ETSlice,
+        key: &ETSlice,
+    ) -> Option<Self> {
+        let melody = vec![];
+        let mut result = CangwuTemperament { plimit, melody };
+        let tclass = Self::new(plimit, &key_to_mapping(plimit.len(), key)?);
+        for &et in ets.iter() {
+            for etmap in tclass.ets_of_size(et) {
+                // This might not give the expected results where the
+                // same ET size will work twice,
+                // but it is likely to produce something sensible
+                if tclass.et_belongs(&etmap) && !result.et_belongs(&etmap) {
+                    result.melody.push(etmap.clone())
+                }
+            }
+        }
+        if result.rank() == tclass.rank() {
+            Some(result)
+        } else {
+            None
+        }
     }
 
     pub fn badness(&self, ek: Cents) -> Cents {
