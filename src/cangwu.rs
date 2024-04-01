@@ -100,7 +100,7 @@ impl<'a> CangwuTemperament<'a> {
             if !ets.is_empty() {
                 return ets;
             }
-            bmax *= 0.1;
+            bmax *= 1.1;
         }
         // Return an empty result if we couldn't find anything
         // in a reasonable amount of time
