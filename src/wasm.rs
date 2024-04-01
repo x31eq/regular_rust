@@ -240,12 +240,12 @@ impl WebContext {
     pub fn get_url_params(&self) -> HashMap<String, String> {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
-            if let Ok(url) = location.href() {
-                if let Some((_, tokens)) = url.split_once('#') {
-                    for param in tokens.split('&') {
-                        if let Some((k, v)) = param.split_once('=') {
-                            params.insert(k.to_string(), v.to_string());
-                        }
+            if let Ok(query) = location.hash() {
+                for param in
+                    query.strip_prefix('#').expect("No hash").split('&')
+                {
+                    if let Some((k, v)) = param.split_once('=') {
+                        params.insert(k.to_string(), v.to_string());
                     }
                 }
             }
