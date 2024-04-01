@@ -68,10 +68,10 @@ impl<'a> CangwuTemperament<'a> {
     pub fn ets_of_size(&self, size: Exponent) -> Mapping {
         let pet = prime_mapping(self.plimit, size);
         let ek = self.badness(0.0);
-        let mut bmax = Self::new(self.plimit, &vec![pet]).badness(ek);
+        let mut bmax = Self::new(self.plimit, &[pet]).badness(ek);
         for _ in 0..100 {
             let ets = limited_mappings(size, ek, bmax, self.plimit);
-            if ets.len() > 0 {
+            if !ets.is_empty() {
                 return ets;
             }
             bmax *= 0.1;
