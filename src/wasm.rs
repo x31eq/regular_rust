@@ -238,6 +238,7 @@ impl WebContext {
 
     /// Escalate an error to an exception
     pub fn fail(&self, message: &str) -> ! {
+        console::error_1(&message.into());
         if let Some(error_field) = self.element("error-report") {
             error_field.set_text_content(Some(message));
         }
