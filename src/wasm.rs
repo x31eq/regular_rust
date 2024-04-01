@@ -1,4 +1,6 @@
+use crate::cangwu::CangwuTemperament;
 use std::collections::HashMap;
+use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{console, Element, Event, HtmlElement, HtmlInputElement};
@@ -52,6 +54,29 @@ fn main() -> Result<(), JsValue> {
                     web.log(&ets);
                     web.log(&limit);
                     web.log(&key);
+                    if let Ok(ets) = ets
+                        .split('_')
+                        .map(Exponent::from_str)
+                        .collect::<Result<Vec<_>, _>>()
+                    {
+                        if let Ok(key) = key
+                            .split('_')
+                            .map(Exponent::from_str)
+                            .collect::<Result<Vec<_>, _>>()
+                        {
+                            if let Ok(limit) = limit.parse::<PrimeLimit>() {
+                                if let Some(rt) =
+                                    CangwuTemperament::from_ets_and_key(
+                                        &limit.pitches,
+                                        &ets,
+                                        &key,
+                                    )
+                                {
+                                    web.log(&format!("rt: {:?}", rt.melody));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
