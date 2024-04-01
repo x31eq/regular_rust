@@ -520,6 +520,22 @@ fn jove_from_key() {
     }
 }
 
+/// Regression test from the web interface
+#[test]
+fn porcupine_from_key() {
+    let limit11 = super::PrimeLimit::new(11);
+    let ets = vec![15, 22];
+    let key = vec![3, 5, -6, 4, 1, 2, 3, 2, 4];
+    assert_eq!(
+        Some(vec![vec![1, 2, 3, 2, 4], vec![0, 3, 5, -6, 4]]),
+        key_to_mapping(limit11.pitches.len(), &key),
+    );
+    match CangwuTemperament::from_ets_and_key(&limit11.pitches, &ets, &key) {
+        Some(_) => (),
+        None => assert!(false),
+    }
+}
+
 #[cfg(test)]
 fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
     mappings.iter().map(|m| m[0]).collect()

@@ -73,20 +73,16 @@ fn main() -> Result<(), JsValue> {
                                     )
                                 {
                                     web.log(&format!("rt: {:?}", rt.melody));
-                                }
-                                else {
+                                } else {
                                     web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                                 }
-                            }
-                            else {
+                            } else {
                                 web.log("Unable to parse limit");
                             }
-                        }
-                        else {
+                        } else {
                             web.log("Unable to parse key");
                         }
-                    }
-                    else {
+                    } else {
                         web.log("Unable to parse ETs")
                     }
                 }
