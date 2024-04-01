@@ -12,7 +12,7 @@ use std::collections::HashSet;
 
 pub struct CangwuTemperament<'a> {
     plimit: &'a [Cents],
-    melody: Mapping,
+    pub melody: Mapping,
 }
 
 pub trait TenneyWeighted {
@@ -501,10 +501,7 @@ fn marvel_from_key() {
     );
     assert!(clone.is_some());
     if let Some(clone) = clone {
-        assert_eq!(
-            TemperamentClass::mapping(&original),
-            TemperamentClass::mapping(&clone)
-        );
+        assert_eq!(original.melody, clone.melody);
     }
 }
 
@@ -519,10 +516,7 @@ fn jove_from_key() {
     );
     assert!(clone.is_some());
     if let Some(clone) = clone {
-        assert_eq!(
-            TemperamentClass::mapping(&original),
-            TemperamentClass::mapping(&clone)
-        );
+        assert_eq!(original.melody, clone.melody);
     }
 }
 
