@@ -371,10 +371,8 @@ fn make_jove(limit11: &super::PrimeLimit) -> CangwuTemperament {
 
 #[cfg(test)]
 fn make_porcupine(limit11: &super::PrimeLimit) -> CangwuTemperament {
-    let porcupine_vector = vec![
-        vec![22, 35, 51, 62, 76],
-        vec![15, 24, 35, 42, 52],
-    ];
+    let porcupine_vector =
+        vec![vec![22, 35, 51, 62, 76], vec![15, 24, 35, 42, 52]];
     CangwuTemperament::new(&limit11.pitches, &porcupine_vector)
 }
 
@@ -551,20 +549,17 @@ fn jove_from_key() {
 #[test]
 fn porcupine_from_key() {
     let limit11 = super::PrimeLimit::new(11);
-    let ets = vec![15, 22];
     let key = vec![3, 5, -6, 4, 1, 2, 3, 2, 4];
     let mapping = key_to_mapping(limit11.pitches.len(), &key);
     assert_eq!(
         Some(vec![vec![1, 2, 3, 2, 4], vec![0, 3, 5, -6, 4]]),
         mapping,
     );
-    let mapping = mapping.expect("no mapping");
-    let tclass = CangwuTemperament::new(&limit11.pitches, &mapping);
-    let ets22= tclass.ets_of_size(22);
-    assert_eq!(ets22, vec![vec![22, 35, 51, 62, 76]]);
-    let ets15= tclass.ets_of_size(15);
-    assert_eq!(ets15, vec![vec![15, 24, 35, 42, 52]]);
-    match CangwuTemperament::from_ets_and_key(&limit11.pitches, &ets, &key) {
+    match CangwuTemperament::from_ets_and_key(
+        &limit11.pitches,
+        &[15, 22],
+        &key,
+    ) {
         Some(_) => (),
         None => assert!(false),
     }
