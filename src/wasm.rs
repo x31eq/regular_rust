@@ -77,6 +77,8 @@ fn main() -> Result<(), JsValue> {
                                         show_rt(&web, limit, rt.melody),
                                         "Failed to show the regular temperament",
                                     );
+                                    // hide the list that got enabled by that function
+                                    web.set_body_class("show-temperament");
                                 } else {
                                     web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                                 }
