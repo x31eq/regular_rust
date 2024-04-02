@@ -241,9 +241,7 @@ impl WebContext {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(query) = location.hash() {
-                for param in
-                    query.strip_prefix('#').expect("No hash").split('&')
-                {
+                for param in query.trim_start_matches('#').split('&') {
                     if let Some((k, v)) = param.split_once('=') {
                         params.insert(k.to_string(), v.to_string());
                     }
