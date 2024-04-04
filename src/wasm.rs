@@ -38,9 +38,18 @@ pub fn form_submit(evt: Event) {
 
 #[wasm_bindgen(start)]
 fn main() -> Result<(), JsValue> {
+    process_hash();
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn hash_change(_evt: Event) {
+    process_hash();
+}
+
+fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    web.log("New page load");
     web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
         web.log("Regular temperament display");
@@ -95,7 +104,6 @@ fn main() -> Result<(), JsValue> {
             }
         }
     }
-    Ok(())
 }
 
 pub fn regular_temperament_search(
