@@ -88,6 +88,13 @@ fn suboptimal_prime_mapping() {
 }
 
 #[test]
+fn name_12p() {
+    let limit13 = PrimeLimit::new(13);
+    let p12 = prime_mapping(&limit13.pitches, 12);
+    assert_eq!(warted_et_name(&limit13, &p12), "12p");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);

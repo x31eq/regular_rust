@@ -79,6 +79,81 @@ impl FromStr for PrimeLimit {
     }
 }
 
+/// Standard name, based on Herman Miller's suggestion.
+/// The basic name is the number of steps to the octave.
+/// If it has the best approximation to each prime
+/// (it is the patent val) a 'p' is appended (not in Herman's suggestion).
+/// Otherwise, a letter is appended for each prime that differs from
+/// its best approximation.
+/// Ambiguity is not considered here.
+/// The letters the start of the alphabet for prime limits
+/// or letters from q for non-prime harmonics.
+pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
+    let mut next_inharmonic_wart = 'q';
+    let mut warts = vec![];
+    for harmonic in &plimit.headings {
+        if let Some(c) = wart_for_prime(harmonic) {
+            warts.push(c);
+        } else {
+            warts.push(next_inharmonic_wart);
+            next_inharmonic_wart = next_char(next_inharmonic_wart);
+        }
+    }
+    let mut name = et[0].to_string();
+    if plimit.headings[0] != "2" {
+        name = name + &warts[0].to_ascii_uppercase().to_string();
+    }
+    let prime_et = prime_mapping(&plimit.pitches, et[0]);
+    if prime_et == et {
+        return name + "p";
+    }
+    let n_notes_scale = et[0] as f64 / plimit.pitches[0];
+    for (&et_i, (&pet_i, (&pitch, &wart))) in et
+        .iter()
+        .zip(prime_et.iter().zip(plimit.pitches.iter().zip(warts.iter())))
+    {
+        if et_i != pet_i {
+            let delta = et_i.abs_diff(pet_i) as isize;
+            let sign = if (pet_i as f64) < pitch * n_notes_scale {
+                1
+            } else {
+                -1
+            };
+            let freq = 2 * delta
+                - (if et_i as isize == pet_i as isize - sign * delta {
+                    0
+                } else {
+                    1
+                });
+            for _ in 0..freq {
+                name = name + &wart.to_string();
+            }
+        }
+    }
+    name
+}
+
+fn wart_for_prime(heading: &str) -> Option<char> {
+    if let Ok(n) = heading.parse::<Harmonic>() {
+        if n > 47 {
+            // 47 is the highest prime we have a letter for
+            return None;
+        }
+        let mut next_wart = 'a';
+        for p in primes_below(48).into_iter() {
+            if n == p {
+                return Some(next_wart);
+            }
+            next_wart = next_char(next_wart);
+        }
+    }
+    None
+}
+
+fn next_char(current: char) -> char {
+    (current as u8 + 1) as char
+}
+
 #[derive(Debug)]
 pub struct ParseLimitError {}
 
