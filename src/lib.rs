@@ -3,8 +3,8 @@
 //! Utilities for regular temperament finding
 
 use num_integer::div_floor;
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
 use std::str::FromStr;
 
 pub type Cents = f64;
@@ -132,31 +132,12 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     name
 }
 
-fn wart_for_prime(heading: &str) -> Option<char> {
-    if let Ok(n) = heading.parse::<Harmonic>() {
-        if n > 47 {
-            // 47 is the highest prime we have a letter for
-            return None;
-        }
-        let mut next_wart = 'a';
-        for p in primes_below(48).into_iter() {
-            assert_ne!(next_wart, 'p');
-            if n == p {
-                return Some(next_wart);
-            }
-            next_wart = next_char(next_wart);
-        }
-    }
-    None
-}
-
 fn prime_warts() -> HashMap<String, char> {
     let mut result = HashMap::new();
     let mut next_wart = 'a';
     for p in primes_below(48).into_iter() {
         assert_ne!(next_wart, 'p');
         result.insert(p.to_string(), next_wart);
-        assert_eq!(Some(next_wart), wart_for_prime(&p.to_string()));
         next_wart = next_char(next_wart);
     }
     result
