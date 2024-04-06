@@ -91,7 +91,9 @@ fn suboptimal_prime_mapping() {
 fn name_12p() {
     let limit = PrimeLimit::new(13);
     let et = prime_mapping(&limit.pitches, 12);
-    assert_eq!(warted_et_name(&limit, &et), "12p");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "12p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
