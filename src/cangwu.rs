@@ -5,8 +5,8 @@ use na::DMatrix;
 
 use super::temperament_class::{key_to_mapping, TemperamentClass};
 use super::{
-    map, prime_mapping, Cents, ETMap, ETSlice, Exponent, Mapping,
-    PriorityQueue,
+    et_from_name, map, prime_mapping, Cents, ETMap, ETSlice, Exponent,
+    Mapping, PrimeLimit, PriorityQueue,
 };
 use std::collections::HashSet;
 
@@ -45,6 +45,20 @@ impl<'a> CangwuTemperament<'a> {
     pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
+    }
+
+    pub fn from_et_names(
+        plimit: &'a PrimeLimit,
+        ets: &[String],
+    ) -> Option<Self> {
+        if let Some(melody) =
+            ets.iter().map(|name| et_from_name(plimit, name)).collect()
+        {
+            let plimit = &plimit.pitches;
+            Some(CangwuTemperament { plimit, melody })
+        } else {
+            None
+        }
     }
 
     pub fn from_ets_and_key(
