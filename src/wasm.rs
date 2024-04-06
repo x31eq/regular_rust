@@ -1,18 +1,20 @@
-use crate::cangwu::CangwuTemperament;
 use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{console, Element, Event, HtmlInputElement};
 
-use super::cangwu;
+use super::cangwu::{
+    ambiguous_et, get_equal_temperaments, higher_rank_search,
+    CangwuTemperament,
+};
 use super::ratio::get_ratio_or_ket_string;
-use super::te;
+use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
 use super::{
-    join, map, normalize_positive, Cents, ETMap, Exponent, Mapping,
-    PrimeLimit,
+    join, map, normalize_positive, warted_et_name, Cents, ETMap, Exponent,
+    Mapping, PrimeLimit,
 };
 
 type Exceptionable = Result<(), JsValue>;
@@ -50,19 +52,10 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
-        web.log("Regular temperament display");
-        if let Some(ets) = params.get("ets") {
-            if let Some(limit) = params.get("limit") {
-                // Note: the "key" format is the old way of
-                // doing it, and it would be easier not to support
-                // it, but only the warted ET names.
-                // The trouble is, I haven't coded them either yet
-                if let Some(key) = params.get("key") {
-                    web.log(&ets);
-                    web.log(&limit);
-                    web.log(&key);
+        if let Some((ets, limit, key)) = parse_rt_params(&params) {
+            if let Ok(limit) = limit.parse::<PrimeLimit>() {
+                if let Some(key) = key {
                     if let Ok(ets) = ets
                         .split('_')
                         .map(Exponent::from_str)
@@ -73,37 +66,62 @@ fn process_hash() {
                             .map(Exponent::from_str)
                             .collect::<Result<Vec<_>, _>>()
                         {
-                            if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                                if let Some(rt) =
-                                    CangwuTemperament::from_ets_and_key(
-                                        &limit.pitches.clone(),
-                                        &ets,
-                                        &key,
-                                    )
-                                {
-                                    web.log(&format!("rt: {:?}", rt.melody));
-                                    web.unwrap(
-                                        show_rt(&web, limit, rt.melody),
-                                        "Failed to show the regular temperament",
-                                    );
-                                    // hide the list that got enabled by that function
-                                    web.set_body_class("show-temperament");
-                                } else {
-                                    web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
-                                }
+                            if let Some(rt) =
+                                CangwuTemperament::from_ets_and_key(
+                                    &limit.pitches.clone(),
+                                    &ets,
+                                    &key,
+                                )
+                            {
+                                web.unwrap(
+                                    crate::wasm::show_rt(
+                                        &web, limit, rt.melody,
+                                    ),
+                                    "Failed to show the regular temperament",
+                                );
+                                // hide the list that got enabled by that function
+                                web.set_body_class("show-temperament");
                             } else {
-                                web.log("Unable to parse limit");
+                                web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                             }
                         } else {
                             web.log("Unable to parse key");
                         }
                     } else {
-                        web.log("Unable to parse ETs")
+                        web.log("Unable to parse limit");
+                    }
+                } else {
+                    let ets: Vec<String> =
+                        ets.split('_').map(|s| s.to_string()).collect();
+                    if let Some(rt) =
+                        CangwuTemperament::from_et_names(&limit, &ets)
+                    {
+                        web.unwrap(
+                            crate::wasm::show_rt(
+                                &web,
+                                limit.clone(),
+                                rt.melody,
+                            ),
+                            "Failed to show the regular temperament",
+                        );
+                    } else {
+                        web.log(&format!("Unable to make temperament class from {:?}, {ets:?}", limit.pitches));
                     }
                 }
+            } else {
+                web.log("Unable to parse ETs")
             }
         }
     }
+}
+
+fn parse_rt_params(
+    params: &HashMap<String, String>,
+) -> Option<(String, String, Option<String>)> {
+    let ets = params.get("ets")?;
+    let limit = params.get("limit")?;
+    let key = params.get("key");
+    Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
 }
 
 pub fn regular_temperament_search(
@@ -118,11 +136,8 @@ pub fn regular_temperament_search(
     } else {
         4 * (dimension as f64).sqrt().floor() as usize
     };
-    let mappings = cangwu::get_equal_temperaments(
-        &limit.pitches,
-        ek,
-        n_results + safety,
-    );
+    let mappings =
+        get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
     web.list.set_inner_html("");
     web.set_body_class("show-list");
@@ -163,7 +178,7 @@ pub fn regular_temperament_search(
     for rank in 2..dimension {
         let eff_n_results =
             n_results + if rank == dimension - 1 { 0 } else { safety };
-        rts = cangwu::higher_rank_search(
+        rts = higher_rank_search(
             &limit.pitches,
             &mappings,
             &rts,
@@ -391,19 +406,11 @@ fn rt_row(
     let link = web.document.create_element("a")?;
 
     // Setup the link as a link
-    let rt = te::TETemperament::new(&limit.pitches, &mapping);
-    link.set_attribute("href", &rt_url(&rt, &limit.label))?;
+    let rt = TETemperament::new(&limit.pitches, &mapping);
+    link.set_attribute("href", &rt_url(&limit, &rt))?;
 
-    // Set data attributes so we get at the mapping later
-    link.set_attribute("data-rank", &mapping.len().to_string())?;
-    for (i, etmap) in mapping.iter().enumerate() {
-        let key = format!("data-mapping{}", i);
-        let value = join("_", etmap);
-        link.set_attribute(&key, &value)?;
-    }
-
-    let octaves = map(|m| m[0], &mapping);
-    let ets = join(" & ", &octaves);
+    let octaves = map(|et| et_name(&limit, et), &mapping);
+    let ets = octaves.join(" & ");
 
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
@@ -433,13 +440,12 @@ fn rt_row(
     Ok(row)
 }
 
-fn rt_url(rt: &te::TETemperament, label: &str) -> String {
-    let octaves = map(|m| m[0], &rt.melody);
+fn rt_url(plimit: &PrimeLimit, rt: &TETemperament) -> String {
+    let ets = map(|et| et_name(&plimit, &et), &rt.melody);
     format!(
-        "#page=rt&ets={}&limit={}&key={}",
-        &join("_", &octaves),
-        &label,
-        &join("_", &rt.key()),
+        "#page=rt&ets={}&limit={}",
+        &ets.join("_"),
+        &plimit.label,
     )
 }
 
@@ -449,15 +455,10 @@ fn show_rt(
     limit: PrimeLimit,
     mapping: Mapping,
 ) -> Exceptionable {
-    let rt = te::TETemperament::new(&limit.pitches, &mapping);
+    let rt = TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        if let Some(name) = rt.name(&limit) {
-            name_field.set_text_content(Some(&name));
-        } else {
-            let octaves = map(|m| m[0], &mapping);
-            name_field.set_text_content(Some(&join(" & ", &octaves)));
-        }
+        name_field.set_text_content(Some(&rt_name(&limit, &rt)));
     }
 
     if let Some(table) = web.element("rt-etmap") {
@@ -519,7 +520,7 @@ fn show_rt(
     }
 
     // Make another RT object to get the generator tunings
-    let rt = te::TETemperament::new(&limit.pitches, &redmap);
+    let rt = TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
         write_float_row(&web, &table, &rt.tuning, 4)?;
     }
@@ -536,8 +537,26 @@ fn show_rt(
     Ok(())
 }
 
+fn rt_name(limit: &PrimeLimit, rt: &TETemperament) -> String {
+    if let Some(name) = rt.name(&limit) {
+        name.to_string()
+    } else {
+        let octaves = map(|et| et_name(limit, et), &rt.mapping());
+        octaves.join(" & ")
+    }
+}
+
+fn et_name(limit: &PrimeLimit, et: &ETMap) -> String {
+    assert!(!et.is_empty());
+    if ambiguous_et(&limit.pitches, et) {
+        warted_et_name(&limit, et)
+    } else {
+        et[0].to_string()
+    }
+}
+
 /// An accordion is an instrument with buttons
-fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
+fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
     let accordion = match web.element("rt-accordion") {
         Some(result) => result,
         None => return Ok(()),
@@ -615,7 +634,7 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
 
 fn accordion_button(
     web: &WebContext,
-    rt: &te::TETemperament,
+    rt: &TETemperament,
     pitch: &[Exponent],
 ) -> Result<Element, JsValue> {
     let button = web.document.create_element("button")?;

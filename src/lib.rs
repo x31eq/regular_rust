@@ -2,7 +2,9 @@
 //!
 //! Utilities for regular temperament finding
 
+use lazy_static::lazy_static;
 use num_integer::div_floor;
+use std::collections::HashMap;
 use std::fmt;
 use std::str::FromStr;
 
@@ -19,6 +21,11 @@ pub type ETSlice = [Exponent];
 pub type Tuning = Vec<Cents>;
 pub type Mapping = Vec<ETMap>;
 
+lazy_static! {
+    static ref PRIME_WARTS: HashMap<String, char> = prime_warts();
+}
+
+#[derive(Debug, Clone)]
 pub struct PrimeLimit {
     /// Something used for printing
     pub label: String,
@@ -62,20 +69,166 @@ impl PrimeLimit {
             headings,
         }
     }
+
+    /// Return the characters used to specify names of
+    /// ambiguous equal temperaments
+    fn warts(&self) -> Vec<char> {
+        let mut next_inharmonic_wart = 'q';
+        let mut warts = vec![];
+        for harmonic in &self.headings {
+            if let Some(&c) = PRIME_WARTS.get(harmonic) {
+                warts.push(c);
+            } else {
+                warts.push(next_inharmonic_wart);
+                next_inharmonic_wart = next_char(next_inharmonic_wart);
+            }
+        }
+        warts
+    }
 }
 
 impl FromStr for PrimeLimit {
     type Err = ParseLimitError;
 
     fn from_str(src: &str) -> Result<PrimeLimit, ParseLimitError> {
-        // FIXME: prime limit of zero causes a runtime error
         if let Ok(limit) = src.parse() {
-            Ok(PrimeLimit::new(limit))
+            if limit == 0 {
+                Err(ParseLimitError {})
+            } else {
+                Ok(PrimeLimit::new(limit))
+            }
         } else if let Ok(primes) = src.split('.').map(str::parse).collect() {
             Ok(PrimeLimit::explicit(primes))
         } else {
             Err(ParseLimitError {})
         }
+    }
+}
+
+/// Standard name, based on Herman Miller's suggestion.
+/// The basic name is the number of steps to the octave.
+/// If it has the best approximation to each prime
+/// (it is the patent val) a 'p' is appended (not in Herman's suggestion).
+/// Otherwise, a letter is appended for each prime that differs from
+/// its best approximation.
+/// Ambiguity is not considered here.
+/// The letters the start of the alphabet for prime limits
+/// or letters from q for non-prime harmonics.
+pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
+    assert_ne!(et, vec![]);
+    let warts = plimit.warts();
+    let mut name = et[0].to_string();
+    if plimit.headings[0] != "2" {
+        name.insert(0, warts[0]);
+    }
+    let prime_et = prime_mapping(&plimit.pitches, et[0]);
+    if prime_et == et {
+        return name + "p";
+    }
+    let n_notes_scale = et[0] as f64 / plimit.pitches[0];
+    for (&et_i, (&pet_i, (&pitch, &wart))) in et
+        .iter()
+        .zip(prime_et.iter().zip(plimit.pitches.iter().zip(warts.iter())))
+    {
+        if et_i != pet_i {
+            // This assumes the headings match the pitches
+            let nearest_prime_sharp = (pet_i as f64) > pitch * n_notes_scale;
+            let sharp_of_prime = et_i > pet_i;
+            let mut n_warts = 2 * et_i.abs_diff(pet_i);
+            if sharp_of_prime != nearest_prime_sharp {
+                // This is on the next-best-approximation side
+                n_warts -= 1;
+            }
+            for _ in 0..n_warts {
+                name.push(wart);
+            }
+        }
+    }
+    name
+}
+
+pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
+    let mut name = name.to_string();
+    let warts = plimit.warts();
+    let octave_size = if warts.contains(&name.chars().next()?) {
+        let octave_wart = name.remove(0);
+        *plimit
+            .pitches
+            .get(warts.iter().position(|&c| c == octave_wart)?)?
+    } else {
+        match name.parse::<usize>() {
+            // A plain integer is the number of steps
+            // to the first element of the plimit
+            Ok(_) => *plimit.pitches.first()?,
+            // A warted name is based on 1200 cents
+            // when there is no prefix wart
+            Err(_) => 1200.0,
+        }
+    };
+    if name.ends_with('p') {
+        // Time to strip this out
+        name.pop().expect("p gone missing");
+    }
+    let mut wart_counts: HashMap<_, Exponent> = HashMap::new();
+    while warts.contains(&name.chars().last()?) {
+        let wart = name.pop()?;
+        wart_counts.insert(wart, wart_counts.get(&wart).unwrap_or(&0) + 1);
+    }
+    let n_notes: usize = name.parse().ok()?;
+    let scaler = n_notes as f64 / octave_size;
+    Some(
+        plimit
+            .pitches
+            .iter()
+            .zip(warts)
+            .map(|(&pitch, wart)| {
+                let target = pitch * scaler;
+                let nearest = target.round();
+                if let Some(&count) = wart_counts.get(&wart) {
+                    let nearest_sharp = nearest > target;
+                    let (approx_sharp, correction) = if (count % 2) == 0 {
+                        (nearest_sharp, count / 2)
+                    } else {
+                        (!nearest_sharp, (count + 1) / 2)
+                    };
+                    nearest as Exponent
+                        + if approx_sharp {
+                            correction
+                        } else {
+                            -correction
+                        }
+                } else {
+                    nearest as Exponent
+                }
+            })
+            .collect(),
+    )
+}
+
+fn prime_warts() -> HashMap<String, char> {
+    let mut result = HashMap::new();
+    let mut next_wart = 'a';
+    for p in primes_below(48).into_iter() {
+        assert_ne!(next_wart, 'p');
+        result.insert(p.to_string(), next_wart);
+        next_wart = next_char(next_wart);
+    }
+    result
+}
+
+/// Next character in the sequence used for warts
+fn next_char(current: char) -> char {
+    // The last harmonic wart is o, so p should never be requested
+    assert_ne!(current, 'p');
+    if current == 'z' {
+        // The Python wrapped around to 'a' again,  but that can be
+        // ambiguous and this code has to handle more primes, so
+        // lets switch to Chinese characters.
+        // The first proper characters (not radicals) are the
+        // so-called Hangzhou numerals, so they'll do
+        '〇'
+    } else {
+        (current as u8 + 1) as char
     }
 }
 

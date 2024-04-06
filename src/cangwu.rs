@@ -5,8 +5,8 @@ use na::DMatrix;
 
 use super::temperament_class::{key_to_mapping, TemperamentClass};
 use super::{
-    map, prime_mapping, Cents, ETMap, ETSlice, Exponent, Mapping,
-    PriorityQueue,
+    et_from_name, map, prime_mapping, Cents, ETMap, ETSlice, Exponent,
+    Mapping, PrimeLimit, PriorityQueue,
 };
 use std::collections::HashSet;
 
@@ -45,6 +45,20 @@ impl<'a> CangwuTemperament<'a> {
     pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
         CangwuTemperament { plimit, melody }
+    }
+
+    pub fn from_et_names(
+        plimit: &'a PrimeLimit,
+        ets: &[String],
+    ) -> Option<Self> {
+        if let Some(melody) =
+            ets.iter().map(|name| et_from_name(plimit, name)).collect()
+        {
+            let plimit = &plimit.pitches;
+            Some(CangwuTemperament { plimit, melody })
+        } else {
+            None
+        }
     }
 
     pub fn from_ets_and_key(
@@ -228,6 +242,26 @@ pub fn equal_temperament_badness(
             .collect(),
     );
     bad2.sqrt() * 12e2
+}
+
+/// Decide if this is unambiguously the best mapping of
+/// this number of notes in the prime limit.
+/// Really a TE error function, but here because we have the search.
+pub fn ambiguous_et(plimit: &[Cents], et: &ETMap) -> bool {
+    let n_notes = if let Some(&n) = et.first() {
+        n
+    } else {
+        // Say an equal temperament with no mappings is unambiguous
+        return false;
+    };
+    if et != &prime_mapping(plimit, et[0]) {
+        return true;
+    }
+    // As this is the prime mapping, check that there are
+    // no other mappings within 20% of its error
+    let error = equal_temperament_badness(plimit, 0.0, et);
+    let others = limited_mappings(n_notes, 0.0, error * 1.2, plimit);
+    others.len() > 1
 }
 
 /// High guess for the worst badness of a search.
@@ -513,6 +547,83 @@ fn nofives() {
     let limit = super::PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = get_equal_temperaments(&limit.pitches, 1.0, 5);
     assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
+}
+
+#[test]
+fn test_ambiguous_et() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    assert!(ambiguous_et(&limit, &vec![1, 2, 3, 4, 5]));
+}
+
+#[test]
+fn test_ambiguity_31_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 31);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_41_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 41);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_12_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 12);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_12_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 12);
+    assert!(ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_19_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 19);
+    assert!(ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_31_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 31);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn marvel_from_et_names() {
+    let limit = super::PrimeLimit::new(11);
+    let original = make_marvel(&limit);
+    let named = CangwuTemperament::from_et_names(
+        &limit,
+        &vec!["22".to_string(), "31".to_string(), "41".to_string()],
+    );
+    assert!(named.is_some());
+    if let Some(rt) = named {
+        assert_eq!(original.melody, rt.melody);
+    }
+}
+
+#[test]
+fn meantone_from_et_names() {
+    let limit = super::PrimeLimit::new(13);
+    let expected =
+        vec![vec![31, 49, 72, 87, 107, 115], vec![12, 19, 28, 34, 42, 45]];
+    let named = CangwuTemperament::from_et_names(
+        &limit,
+        &vec!["31".to_string(), "12f".to_string()],
+    );
+    assert!(named.is_some());
+    if let Some(rt) = named {
+        assert_eq!(rt.melody, expected);
+    }
 }
 
 #[test]

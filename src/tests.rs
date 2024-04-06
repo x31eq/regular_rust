@@ -88,6 +88,141 @@ fn suboptimal_prime_mapping() {
 }
 
 #[test]
+fn name_12p() {
+    let limit = PrimeLimit::new(13);
+    let et = prime_mapping(&limit.pitches, 12);
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "12p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_38de() {
+    let limit = PrimeLimit::new(11);
+    let et = vec![38, 60, 88, 106, 132];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "38de");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_b4() {
+    let limit = PrimeLimit::explicit(vec![3, 5, 7]);
+    let et = vec![4, 6, 7];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "b4p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_q15e() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![15, 15, 16];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q15e");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_q32r() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![32, 33, 34];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q32r");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_q22() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![22, 23, 24];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q22p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_q11() {
+    let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
+    let et = vec![11, 12, 13, 14];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q11p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_q2t() {
+    let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
+    let et = vec![2, 2, 2, 2]; // contorted
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q2t");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_8dee() {
+    let limit = PrimeLimit::new(11);
+    let et = vec![8, 13, 19, 23, 29];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "8dee");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_2egg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![2, 3, 5, 6, 6, 7, 7];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "2egg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_4ef() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 16];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4ef");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_4efgg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 15];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efgg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_4efgggg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 14];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efgggg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_4efg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 17];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn name_4efggg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 18];
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efggg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
