@@ -122,7 +122,7 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
                 n_warts -= 1;
             }
             for _ in 0..n_warts {
-                name = name + &wart.to_string();
+                name.push(wart);
             }
         }
     }
