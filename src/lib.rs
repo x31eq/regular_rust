@@ -113,19 +113,15 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
         .zip(prime_et.iter().zip(plimit.pitches.iter().zip(warts.iter())))
     {
         if et_i != pet_i {
-            let delta = et_i.abs_diff(pet_i) as isize;
-            let sign = if (pet_i as f64) < pitch * n_notes_scale {
-                1
-            } else {
-                -1
-            };
-            let freq = 2 * delta
-                - (if et_i as isize == pet_i as isize - sign * delta {
-                    0
-                } else {
-                    1
-                });
-            for _ in 0..freq {
+            // This assumes the headings match the pitches
+            let nearest_prime_sharp = (pet_i as f64) < pitch * n_notes_scale;
+            let sharp_of_prime = et_i > pet_i;
+            let mut n_warts = 2 * et_i.abs_diff(pet_i);
+            if sharp_of_prime == nearest_prime_sharp {
+                // This is on the next-best-approximation side
+                n_warts -= 1;
+            }
+            for _ in 0..n_warts {
                 name = name + &wart.to_string();
             }
         }
