@@ -174,14 +174,14 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
         wart_counts.insert(wart, wart_counts.get(&wart).unwrap_or(&0) + 1);
     }
     let n_notes: usize = name.parse().ok()?;
-    let step_size = octave_size / n_notes as f64;
+    let scaler = n_notes as f64 / octave_size;
     Some(
         plimit
             .pitches
             .iter()
             .zip(warts)
             .map(|(&pitch, wart)| {
-                let target = pitch * step_size;
+                let target = pitch * scaler;
                 let nearest = target.round();
                 if let Some(&count) = wart_counts.get(&wart) {
                     let nearest_sharp = nearest > target;
