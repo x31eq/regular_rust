@@ -149,7 +149,7 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
 pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
     let mut name = name.to_string();
     let warts = plimit.warts();
-    let octave_size = if warts.contains(&name.chars().nth(0)?) {
+    let octave_size = if warts.contains(&name.chars().next()?) {
         let octave_wart = name.remove(0);
         *plimit
             .pitches
@@ -158,13 +158,13 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
         match name.parse::<usize>() {
             // A plain integer is the number of steps
             // to the first element of the plimit
-            Ok(_) => *plimit.pitches.get(0)?,
+            Ok(_) => *plimit.pitches.first()?,
             // A warted name is based on 1200 cents
             // when there is no prefix wart
             Err(_) => 1200.0,
         }
     };
-    if name.chars().last() == Some('p') {
+    if name.ends_with('p') {
         // Time to strip this out
         name.pop().expect("p gone missing");
     }
