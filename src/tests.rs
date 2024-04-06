@@ -151,6 +151,13 @@ fn name_8dee() {
 }
 
 #[test]
+fn name_2egg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![2, 3, 5, 6, 6, 7, 7];
+    assert_eq!(warted_et_name(&limit, &et), "2egg");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
