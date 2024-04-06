@@ -234,7 +234,7 @@ pub fn equal_temperament_badness(
 /// this number of notes in the prime limit.
 /// Really a TE error function, but here because we have the search.
 pub fn ambiguous_et(plimit: &[Cents], et: &ETMap) -> bool {
-    let n_notes = if let Some(&n) = et.get(0) {
+    let n_notes = if let Some(&n) = et.first() {
         n
     } else {
         // Say an equal temperament with no mappings is unambiguous
