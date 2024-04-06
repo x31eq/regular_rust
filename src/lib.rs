@@ -114,10 +114,10 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     {
         if et_i != pet_i {
             // This assumes the headings match the pitches
-            let nearest_prime_sharp = (pet_i as f64) < pitch * n_notes_scale;
+            let nearest_prime_sharp = (pet_i as f64) > pitch * n_notes_scale;
             let sharp_of_prime = et_i > pet_i;
             let mut n_warts = 2 * et_i.abs_diff(pet_i);
-            if sharp_of_prime == nearest_prime_sharp {
+            if sharp_of_prime != nearest_prime_sharp {
                 // This is on the next-best-approximation side
                 n_warts -= 1;
             }
