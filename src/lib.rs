@@ -4,6 +4,7 @@
 
 use num_integer::div_floor;
 use std::fmt;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub type Cents = f64;
@@ -90,10 +91,11 @@ impl FromStr for PrimeLimit {
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     assert_ne!(et, vec![]);
+    let standard_warts = prime_warts();
     let mut next_inharmonic_wart = 'q';
     let mut warts = vec![];
     for harmonic in &plimit.headings {
-        if let Some(c) = wart_for_prime(harmonic) {
+        if let Some(&c) = standard_warts.get(harmonic) {
             warts.push(c);
         } else {
             warts.push(next_inharmonic_wart);
@@ -146,6 +148,18 @@ fn wart_for_prime(heading: &str) -> Option<char> {
         }
     }
     None
+}
+
+fn prime_warts() -> HashMap<String, char> {
+    let mut result = HashMap::new();
+    let mut next_wart = 'a';
+    for p in primes_below(48).into_iter() {
+        assert_ne!(next_wart, 'p');
+        result.insert(p.to_string(), next_wart);
+        assert_eq!(Some(next_wart), wart_for_prime(&p.to_string()));
+        next_wart = next_char(next_wart);
+    }
+    result
 }
 
 /// Next character in the sequence used for warts
