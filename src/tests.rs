@@ -139,7 +139,7 @@ fn name_q11() {
 #[test]
 fn name_q2t() {
     let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
-    let et = vec![2, 2, 2, 2];  // contorted
+    let et = vec![2, 2, 2, 2]; // contorted
     assert_eq!(warted_et_name(&limit, &et), "q2t");
 }
 

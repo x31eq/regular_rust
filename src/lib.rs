@@ -155,8 +155,7 @@ fn next_char(current: char) -> char {
         // The first proper characters (not radicals) are the
         // so-called Hangzhou numerals, so they'll do
         '〇'
-    }
-    else {
+    } else {
         (current as u8 + 1) as char
     }
 }
