@@ -13,8 +13,8 @@ use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
 use super::{
-    join, map, normalize_positive, Cents, ETMap, Exponent, Mapping,
-    PrimeLimit,
+    join, map, normalize_positive, warted_et_name, Cents, ETMap, Exponent,
+    Mapping, PrimeLimit,
 };
 
 type Exceptionable = Result<(), JsValue>;
@@ -451,12 +451,7 @@ fn show_rt(
     let rt = TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        if let Some(name) = rt.name(&limit) {
-            name_field.set_text_content(Some(&name));
-        } else {
-            let octaves = map(|m| m[0], &mapping);
-            name_field.set_text_content(Some(&join(" & ", &octaves)));
-        }
+        name_field.set_text_content(Some(&rt_name(&limit, &rt)));
     }
 
     if let Some(table) = web.element("rt-etmap") {
@@ -533,6 +528,24 @@ fn show_rt(
     }
 
     Ok(())
+}
+
+fn rt_name(limit: &PrimeLimit, rt: &TETemperament) -> String {
+    if let Some(name) = rt.name(&limit) {
+        name.to_string()
+    } else {
+        let octaves = map(|et| et_name(limit, et), &rt.mapping());
+        octaves.join(" & ")
+    }
+}
+
+fn et_name(limit: &PrimeLimit, et: &ETMap) -> String {
+    assert!(!et.is_empty());
+    if ambiguous_et(&limit.pitches, et) {
+        warted_et_name(&limit, et)
+    } else {
+        et[0].to_string()
+    }
 }
 
 /// An accordion is an instrument with buttons
