@@ -89,16 +89,16 @@ fn suboptimal_prime_mapping() {
 
 #[test]
 fn name_12p() {
-    let limit13 = PrimeLimit::new(13);
-    let p12 = prime_mapping(&limit13.pitches, 12);
-    assert_eq!(warted_et_name(&limit13, &p12), "12p");
+    let limit = PrimeLimit::new(13);
+    let et = prime_mapping(&limit.pitches, 12);
+    assert_eq!(warted_et_name(&limit, &et), "12p");
 }
 
 #[test]
 fn name_38de() {
-    let limit11 = PrimeLimit::new(11);
-    let de38 = vec![38, 60, 88, 106, 132];
-    assert_eq!(warted_et_name(&limit11, &de38), "38de");
+    let limit = PrimeLimit::new(11);
+    let et = vec![38, 60, 88, 106, 132];
+    assert_eq!(warted_et_name(&limit, &et), "38de");
 }
 
 #[test]
