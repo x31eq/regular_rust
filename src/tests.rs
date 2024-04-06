@@ -158,6 +158,41 @@ fn name_2egg() {
 }
 
 #[test]
+fn name_4ef() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 16];
+    assert_eq!(warted_et_name(&limit, &et), "4ef");
+}
+
+#[test]
+fn name_4efgg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 15];
+    assert_eq!(warted_et_name(&limit, &et), "4efgg");
+}
+
+#[test]
+fn name_4efgggg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 14];
+    assert_eq!(warted_et_name(&limit, &et), "4efgggg");
+}
+
+#[test]
+fn name_4efg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 17];
+    assert_eq!(warted_et_name(&limit, &et), "4efg");
+}
+
+#[test]
+fn name_4efggg() {
+    let limit = PrimeLimit::new(17);
+    let et = vec![4, 6, 9, 11, 13, 14, 18];
+    assert_eq!(warted_et_name(&limit, &et), "4efggg");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
