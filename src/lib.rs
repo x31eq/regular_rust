@@ -164,6 +164,10 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
             Err(_) => 1200.0,
         }
     };
+    if name.chars().last() == Some('p') {
+        // Time to strip this out
+        name.pop().expect("p gone missing");
+    }
     let mut wart_counts: HashMap<_, Exponent> = HashMap::new();
     while warts.contains(&name.chars().last()?) {
         let wart = name.pop()?;
