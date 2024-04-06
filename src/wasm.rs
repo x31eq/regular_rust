@@ -54,58 +54,53 @@ fn process_hash() {
     let params = web.get_url_params();
     web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
-        web.log("Regular temperament display");
-        if let Some(ets) = params.get("ets") {
-            if let Some(limit) = params.get("limit") {
-                // Note: the "key" format is the old way of
-                // doing it, and it would be easier not to support
-                // it, but only the warted ET names.
-                // The trouble is, I haven't coded them either yet
-                if let Some(key) = params.get("key") {
-                    web.log(&ets);
-                    web.log(&limit);
-                    web.log(&key);
-                    if let Ok(ets) = ets
-                        .split('_')
-                        .map(Exponent::from_str)
-                        .collect::<Result<Vec<_>, _>>()
-                    {
-                        if let Ok(key) = key
-                            .split('_')
-                            .map(Exponent::from_str)
-                            .collect::<Result<Vec<_>, _>>()
-                        {
-                            if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                                if let Some(rt) =
-                                    CangwuTemperament::from_ets_and_key(
-                                        &limit.pitches.clone(),
-                                        &ets,
-                                        &key,
-                                    )
-                                {
-                                    web.log(&format!("rt: {:?}", rt.melody));
-                                    web.unwrap(
-                                        show_rt(&web, limit, rt.melody),
-                                        "Failed to show the regular temperament",
-                                    );
-                                    // hide the list that got enabled by that function
-                                    web.set_body_class("show-temperament");
-                                } else {
-                                    web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
-                                }
-                            } else {
-                                web.log("Unable to parse limit");
-                            }
+        if let Some((ets, limit, key)) = parse_rt_params(&params) {
+            if let Ok(ets) = ets
+                .split('_')
+                .map(Exponent::from_str)
+                .collect::<Result<Vec<_>, _>>()
+            {
+                if let Ok(key) = key
+                    .split('_')
+                    .map(Exponent::from_str)
+                    .collect::<Result<Vec<_>, _>>()
+                {
+                    if let Ok(limit) = limit.parse::<PrimeLimit>() {
+                        if let Some(rt) = CangwuTemperament::from_ets_and_key(
+                            &limit.pitches.clone(),
+                            &ets,
+                            &key,
+                        ) {
+                            web.log(&format!("rt: {:?}", rt.melody));
+                            web.unwrap(
+                                crate::wasm::show_rt(&web, limit, rt.melody),
+                                "Failed to show the regular temperament",
+                            );
+                            // hide the list that got enabled by that function
+                            web.set_body_class("show-temperament");
                         } else {
-                            web.log("Unable to parse key");
+                            web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                         }
                     } else {
-                        web.log("Unable to parse ETs")
+                        web.log("Unable to parse limit");
                     }
+                } else {
+                    web.log("Unable to parse key");
                 }
+            } else {
+                web.log("Unable to parse ETs")
             }
         }
     }
+}
+
+fn parse_rt_params(
+    params: &HashMap<String, String>,
+) -> Option<(String, String, String)> {
+    let ets = params.get("ets")?;
+    let limit = params.get("limit")?;
+    let key = params.get("key")?;
+    Some((ets.clone(), limit.clone(), key.clone()))
 }
 
 pub fn regular_temperament_search(
