@@ -409,14 +409,6 @@ fn rt_row(
     let rt = TETemperament::new(&limit.pitches, &mapping);
     link.set_attribute("href", &rt_url(&rt, &limit.label))?;
 
-    // Set data attributes so we get at the mapping later
-    link.set_attribute("data-rank", &mapping.len().to_string())?;
-    for (i, etmap) in mapping.iter().enumerate() {
-        let key = format!("data-mapping{}", i);
-        let value = join("_", etmap);
-        link.set_attribute(&key, &value)?;
-    }
-
     let octaves = map(|et| et_name(&limit, et), &mapping);
     let ets = octaves.join(" & ");
 
