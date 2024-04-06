@@ -407,7 +407,7 @@ fn rt_row(
 
     // Setup the link as a link
     let rt = TETemperament::new(&limit.pitches, &mapping);
-    link.set_attribute("href", &rt_url(&rt, &limit.label))?;
+    link.set_attribute("href", &rt_url(&limit, &rt))?;
 
     let octaves = map(|et| et_name(&limit, et), &mapping);
     let ets = octaves.join(" & ");
@@ -440,13 +440,12 @@ fn rt_row(
     Ok(row)
 }
 
-fn rt_url(rt: &TETemperament, label: &str) -> String {
-    let octaves = map(|m| m[0], &rt.melody);
+fn rt_url(plimit: &PrimeLimit, rt: &TETemperament) -> String {
+    let ets = map(|et| et_name(&plimit, &et), &rt.melody);
     format!(
-        "#page=rt&ets={}&limit={}&key={}",
-        &join("_", &octaves),
-        &label,
-        &join("_", &rt.key()),
+        "#page=rt&ets={}&limit={}",
+        &ets.join("_"),
+        &plimit.label,
     )
 }
 
