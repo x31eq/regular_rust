@@ -144,6 +144,13 @@ fn name_q2t() {
 }
 
 #[test]
+fn name_8dee() {
+    let limit = PrimeLimit::new(11);
+    let et = vec![8, 13, 19, 23, 29];
+    assert_eq!(warted_et_name(&limit, &et), "8dee");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
