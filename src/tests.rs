@@ -100,98 +100,126 @@ fn name_12p() {
 fn name_38de() {
     let limit = PrimeLimit::new(11);
     let et = vec![38, 60, 88, 106, 132];
-    assert_eq!(warted_et_name(&limit, &et), "38de");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "38de");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_b4() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7]);
     let et = vec![4, 6, 7];
-    assert_eq!(warted_et_name(&limit, &et), "b4p");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "b4p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_q15e() {
     let limit = PrimeLimit::explicit(vec![10, 11, 12]);
     let et = vec![15, 15, 16];
-    assert_eq!(warted_et_name(&limit, &et), "q15e");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q15e");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_q32r() {
     let limit = PrimeLimit::explicit(vec![10, 11, 12]);
     let et = vec![32, 33, 34];
-    assert_eq!(warted_et_name(&limit, &et), "q32r");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q32r");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_q22() {
     let limit = PrimeLimit::explicit(vec![10, 11, 12]);
     let et = vec![22, 23, 24];
-    assert_eq!(warted_et_name(&limit, &et), "q22p");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q22p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_q11() {
     let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
     let et = vec![11, 12, 13, 14];
-    assert_eq!(warted_et_name(&limit, &et), "q11p");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q11p");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_q2t() {
     let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
     let et = vec![2, 2, 2, 2]; // contorted
-    assert_eq!(warted_et_name(&limit, &et), "q2t");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "q2t");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_8dee() {
     let limit = PrimeLimit::new(11);
     let et = vec![8, 13, 19, 23, 29];
-    assert_eq!(warted_et_name(&limit, &et), "8dee");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "8dee");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_2egg() {
     let limit = PrimeLimit::new(17);
     let et = vec![2, 3, 5, 6, 6, 7, 7];
-    assert_eq!(warted_et_name(&limit, &et), "2egg");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "2egg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_4ef() {
     let limit = PrimeLimit::new(17);
     let et = vec![4, 6, 9, 11, 13, 14, 16];
-    assert_eq!(warted_et_name(&limit, &et), "4ef");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4ef");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_4efgg() {
     let limit = PrimeLimit::new(17);
     let et = vec![4, 6, 9, 11, 13, 14, 15];
-    assert_eq!(warted_et_name(&limit, &et), "4efgg");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efgg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_4efgggg() {
     let limit = PrimeLimit::new(17);
     let et = vec![4, 6, 9, 11, 13, 14, 14];
-    assert_eq!(warted_et_name(&limit, &et), "4efgggg");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efgggg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_4efg() {
     let limit = PrimeLimit::new(17);
     let et = vec![4, 6, 9, 11, 13, 14, 17];
-    assert_eq!(warted_et_name(&limit, &et), "4efg");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn name_4efggg() {
     let limit = PrimeLimit::new(17);
     let et = vec![4, 6, 9, 11, 13, 14, 18];
-    assert_eq!(warted_et_name(&limit, &et), "4efggg");
+    let name = warted_et_name(&limit, &et);
+    assert_eq!(name, "4efggg");
+    assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
