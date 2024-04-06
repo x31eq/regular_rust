@@ -1,7 +1,9 @@
+use crate::cangwu::CangwuTemperament;
 use std::collections::HashMap;
-use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
+use std::str::FromStr;
+use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
-use web_sys::{console, Element, Event, HtmlElement, HtmlInputElement};
+use web_sys::{console, Element, Event, HtmlInputElement};
 
 use super::cangwu;
 use super::ratio::get_ratio_or_ket_string;
@@ -16,7 +18,7 @@ use super::{
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
-pub fn form_submit(evt: Event) -> SearchResult {
+pub fn form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let limit = web.unwrap(
@@ -36,9 +38,18 @@ pub fn form_submit(evt: Event) -> SearchResult {
 
 #[wasm_bindgen(start)]
 fn main() -> Result<(), JsValue> {
+    process_hash();
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn hash_change(_evt: Event) {
+    process_hash();
+}
+
+fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    web.log("New page load");
     web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
         web.log("Regular temperament display");
@@ -52,18 +63,54 @@ fn main() -> Result<(), JsValue> {
                     web.log(&ets);
                     web.log(&limit);
                     web.log(&key);
+                    if let Ok(ets) = ets
+                        .split('_')
+                        .map(Exponent::from_str)
+                        .collect::<Result<Vec<_>, _>>()
+                    {
+                        if let Ok(key) = key
+                            .split('_')
+                            .map(Exponent::from_str)
+                            .collect::<Result<Vec<_>, _>>()
+                        {
+                            if let Ok(limit) = limit.parse::<PrimeLimit>() {
+                                if let Some(rt) =
+                                    CangwuTemperament::from_ets_and_key(
+                                        &limit.pitches.clone(),
+                                        &ets,
+                                        &key,
+                                    )
+                                {
+                                    web.log(&format!("rt: {:?}", rt.melody));
+                                    web.unwrap(
+                                        show_rt(&web, limit, rt.melody),
+                                        "Failed to show the regular temperament",
+                                    );
+                                    // hide the list that got enabled by that function
+                                    web.set_body_class("show-temperament");
+                                } else {
+                                    web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
+                                }
+                            } else {
+                                web.log("Unable to parse limit");
+                            }
+                        } else {
+                            web.log("Unable to parse key");
+                        }
+                    } else {
+                        web.log("Unable to parse ETs")
+                    }
                 }
             }
         }
     }
-    Ok(())
 }
 
 pub fn regular_temperament_search(
     limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
-) -> SearchResult {
+) {
     let dimension = limit.pitches.len();
     let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
     let safety = if dimension < 100 {
@@ -131,20 +178,6 @@ pub fn regular_temperament_search(
             );
         }
     }
-
-    // Callback for clicking a link
-    let callback = Closure::wrap(
-        Box::new(rt_click_handler) as Box<dyn FnMut(Event) -> ()>
-    );
-    web.list
-        .dyn_ref::<HtmlElement>()
-        .expect("Result list isn't an HtmlElement")
-        .set_onclick(Some(callback.as_ref().unchecked_ref()));
-
-    // Return the callback so the browser keeps it alive
-    SearchResult {
-        _callback: callback,
-    }
 }
 
 struct WebContext {
@@ -203,12 +236,10 @@ impl WebContext {
     pub fn get_url_params(&self) -> HashMap<String, String> {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
-            if let Ok(url) = location.href() {
-                if let Some((_, tokens)) = url.split_once('#') {
-                    for param in tokens.split('&') {
-                        if let Some((k, v)) = param.split_once('=') {
-                            params.insert(k.to_string(), v.to_string());
-                        }
+            if let Ok(query) = location.hash() {
+                for param in query.trim_start_matches('#').split('&') {
+                    if let Some((k, v)) = param.split_once('=') {
+                        params.insert(k.to_string(), v.to_string());
                     }
                 }
             }
@@ -412,73 +443,6 @@ fn rt_url(rt: &te::TETemperament, label: &str) -> String {
     )
 }
 
-#[wasm_bindgen]
-/// Object to return from a search so that
-/// the callbacks stay alive
-pub struct SearchResult {
-    _callback: Closure<dyn FnMut(Event) -> ()>,
-}
-
-/// Function to call when a temperament link is "clicked"
-/// (which includes in-page activation)
-fn rt_click_handler(evt: Event) {
-    WebContext::new().log("Click handler called");
-    if let Some(target) = evt.target() {
-        let target = target
-            .dyn_ref::<Element>()
-            .expect("Target isn't an Element");
-        if target.has_attribute("href") {
-            let web = WebContext::new();
-            web.log(&format!("{:?}", web.get_url_params()));
-            let limit = web.expect(
-                load_limit(&web.list),
-                "Programming Error: failed to load prime limit",
-            );
-            let mapping = web.expect(
-                load_mapping(&target),
-                "Programming Error: failed to load mapping",
-            );
-            web.unwrap(
-                show_rt(&web, limit, mapping),
-                "Failed to show the regular temperament",
-            );
-            evt.prevent_default();
-        }
-    }
-}
-
-/// Pull the prime limit out of the DOM
-fn load_limit(list: &Element) -> Option<PrimeLimit> {
-    let label = list.get_attribute("data-label")?;
-    let value = list.get_attribute("data-pitches")?;
-    let pitches =
-        result_to_option(value.split('_').map(str::parse).collect())?;
-    let value = list.get_attribute("data-headings")?;
-    let headings = value
-        .split('_')
-        .map(|heading| heading.to_string())
-        .collect();
-    Some(PrimeLimit {
-        label,
-        pitches,
-        headings,
-    })
-}
-
-/// Get the regular temperament mapping from the DOM
-fn load_mapping(link: &Element) -> Option<Mapping> {
-    let mut mapping = Vec::new();
-    let value = link.get_attribute("data-rank")?;
-    let rank: usize = result_to_option(value.parse())?;
-    for i in 0..rank {
-        let value = link.get_attribute(&format!("data-mapping{}", i))?;
-        let vector =
-            result_to_option(value.split('_').map(str::parse).collect())?;
-        mapping.push(vector);
-    }
-    Some(mapping)
-}
-
 /// Set the fields about the regular temperament
 fn show_rt(
     web: &WebContext,
@@ -662,11 +626,4 @@ fn accordion_button(
     let freq = 264.0 * 2.0_f64.powf(pitch / 12e2);
     button.set_attribute("data-freq", &format!("{:.6}", freq))?;
     Ok(button)
-}
-
-fn result_to_option<T, E>(result: Result<T, E>) -> Option<T> {
-    match result {
-        Ok(value) => Some(value),
-        Err(_) => None,
-    }
 }
