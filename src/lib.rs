@@ -2,6 +2,7 @@
 //!
 //! Utilities for regular temperament finding
 
+use lazy_static::lazy_static;
 use num_integer::div_floor;
 use std::collections::HashMap;
 use std::fmt;
@@ -19,6 +20,10 @@ pub type ETMap = Vec<Exponent>;
 pub type ETSlice = [Exponent];
 pub type Tuning = Vec<Cents>;
 pub type Mapping = Vec<ETMap>;
+
+lazy_static! {
+    static ref PRIME_WARTS: HashMap<String, char> = prime_warts();
+}
 
 pub struct PrimeLimit {
     /// Something used for printing
@@ -91,11 +96,10 @@ impl FromStr for PrimeLimit {
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     assert_ne!(et, vec![]);
-    let standard_warts = prime_warts();
     let mut next_inharmonic_wart = 'q';
     let mut warts = vec![];
     for harmonic in &plimit.headings {
-        if let Some(&c) = standard_warts.get(harmonic) {
+        if let Some(&c) = PRIME_WARTS.get(harmonic) {
             warts.push(c);
         } else {
             warts.push(next_inharmonic_wart);
