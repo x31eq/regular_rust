@@ -150,8 +150,19 @@ fn wart_for_prime(heading: &str) -> Option<char> {
     None
 }
 
+/// Next character in the sequence used for warts
 fn next_char(current: char) -> char {
-    (current as u8 + 1) as char
+    if current == 'z' {
+        // The Python wrapped around to 'a' again,  but that can be
+        // ambiguous and this code has to handle more primes, so
+        // lets switch to Chinese characters.
+        // The first proper characters (not radicals) are the
+        // so-called Hangzhou numerals, so they'll do
+        '〇'
+    }
+    else {
+        (current as u8 + 1) as char
+    }
 }
 
 #[derive(Debug)]
