@@ -598,6 +598,19 @@ fn test_ambiguity_31_13() {
 }
 
 #[test]
+fn marvel_from_et_names() {
+    let limit = super::PrimeLimit::new(11);
+    let original = make_marvel(&limit);
+    let named = CangwuTemperament::from_et_names(
+        &limit,
+        &vec!["22".to_string(), "31".to_string(), "41".to_string()],
+    );
+    assert!(named.is_some());
+    if let Some(rt) = named {
+        assert_eq!(original.melody, rt.melody);
+    }
+}
+#[test]
 fn marvel_from_key() {
     let limit11 = super::PrimeLimit::new(11);
     let original = make_marvel(&limit11);
