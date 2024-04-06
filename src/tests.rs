@@ -109,6 +109,27 @@ fn name_b4() {
 }
 
 #[test]
+fn name_q15e() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![15, 15, 16];
+    assert_eq!(warted_et_name(&limit, &et), "q15e");
+}
+
+#[test]
+fn name_q32r() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![32, 33, 34];
+    assert_eq!(warted_et_name(&limit, &et), "q32r");
+}
+
+#[test]
+fn name_q22() {
+    let limit = PrimeLimit::explicit(vec![10, 11, 12]);
+    let et = vec![22, 23, 24];
+    assert_eq!(warted_et_name(&limit, &et), "q22p");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
