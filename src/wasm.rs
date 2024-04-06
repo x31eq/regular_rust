@@ -52,34 +52,39 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    web.log(&format!("URL params {:?}", params));
     if params.get("page") == Some(&"rt".to_string()) {
         if let Some((ets, limit, key)) = parse_rt_params(&params) {
-            if let Ok(ets) = ets
-                .split('_')
-                .map(Exponent::from_str)
-                .collect::<Result<Vec<_>, _>>()
-            {
-                if let Ok(key) = key
-                    .split('_')
-                    .map(Exponent::from_str)
-                    .collect::<Result<Vec<_>, _>>()
-                {
-                    if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                        if let Some(rt) = CangwuTemperament::from_ets_and_key(
-                            &limit.pitches.clone(),
-                            &ets,
-                            &key,
-                        ) {
-                            web.log(&format!("rt: {:?}", rt.melody));
-                            web.unwrap(
-                                crate::wasm::show_rt(&web, limit, rt.melody),
-                                "Failed to show the regular temperament",
-                            );
-                            // hide the list that got enabled by that function
-                            web.set_body_class("show-temperament");
-                        } else {
-                            web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
+            if let Ok(limit) = limit.parse::<PrimeLimit>() {
+                if let Some(key) = key {
+                    if let Ok(ets) = ets
+                        .split('_')
+                        .map(Exponent::from_str)
+                        .collect::<Result<Vec<_>, _>>()
+                    {
+                        if let Ok(key) = key
+                            .split('_')
+                            .map(Exponent::from_str)
+                            .collect::<Result<Vec<_>, _>>()
+                        {
+                            if let Some(rt) =
+                                CangwuTemperament::from_ets_and_key(
+                                    &limit.pitches.clone(),
+                                    &ets,
+                                    &key,
+                                )
+                            {
+                                web.log(&format!("rt: {:?}", rt.melody));
+                                web.unwrap(
+                                    crate::wasm::show_rt(
+                                        &web, limit, rt.melody,
+                                    ),
+                                    "Failed to show the regular temperament",
+                                );
+                                // hide the list that got enabled by that function
+                                web.set_body_class("show-temperament");
+                            } else {
+                                web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
+                            }
                         }
                     } else {
                         web.log("Unable to parse limit");
@@ -96,11 +101,11 @@ fn process_hash() {
 
 fn parse_rt_params(
     params: &HashMap<String, String>,
-) -> Option<(String, String, String)> {
+) -> Option<(String, String, Option<String>)> {
     let ets = params.get("ets")?;
     let limit = params.get("limit")?;
-    let key = params.get("key")?;
-    Some((ets.clone(), limit.clone(), key.clone()))
+    let key = params.get("key");
+    Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
 }
 
 pub fn regular_temperament_search(
