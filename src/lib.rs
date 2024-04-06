@@ -101,7 +101,7 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     }
     let mut name = et[0].to_string();
     if plimit.headings[0] != "2" {
-        name = name + &warts[0].to_ascii_uppercase().to_string();
+        name.insert(0, warts[0]);
     }
     let prime_et = prime_mapping(&plimit.pitches, et[0]);
     if prime_et == et {
