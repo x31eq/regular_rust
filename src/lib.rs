@@ -69,7 +69,9 @@ impl PrimeLimit {
         }
     }
 
-    pub fn warts(&self) -> Vec<char> {
+    /// Return the characters used to specify names of
+    /// ambiguous equal temperaments
+    fn warts(&self) -> Vec<char> {
         let mut next_inharmonic_wart = 'q';
         let mut warts = vec![];
         for harmonic in &self.headings {
