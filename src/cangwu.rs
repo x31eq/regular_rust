@@ -610,6 +610,22 @@ fn marvel_from_et_names() {
         assert_eq!(original.melody, rt.melody);
     }
 }
+
+#[test]
+fn meantone_from_et_names() {
+    let limit = super::PrimeLimit::new(13);
+    let expected =
+        vec![vec![31, 49, 72, 87, 107, 115], vec![12, 19, 28, 34, 42, 45]];
+    let named = CangwuTemperament::from_et_names(
+        &limit,
+        &vec!["31".to_string(), "12f".to_string()],
+    );
+    assert!(named.is_some());
+    if let Some(rt) = named {
+        assert_eq!(rt.melody, expected);
+    }
+}
+
 #[test]
 fn marvel_from_key() {
     let limit11 = super::PrimeLimit::new(11);
