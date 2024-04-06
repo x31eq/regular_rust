@@ -542,6 +542,48 @@ fn test_ambiguous_et() {
 }
 
 #[test]
+fn test_ambiguity_31_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 31);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_41_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 41);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_12_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let et = prime_mapping(&limit, 12);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_12_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 12);
+    assert!(ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_19_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 19);
+    assert!(ambiguous_et(&limit, &et));
+}
+
+#[test]
+fn test_ambiguity_31_13() {
+    let limit = super::PrimeLimit::new(13).pitches;
+    let et = prime_mapping(&limit, 31);
+    assert!(!ambiguous_et(&limit, &et));
+}
+
+#[test]
 fn marvel_from_key() {
     let limit11 = super::PrimeLimit::new(11);
     let original = make_marvel(&limit11);
