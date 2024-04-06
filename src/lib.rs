@@ -89,6 +89,7 @@ impl FromStr for PrimeLimit {
 /// The letters the start of the alphabet for prime limits
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
+    assert_ne!(et, vec![]);
     let mut next_inharmonic_wart = 'q';
     let mut warts = vec![];
     for harmonic in &plimit.headings {
@@ -137,6 +138,7 @@ fn wart_for_prime(heading: &str) -> Option<char> {
         }
         let mut next_wart = 'a';
         for p in primes_below(48).into_iter() {
+            assert_ne!(next_wart, 'p');
             if n == p {
                 return Some(next_wart);
             }
@@ -148,6 +150,8 @@ fn wart_for_prime(heading: &str) -> Option<char> {
 
 /// Next character in the sequence used for warts
 fn next_char(current: char) -> char {
+    // The last harmonic wart is o, so p should never be requested
+    assert_ne!(current, 'p');
     if current == 'z' {
         // The Python wrapped around to 'a' again,  but that can be
         // ambiguous and this code has to handle more primes, so
