@@ -230,6 +230,26 @@ pub fn equal_temperament_badness(
     bad2.sqrt() * 12e2
 }
 
+/// Decide if this is unambiguously the best mapping of
+/// this number of notes in the prime limit.
+/// Really a TE error function, but here because we have the search.
+pub fn ambiguous_et(plimit: &[Cents], et: &ETMap) -> bool {
+    let n_notes = if let Some(&n) = et.get(0) {
+        n
+    } else {
+        // Say an equal temperament with no mappings is unambiguous
+        return false;
+    };
+    if et != &prime_mapping(plimit, et[0]) {
+        return true;
+    }
+    // As this is the prime mapping, check that there are
+    // no other mappings within 20% of its error
+    let error = equal_temperament_badness(plimit, 0.0, et);
+    let others = limited_mappings(n_notes, 0.0, error * 1.2, plimit);
+    others.len() > 1
+}
+
 /// High guess for the worst badness of a search.
 /// Must be a reasonable cap, and at least as high
 /// as the worst result we want to keep in the real search.
@@ -513,6 +533,12 @@ fn nofives() {
     let limit = super::PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = get_equal_temperaments(&limit.pitches, 1.0, 5);
     assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
+}
+
+#[test]
+fn test_ambiguous_et() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    assert!(ambiguous_et(&limit, &vec![1, 2, 3, 4, 5]));
 }
 
 #[test]
