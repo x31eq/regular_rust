@@ -401,8 +401,8 @@ fn rt_row(
         link.set_attribute(&key, &value)?;
     }
 
-    let octaves = map(|m| m[0], &mapping);
-    let ets = join(" & ", &octaves);
+    let octaves = map(|et| et_name(&limit, et), &mapping);
+    let ets = octaves.join(" & ");
 
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
