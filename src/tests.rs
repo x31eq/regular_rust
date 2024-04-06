@@ -102,6 +102,13 @@ fn name_38de() {
 }
 
 #[test]
+fn name_b4() {
+    let limit = PrimeLimit::explicit(vec![3, 5, 7]);
+    let et = vec![4, 6, 7];
+    assert_eq!(warted_et_name(&limit, &et), "b4p");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
