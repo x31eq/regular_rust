@@ -130,6 +130,20 @@ fn name_q22() {
 }
 
 #[test]
+fn name_q11() {
+    let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
+    let et = vec![11, 12, 13, 14];
+    assert_eq!(warted_et_name(&limit, &et), "q11p");
+}
+
+#[test]
+fn name_q2t() {
+    let limit = PrimeLimit::explicit(vec![8, 10, 12, 14]);
+    let et = vec![2, 2, 2, 2];  // contorted
+    assert_eq!(warted_et_name(&limit, &et), "q2t");
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
