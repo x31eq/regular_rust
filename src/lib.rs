@@ -146,6 +146,60 @@ pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     name
 }
 
+pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
+    let mut name = name.to_string();
+    let warts = plimit.warts();
+    let octave_size = if warts.contains(&name.chars().nth(0)?) {
+        let octave_wart = name.remove(0);
+        *plimit
+            .pitches
+            .get(warts.iter().position(|&c| c == octave_wart)?)?
+    } else {
+        match name.parse::<usize>() {
+            // A plain integer is the number of steps
+            // to the first element of the plimit
+            Ok(_) => *plimit.pitches.get(0)?,
+            // A warted name is based on 1200 cents
+            // when there is no prefix wart
+            Err(_) => 1200.0,
+        }
+    };
+    let mut wart_counts: HashMap<_, Exponent> = HashMap::new();
+    while warts.contains(&name.chars().last()?) {
+        let wart = name.pop()?;
+        wart_counts.insert(wart, wart_counts.get(&wart).unwrap_or(&0) + 1);
+    }
+    let n_notes: usize = name.parse().ok()?;
+    let step_size = octave_size / n_notes as f64;
+    Some(
+        plimit
+            .pitches
+            .iter()
+            .zip(warts)
+            .map(|(&pitch, wart)| {
+                let target = pitch * step_size;
+                let nearest = target.round();
+                if let Some(&count) = wart_counts.get(&wart) {
+                    let nearest_sharp = nearest > target;
+                    let (approx_sharp, correction) = if (count % 2) == 0 {
+                        (nearest_sharp, count / 2)
+                    } else {
+                        (!nearest_sharp, (count + 1) / 2)
+                    };
+                    nearest as Exponent
+                        + if approx_sharp {
+                            correction
+                        } else {
+                            -correction
+                        }
+                } else {
+                    nearest as Exponent
+                }
+            })
+            .collect(),
+    )
+}
+
 fn prime_warts() -> HashMap<String, char> {
     let mut result = HashMap::new();
     let mut next_wart = 'a';
