@@ -68,6 +68,20 @@ impl PrimeLimit {
             headings,
         }
     }
+
+    pub fn warts(&self) -> Vec<char> {
+        let mut next_inharmonic_wart = 'q';
+        let mut warts = vec![];
+        for harmonic in &self.headings {
+            if let Some(&c) = PRIME_WARTS.get(harmonic) {
+                warts.push(c);
+            } else {
+                warts.push(next_inharmonic_wart);
+                next_inharmonic_wart = next_char(next_inharmonic_wart);
+            }
+        }
+        warts
+    }
 }
 
 impl FromStr for PrimeLimit {
@@ -96,16 +110,7 @@ impl FromStr for PrimeLimit {
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
     assert_ne!(et, vec![]);
-    let mut next_inharmonic_wart = 'q';
-    let mut warts = vec![];
-    for harmonic in &plimit.headings {
-        if let Some(&c) = PRIME_WARTS.get(harmonic) {
-            warts.push(c);
-        } else {
-            warts.push(next_inharmonic_wart);
-            next_inharmonic_wart = next_char(next_inharmonic_wart);
-        }
-    }
+    let warts = plimit.warts();
     let mut name = et[0].to_string();
     if plimit.headings[0] != "2" {
         name.insert(0, warts[0]);
