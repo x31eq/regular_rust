@@ -1,13 +1,15 @@
-use crate::cangwu::CangwuTemperament;
 use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{console, Element, Event, HtmlInputElement};
 
-use super::cangwu;
+use super::cangwu::{
+    ambiguous_et, get_equal_temperaments, higher_rank_search,
+    CangwuTemperament,
+};
 use super::ratio::get_ratio_or_ket_string;
-use super::te;
+use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
 use super::{
@@ -118,11 +120,8 @@ pub fn regular_temperament_search(
     } else {
         4 * (dimension as f64).sqrt().floor() as usize
     };
-    let mappings = cangwu::get_equal_temperaments(
-        &limit.pitches,
-        ek,
-        n_results + safety,
-    );
+    let mappings =
+        get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
     web.list.set_inner_html("");
     web.set_body_class("show-list");
@@ -163,7 +162,7 @@ pub fn regular_temperament_search(
     for rank in 2..dimension {
         let eff_n_results =
             n_results + if rank == dimension - 1 { 0 } else { safety };
-        rts = cangwu::higher_rank_search(
+        rts = higher_rank_search(
             &limit.pitches,
             &mappings,
             &rts,
@@ -391,7 +390,7 @@ fn rt_row(
     let link = web.document.create_element("a")?;
 
     // Setup the link as a link
-    let rt = te::TETemperament::new(&limit.pitches, &mapping);
+    let rt = TETemperament::new(&limit.pitches, &mapping);
     link.set_attribute("href", &rt_url(&rt, &limit.label))?;
 
     // Set data attributes so we get at the mapping later
@@ -433,7 +432,7 @@ fn rt_row(
     Ok(row)
 }
 
-fn rt_url(rt: &te::TETemperament, label: &str) -> String {
+fn rt_url(rt: &TETemperament, label: &str) -> String {
     let octaves = map(|m| m[0], &rt.melody);
     format!(
         "#page=rt&ets={}&limit={}&key={}",
@@ -449,7 +448,7 @@ fn show_rt(
     limit: PrimeLimit,
     mapping: Mapping,
 ) -> Exceptionable {
-    let rt = te::TETemperament::new(&limit.pitches, &mapping);
+    let rt = TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
         if let Some(name) = rt.name(&limit) {
@@ -519,7 +518,7 @@ fn show_rt(
     }
 
     // Make another RT object to get the generator tunings
-    let rt = te::TETemperament::new(&limit.pitches, &redmap);
+    let rt = TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
         write_float_row(&web, &table, &rt.tuning, 4)?;
     }
@@ -537,7 +536,7 @@ fn show_rt(
 }
 
 /// An accordion is an instrument with buttons
-fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
+fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
     let accordion = match web.element("rt-accordion") {
         Some(result) => result,
         None => return Ok(()),
@@ -615,7 +614,7 @@ fn show_accordion(web: &WebContext, rt: &te::TETemperament) -> Exceptionable {
 
 fn accordion_button(
     web: &WebContext,
-    rt: &te::TETemperament,
+    rt: &TETemperament,
     pitch: &[Exponent],
 ) -> Result<Element, JsValue> {
     let button = web.document.create_element("button")?;
