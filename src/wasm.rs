@@ -73,7 +73,6 @@ fn process_hash() {
                                     &key,
                                 )
                             {
-                                web.log(&format!("rt: {:?}", rt.melody));
                                 web.unwrap(
                                     crate::wasm::show_rt(
                                         &web, limit, rt.melody,
@@ -85,12 +84,29 @@ fn process_hash() {
                             } else {
                                 web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                             }
+                        } else {
+                            web.log("Unable to parse key");
                         }
                     } else {
                         web.log("Unable to parse limit");
                     }
                 } else {
-                    web.log("Unable to parse key");
+                    let ets: Vec<String> =
+                        ets.split('_').map(|s| s.to_string()).collect();
+                    if let Some(rt) =
+                        CangwuTemperament::from_et_names(&limit, &ets)
+                    {
+                        web.unwrap(
+                            crate::wasm::show_rt(
+                                &web,
+                                limit.clone(),
+                                rt.melody,
+                            ),
+                            "Failed to show the regular temperament",
+                        );
+                    } else {
+                        web.log(&format!("Unable to make temperament class from {:?}, {ets:?}", limit.pitches));
+                    }
                 }
             } else {
                 web.log("Unable to parse ETs")

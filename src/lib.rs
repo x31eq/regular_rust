@@ -25,6 +25,7 @@ lazy_static! {
     static ref PRIME_WARTS: HashMap<String, char> = prime_warts();
 }
 
+#[derive(Debug, Clone)]
 pub struct PrimeLimit {
     /// Something used for printing
     pub label: String,
