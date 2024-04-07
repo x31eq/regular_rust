@@ -24,8 +24,7 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
-    let mut params = HashMap::new();
-    params.insert("page", "pregular".to_string());
+    let mut params = HashMap::from([("page", "pregular".to_string())]);
     // The search will fail if this is missing, but the URL should make it clear why
     if let Some(limit) = web.input_value("prime-limit") {
         params.insert("limit", limit.trim().to_string());
@@ -38,7 +37,8 @@ pub fn form_submit(evt: Event) {
         params.insert("nresults", n_results.trim().to_string());
     }
     let hash = web.hash_from_params(&params);
-    let _ = web.document
+    let _ = web
+        .document
         .location()
         .expect("no location")
         .set_hash(&hash);
@@ -55,8 +55,7 @@ fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
                         .parse()
                     {
                         regular_temperament_search(limit, eka, nresults);
-                    }
-                    else {
+                    } else {
                         web.log("Failed to parse n of results");
                     }
                 } else {
@@ -90,10 +89,10 @@ fn process_hash() {
     match params.get("page").map(String::as_str) {
         Some("rt") => {
             rt_action(&web, &params);
-        },
+        }
         Some("pregular") => {
             pregular_action(&web, &params);
-        },
+        }
         _ => (),
     }
 }
