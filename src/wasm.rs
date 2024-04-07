@@ -455,7 +455,7 @@ fn rt_row(
 
     // Setup the link as a link
     let rt = TETemperament::new(&limit.pitches, &mapping);
-    link.set_attribute("href", &rt_url(&limit, &rt))?;
+    link.set_attribute("href", &rt_url(&web, &limit, &rt))?;
 
     let octaves = map(|et| et_name(&limit, et), &mapping);
     let ets = octaves.join(" & ");
@@ -488,9 +488,18 @@ fn rt_row(
     Ok(row)
 }
 
-fn rt_url(plimit: &PrimeLimit, rt: &TETemperament) -> String {
+fn rt_url(
+    web: &WebContext,
+    plimit: &PrimeLimit,
+    rt: &TETemperament,
+) -> String {
     let ets = map(|et| et_name(&plimit, &et), &rt.melody);
-    format!("#page=rt&ets={}&limit={}", &ets.join("_"), &plimit.label,)
+    let params = HashMap::from([
+        ("page", "rt".to_string()),
+        ("ets", ets.join("_")),
+        ("limit", plimit.label.clone()),
+    ]);
+    web.hash_from_params(&params)
 }
 
 /// Set the fields about the regular temperament
