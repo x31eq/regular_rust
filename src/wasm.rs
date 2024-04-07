@@ -51,9 +51,10 @@ fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
             if let Some(eka) = params.get("error") {
                 web.set_input_value("prime-eka", &eka);
                 if let Ok(eka) = eka.parse() {
-                    let default_results = "10".to_string(); // yay ownership
-                    let nresults =
-                        params.get("nresults").unwrap_or(&default_results);
+                    let nresults = params
+                        .get("nresults")
+                        .cloned()
+                        .unwrap_or("10".to_string());
                     web.set_input_value("n-results", &nresults.to_string());
                     if let Ok(nresults) = nresults.parse() {
                         regular_temperament_search(limit, eka, nresults);
