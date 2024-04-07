@@ -586,13 +586,25 @@ fn nofives() {
 #[test]
 fn marvel_unison_vectors() {
     let limit = super::PrimeLimit::new(11);
-    let marvel = make_marvel(&limit);
+    let lt = make_marvel(&limit);
     let n_results = 5;
-    let uvs = marvel.unison_vectors(n_results);
+    let uvs = lt.unison_vectors(n_results);
     assert!(uvs.len() <= n_results);
     assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
     assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
     assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
+}
+
+#[test]
+fn porcupine_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let lt = make_porcupine(&limit);
+    let n_results = 5;
+    let uvs = lt.unison_vectors(n_results);
+    assert!(uvs.len() <= n_results);
+    assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
+    assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
+    assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
 }
 
 #[test]
