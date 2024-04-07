@@ -47,7 +47,7 @@ pub fn form_submit(evt: Event) {
 fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
     if let Some(limit) = params.get("limit") {
         if let Ok(limit) = limit.parse() {
-            if let Some(eka) = params.get("eka") {
+            if let Some(eka) = params.get("error") {
                 if let Ok(eka) = eka.parse() {
                     if let Ok(nresults) = params
                         .get("nresults")
@@ -55,6 +55,9 @@ fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
                         .parse()
                     {
                         regular_temperament_search(limit, eka, nresults);
+                    }
+                    else {
+                        web.log("Failed to parse n of results");
                     }
                 } else {
                     web.log("Unrecognized badness parameter");
