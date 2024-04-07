@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
-use web_sys::{console, Element, Event, HtmlInputElement};
 use web_sys::js_sys::decode_uri;
+use web_sys::{console, Element, Event, HtmlInputElement};
 
 use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
@@ -54,25 +54,7 @@ fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
     if params.get("page") == Some(&"rt".to_string()) {
-        if let Some((ets, limit, key)) = parse_rt_params(&params) {
-            if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                if let Some(rt) = match key {
-                    Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-                    None => rt_from_et_names(&limit, &ets),
-                } {
-                    web.unwrap(
-                        show_rt(&web, &limit, rt.melody),
-                        "Failed to show the regular temperament",
-                    );
-                    // hide the list that got enabled by that function
-                    web.set_body_class("show-temperament");
-                } else {
-                    web.log("Unable to make temperament class");
-                }
-            } else {
-                web.log("Unable to parse limit");
-            }
-        }
+        rt_action(&web, &params);
     }
 }
 
@@ -83,6 +65,28 @@ fn parse_rt_params(
     let limit = params.get("limit")?;
     let key = params.get("key");
     Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
+}
+
+fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
+    if let Some((ets, limit, key)) = parse_rt_params(&params) {
+        if let Ok(limit) = limit.parse::<PrimeLimit>() {
+            if let Some(rt) = match key {
+                Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+                None => rt_from_et_names(&limit, &ets),
+            } {
+                web.unwrap(
+                    show_rt(&web, &limit, rt.melody),
+                    "Failed to show the regular temperament",
+                );
+                // hide the list that got enabled by that function
+                web.set_body_class("show-temperament");
+            } else {
+                web.log("Unable to make temperament class");
+            }
+        } else {
+            web.log("Unable to parse limit");
+        }
+    }
 }
 
 fn rt_from_ets_and_key<'a>(
