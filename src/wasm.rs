@@ -55,31 +55,18 @@ fn process_hash() {
     if params.get("page") == Some(&"rt".to_string()) {
         if let Some((ets, limit, key)) = parse_rt_params(&params) {
             if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                if let Some(key) = key {
-                    if let Some(rt) = rt_from_ets_and_key(&limit, &ets, &key)
-                    {
-                        web.unwrap(
-                            show_rt(&web, &limit, rt.melody),
-                            "Failed to show the regular temperament",
-                        );
-                        // hide the list that got enabled by that function
-                        web.set_body_class("show-temperament");
-                    } else {
-                        web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
-                    }
+                if let Some(rt) = match key {
+                    Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+                    None => rt_from_et_names(&limit, &ets),
+                } {
+                    web.unwrap(
+                        show_rt(&web, &limit, rt.melody),
+                        "Failed to show the regular temperament",
+                    );
+                    // hide the list that got enabled by that function
+                    web.set_body_class("show-temperament");
                 } else {
-                    let ets: Vec<String> =
-                        ets.split('_').map(|s| s.to_string()).collect();
-                    if let Some(rt) =
-                        CangwuTemperament::from_et_names(&limit, &ets)
-                    {
-                        web.unwrap(
-                            show_rt(&web, &limit, rt.melody),
-                            "Failed to show the regular temperament",
-                        );
-                    } else {
-                        web.log(&format!("Unable to make temperament class from {:?}, {ets:?}", limit.pitches));
-                    }
+                    web.log("Unable to make temperament class");
                 }
             } else {
                 web.log("Unable to parse limit");
@@ -113,6 +100,14 @@ fn rt_from_ets_and_key<'a>(
         .collect::<Result<Vec<_>, _>>()
         .ok()?;
     CangwuTemperament::from_ets_and_key(&limit.pitches, &ets, &key)
+}
+
+fn rt_from_et_names<'a>(
+    limit: &'a PrimeLimit,
+    ets: &str,
+) -> Option<CangwuTemperament<'a>> {
+    let ets: Vec<String> = ets.split('_').map(|s| s.to_string()).collect();
+    CangwuTemperament::from_et_names(&limit, &ets)
 }
 
 pub fn regular_temperament_search(
