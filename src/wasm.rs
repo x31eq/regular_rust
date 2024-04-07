@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
-use web_sys::{console, Element, Event, HtmlInputElement};
 use web_sys::js_sys::decode_uri;
+use web_sys::{console, Element, Event, HtmlInputElement};
 
 use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
@@ -24,19 +24,55 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
-    let limit = web.unwrap(
-        web.input_value("prime-limit").trim().parse(),
-        "Unrecognized prime limit",
-    );
-    let eka = web.unwrap(
-        web.input_value("prime-eka").trim().parse(),
-        "Unrecognized badness parameter",
-    );
-    let nresults = web.unwrap(
-        web.input_value("n-results").trim().parse(),
-        "Unrecognized number of results",
-    );
-    regular_temperament_search(limit, eka, nresults)
+    let mut params = HashMap::from([("page", "pregular".to_string())]);
+    // The search will fail if this is missing, but the URL should make it clear why
+    if let Some(limit) = web.input_value("prime-limit") {
+        params.insert("limit", limit.trim().to_string());
+    }
+    // Same with this
+    if let Some(eka) = web.input_value("prime-eka") {
+        params.insert("error", eka.trim().to_string());
+    }
+    if let Some(n_results) = web.input_value("n-results") {
+        params.insert("nresults", n_results.trim().to_string());
+    }
+    let hash = web.hash_from_params(&params);
+    let _ = web
+        .document
+        .location()
+        .expect("no location")
+        .set_hash(&hash);
+}
+
+fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
+    if let Some(limit) = params.get("limit") {
+        web.set_input_value("prime-limit", &limit);
+        if let Ok(limit) = limit.parse() {
+            if let Some(eka) = params.get("error") {
+                web.set_input_value("prime-eka", &eka);
+                if let Ok(eka) = eka.parse() {
+                    let nresults = params
+                        .get("nresults")
+                        .cloned()
+                        .unwrap_or("10".to_string());
+                    web.set_input_value("n-results", &nresults.to_string());
+                    if let Ok(nresults) = nresults.parse() {
+                        regular_temperament_search(limit, eka, nresults);
+                    } else {
+                        web.log_error("Failed to parse n of results");
+                    }
+                } else {
+                    web.log_error("Unrecognized badness parameter");
+                }
+            } else {
+                web.log_error("No target error");
+            }
+        } else {
+            web.log_error("Unrecognized prime limit");
+        }
+    } else {
+        web.log_error("No prime limit");
+    }
 }
 
 #[wasm_bindgen(start)]
@@ -53,26 +89,14 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    if params.get("page") == Some(&"rt".to_string()) {
-        if let Some((ets, limit, key)) = parse_rt_params(&params) {
-            if let Ok(limit) = limit.parse::<PrimeLimit>() {
-                if let Some(rt) = match key {
-                    Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-                    None => rt_from_et_names(&limit, &ets),
-                } {
-                    web.unwrap(
-                        show_rt(&web, &limit, rt.melody),
-                        "Failed to show the regular temperament",
-                    );
-                    // hide the list that got enabled by that function
-                    web.set_body_class("show-temperament");
-                } else {
-                    web.log("Unable to make temperament class");
-                }
-            } else {
-                web.log("Unable to parse limit");
-            }
+    match params.get("page").map(String::as_str) {
+        Some("rt") => {
+            rt_action(&web, &params);
         }
+        Some("pregular") => {
+            pregular_action(&web, &params);
+        }
+        _ => (),
     }
 }
 
@@ -83,6 +107,28 @@ fn parse_rt_params(
     let limit = params.get("limit")?;
     let key = params.get("key");
     Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
+}
+
+fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
+    if let Some((ets, limit, key)) = parse_rt_params(&params) {
+        web.set_input_value("prime-limit", &limit);
+        if let Ok(limit) = limit.parse::<PrimeLimit>() {
+            if let Some(rt) = match key {
+                Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+                None => rt_from_et_names(&limit, &ets),
+            } {
+                web.unwrap(
+                    show_rt(&web, &limit, rt.melody),
+                    "Failed to show the regular temperament",
+                );
+                // hide the list that got enabled by that function
+            } else {
+                web.log_error("Unable to make temperament class");
+            }
+        } else {
+            web.log_error("Unable to parse limit");
+        }
+    }
 }
 
 fn rt_from_ets_and_key<'a>(
@@ -209,14 +255,24 @@ impl WebContext {
         self.document.get_element_by_id(id)
     }
 
-    pub fn input_value(&self, id: &str) -> String {
-        let element =
-            self.expect(self.element(id), "Unable to find input element");
-        self.expect(
-            element.dyn_ref::<HtmlInputElement>(),
-            "Element isn't an input element",
-        )
-        .value()
+    pub fn input_value(&self, id: &str) -> Option<String> {
+        let element = self.element(id)?;
+        let input_element = element.dyn_ref::<HtmlInputElement>()?;
+        Some(input_element.value())
+    }
+
+    /// Set an input if found: log errors and carry on
+    pub fn set_input_value(&self, id: &str, value: &str) {
+        if let Some(element) = self.element(id) {
+            if let Some(input_element) = element.dyn_ref::<HtmlInputElement>()
+            {
+                input_element.set_value(value);
+            } else {
+                self.log_error("Not an input elemenet")
+            }
+        } else {
+            self.log_error("Element not found")
+        }
     }
 
     fn new_or_emptied_element(
@@ -252,8 +308,23 @@ impl WebContext {
         params
     }
 
-    pub fn log(&self, message: &str) {
-        console::log_1(&message.into());
+    fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
+        let mut result = params
+            .iter()
+            .map(|(&k, v)| {
+                let mut field = k.to_string();
+                field.push('=');
+                field.push_str(v);
+                field.to_string()
+            })
+            .collect::<Vec<String>>()
+            .join("&");
+        result.insert(0, '#');
+        result
+    }
+
+    pub fn log_error(&self, message: &str) {
+        console::error_1(&message.into());
     }
 
     /// Unwrap a value with the potential of an exception
@@ -261,14 +332,6 @@ impl WebContext {
         match result {
             Ok(value) => value,
             Err(_) => self.fail(message),
-        }
-    }
-
-    /// Raise an exception on a none
-    pub fn expect<T>(&self, result: Option<T>, message: &str) -> T {
-        match result {
-            Some(value) => value,
-            None => self.fail(message),
         }
     }
 
@@ -397,7 +460,7 @@ fn rt_row(
 
     // Setup the link as a link
     let rt = TETemperament::new(&limit.pitches, &mapping);
-    link.set_attribute("href", &rt_url(&limit, &rt))?;
+    link.set_attribute("href", &rt_url(&web, &limit, &rt))?;
 
     let octaves = map(|et| et_name(&limit, et), &mapping);
     let ets = octaves.join(" & ");
@@ -430,9 +493,18 @@ fn rt_row(
     Ok(row)
 }
 
-fn rt_url(plimit: &PrimeLimit, rt: &TETemperament) -> String {
+fn rt_url(
+    web: &WebContext,
+    plimit: &PrimeLimit,
+    rt: &TETemperament,
+) -> String {
     let ets = map(|et| et_name(&plimit, &et), &rt.melody);
-    format!("#page=rt&ets={}&limit={}", &ets.join("_"), &plimit.label,)
+    let params = HashMap::from([
+        ("page", "rt".to_string()),
+        ("ets", ets.join("_")),
+        ("limit", plimit.label.clone()),
+    ]);
+    web.hash_from_params(&params)
 }
 
 /// Set the fields about the regular temperament
@@ -515,7 +587,7 @@ fn show_rt(
         write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
-    web.set_body_class("show-list show-temperament");
+    web.set_body_class("show-temperament");
     if let Some(result) = web.element("regular-temperament") {
         result.scroll_into_view();
     }
