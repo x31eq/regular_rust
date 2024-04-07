@@ -468,7 +468,7 @@ fn rt_row(
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
     } else if let Some(uv) = only_unison_vector(&rt.melody) {
-        let norm_uv = normalize_positive(&limit, uv);
+        let norm_uv = normalize_positive(&limit.pitches, uv);
         let name = get_ratio_or_ket_string(&limit, &norm_uv);
         link.set_text_content(Some(&name));
     } else {

@@ -241,9 +241,8 @@ impl fmt::Display for ParseLimitError {
     }
 }
 
-pub fn normalize_positive(limit: &PrimeLimit, rsvec: ETMap) -> ETMap {
+pub fn normalize_positive(limit: &[Cents], rsvec: ETMap) -> ETMap {
     let pitch_width = limit
-        .pitches
         .iter()
         .zip(rsvec.iter())
         .fold(0.0, |acc, (&x, &y)| acc + x * (y as Cents));
