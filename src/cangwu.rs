@@ -122,16 +122,19 @@ impl<'a> CangwuTemperament<'a> {
         vec![]
     }
 
+    /// Find unison vectors that this temperament class tempers out.
+    /// Might not find as many as you ask for, but will do its best
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
         let n_ets = n_results * 2;
         let n_lts = n_results + n_results / 2;
         let ek = self.badness(0.0) * 10.0;
-        let seed_ets: Vec<ETMap> = get_equal_temperaments(self.plimit, ek, n_ets)
-            .drain(..)
-            .filter(|et| !self.et_belongs(et))
-            .collect();
+        let seed_ets: Vec<ETMap> =
+            get_equal_temperaments(self.plimit, ek, n_ets)
+                .drain(..)
+                .filter(|et| !self.et_belongs(et))
+                .collect();
         let mut rts = vec![self.melody.clone()];
         for new_rank in (rank + 1)..dimension {
             rts = higher_rank_search(
