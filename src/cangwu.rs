@@ -137,7 +137,6 @@ impl<'a> CangwuTemperament<'a> {
                 ek,
                 n_results,
             );
-            println!("{:?}", rts);
         }
         rts.iter().filter_map(|rt| only_unison_vector(rt)).collect()
     }
@@ -568,6 +567,14 @@ fn nofives() {
     let limit = super::PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = get_equal_temperaments(&limit.pitches, 1.0, 5);
     assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
+}
+
+#[test]
+fn marvel_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let marvel = make_marvel(&limit);
+    let uvs = marvel.unison_vectors(10);
+    assert_eq!(uvs, vec![vec![1, 22]]);
 }
 
 #[test]
