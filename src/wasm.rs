@@ -3,6 +3,7 @@ use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::{throw_str, JsCast};
 use web_sys::{console, Element, Event, HtmlInputElement};
+use web_sys::js_sys::decode_uri;
 
 use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
@@ -238,9 +239,12 @@ impl WebContext {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(query) = location.hash() {
-                for param in query.trim_start_matches('#').split('&') {
-                    if let Some((k, v)) = param.split_once('=') {
-                        params.insert(k.to_string(), v.to_string());
+                if let Ok(query) = decode_uri(&query) {
+                    let query: String = query.into();
+                    for param in query.trim_start_matches('#').split('&') {
+                        if let Some((k, v)) = param.split_once('=') {
+                            params.insert(k.to_string(), v.to_string());
+                        }
                     }
                 }
             }

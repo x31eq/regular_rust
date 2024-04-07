@@ -226,7 +226,10 @@ fn name_4efggg() {
 #[test]
 fn name_chinese_wart() {
     let limit = PrimeLimit::new(101);
-    let et = vec![62, 98, 144, 174, 214, 229, 253, 263, 280, 301, 307, 323, 332, 336, 344, 355, 364, 367, 376, 381, 383, 390, 395, 401, 409, 412];
+    let et = vec![
+        62, 98, 144, 174, 214, 229, 253, 263, 280, 301, 307, 323, 332, 336,
+        344, 355, 364, 367, 376, 381, 383, 390, 395, 401, 409, 412,
+    ];
     let name = warted_et_name(&limit, &et);
     assert_eq!(name, "62rsvw〇");
     assert_eq!(Some(et), et_from_name(&limit, &name));
