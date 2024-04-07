@@ -589,6 +589,7 @@ fn marvel_unison_vectors() {
     assert!(uvs.len() <= n_results);
     assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
     assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
+    assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
 }
 
 #[test]
