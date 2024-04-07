@@ -56,39 +56,16 @@ fn process_hash() {
         if let Some((ets, limit, key)) = parse_rt_params(&params) {
             if let Ok(limit) = limit.parse::<PrimeLimit>() {
                 if let Some(key) = key {
-                    if let Ok(ets) = ets
-                        .split('_')
-                        .map(Exponent::from_str)
-                        .collect::<Result<Vec<_>, _>>()
+                    if let Some(rt) = rt_from_ets_and_key(&limit, &ets, &key)
                     {
-                        if let Ok(key) = key
-                            .split('_')
-                            .map(Exponent::from_str)
-                            .collect::<Result<Vec<_>, _>>()
-                        {
-                            if let Some(rt) =
-                                CangwuTemperament::from_ets_and_key(
-                                    &limit.pitches.clone(),
-                                    &ets,
-                                    &key,
-                                )
-                            {
-                                web.unwrap(
-                                    crate::wasm::show_rt(
-                                        &web, limit, rt.melody,
-                                    ),
-                                    "Failed to show the regular temperament",
-                                );
-                                // hide the list that got enabled by that function
-                                web.set_body_class("show-temperament");
-                            } else {
-                                web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
-                            }
-                        } else {
-                            web.log("Unable to parse key");
-                        }
+                        web.unwrap(
+                            show_rt(&web, &limit, rt.melody),
+                            "Failed to show the regular temperament",
+                        );
+                        // hide the list that got enabled by that function
+                        web.set_body_class("show-temperament");
                     } else {
-                        web.log("Unable to parse limit");
+                        web.log(&format!("Unable to make temperament class from {:?}, {ets:?}, {key:?}", limit.pitches));
                     }
                 } else {
                     let ets: Vec<String> =
@@ -97,11 +74,7 @@ fn process_hash() {
                         CangwuTemperament::from_et_names(&limit, &ets)
                     {
                         web.unwrap(
-                            crate::wasm::show_rt(
-                                &web,
-                                limit.clone(),
-                                rt.melody,
-                            ),
+                            show_rt(&web, &limit, rt.melody),
                             "Failed to show the regular temperament",
                         );
                     } else {
@@ -109,7 +82,7 @@ fn process_hash() {
                     }
                 }
             } else {
-                web.log("Unable to parse ETs")
+                web.log("Unable to parse limit");
             }
         }
     }
@@ -122,6 +95,24 @@ fn parse_rt_params(
     let limit = params.get("limit")?;
     let key = params.get("key");
     Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
+}
+
+fn rt_from_ets_and_key<'a>(
+    limit: &'a PrimeLimit,
+    ets: &str,
+    key: &str,
+) -> Option<CangwuTemperament<'a>> {
+    let ets = ets
+        .split('_')
+        .map(Exponent::from_str)
+        .collect::<Result<Vec<_>, _>>()
+        .ok()?;
+    let key = key
+        .split('_')
+        .map(Exponent::from_str)
+        .collect::<Result<Vec<_>, _>>()
+        .ok()?;
+    CangwuTemperament::from_ets_and_key(&limit.pitches, &ets, &key)
 }
 
 pub fn regular_temperament_search(
@@ -442,17 +433,13 @@ fn rt_row(
 
 fn rt_url(plimit: &PrimeLimit, rt: &TETemperament) -> String {
     let ets = map(|et| et_name(&plimit, &et), &rt.melody);
-    format!(
-        "#page=rt&ets={}&limit={}",
-        &ets.join("_"),
-        &plimit.label,
-    )
+    format!("#page=rt&ets={}&limit={}", &ets.join("_"), &plimit.label,)
 }
 
 /// Set the fields about the regular temperament
 fn show_rt(
     web: &WebContext,
-    limit: PrimeLimit,
+    limit: &PrimeLimit,
     mapping: Mapping,
 ) -> Exceptionable {
     let rt = TETemperament::new(&limit.pitches, &mapping);
