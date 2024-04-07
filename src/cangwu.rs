@@ -127,7 +127,7 @@ impl<'a> CangwuTemperament<'a> {
         let dimension = self.plimit.len();
         let n_ets = n_results + n_results / 5;
         let n_lts = n_results + n_results / 10;
-        let ek = self.badness(0.0);
+        let ek = self.badness(0.0) * 10.0;
         let seed_ets: Vec<ETMap> = get_equal_temperaments(self.plimit, ek, n_ets)
             .drain(..)
             .filter(|et| !self.et_belongs(et))
