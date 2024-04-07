@@ -46,14 +46,16 @@ pub fn form_submit(evt: Event) {
 
 fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
     if let Some(limit) = params.get("limit") {
+        web.set_input_value("prime-limit", &limit);
         if let Ok(limit) = limit.parse() {
             if let Some(eka) = params.get("error") {
+                web.set_input_value("prime-eka", &eka);
                 if let Ok(eka) = eka.parse() {
-                    if let Ok(nresults) = params
-                        .get("nresults")
-                        .unwrap_or(&"10".to_string())
-                        .parse()
-                    {
+                    let default_results = "10".to_string(); // yay ownership
+                    let nresults =
+                        params.get("nresults").unwrap_or(&default_results);
+                    web.set_input_value("n-results", &nresults.to_string());
+                    if let Ok(nresults) = nresults.parse() {
                         regular_temperament_search(limit, eka, nresults);
                     } else {
                         web.log("Failed to parse n of results");
@@ -108,6 +110,7 @@ fn parse_rt_params(
 
 fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
     if let Some((ets, limit, key)) = parse_rt_params(&params) {
+        web.set_input_value("prime-limit", &limit);
         if let Ok(limit) = limit.parse::<PrimeLimit>() {
             if let Some(rt) = match key {
                 Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
@@ -260,6 +263,20 @@ impl WebContext {
             )
             .value(),
         )
+    }
+
+    /// Set an input if found: log errors and carry on
+    pub fn set_input_value(&self, id: &str, value: &str) {
+        if let Some(element) = self.element(id) {
+            if let Some(input_element) = element.dyn_ref::<HtmlInputElement>()
+            {
+                input_element.set_value(value);
+            } else {
+                self.log("Not an input elemenet")
+            }
+        } else {
+            self.log("Element not found")
+        }
     }
 
     fn new_or_emptied_element(
