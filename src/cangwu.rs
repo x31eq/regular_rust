@@ -125,17 +125,22 @@ impl<'a> CangwuTemperament<'a> {
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let n_ets = n_results + n_results / 10;
+        let n_ets = n_results + n_results / 5;
+        let n_lts = n_results + n_results / 10;
         let ek = self.badness(0.0);
         let seed_ets = get_equal_temperaments(self.plimit, ek, n_ets);
         let mut rts = vec![self.melody.clone()];
-        for _ in rank..(dimension - 1) {
+        for new_rank in (rank + 1)..dimension {
             rts = higher_rank_search(
                 self.plimit,
                 &seed_ets,
                 &rts,
                 ek,
-                n_results,
+                if new_rank == dimension - 1 {
+                    n_results
+                } else {
+                    n_lts
+                },
             );
         }
         rts.iter()
