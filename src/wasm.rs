@@ -119,7 +119,6 @@ fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
                     "Failed to show the regular temperament",
                 );
                 // hide the list that got enabled by that function
-                web.set_body_class("show-temperament");
             } else {
                 web.log("Unable to make temperament class");
             }
@@ -575,7 +574,7 @@ fn show_rt(
         write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
     }
 
-    web.set_body_class("show-list show-temperament");
+    web.set_body_class("show-temperament");
     if let Some(result) = web.element("regular-temperament") {
         result.scroll_into_view();
     }
