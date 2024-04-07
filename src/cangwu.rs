@@ -128,7 +128,10 @@ impl<'a> CangwuTemperament<'a> {
         let n_ets = n_results + n_results / 5;
         let n_lts = n_results + n_results / 10;
         let ek = self.badness(0.0);
-        let seed_ets = get_equal_temperaments(self.plimit, ek, n_ets);
+        let seed_ets: Vec<ETMap> = get_equal_temperaments(self.plimit, ek, n_ets)
+            .drain(..)
+            .filter(|et| !self.et_belongs(et))
+            .collect();
         let mut rts = vec![self.melody.clone()];
         for new_rank in (rank + 1)..dimension {
             rts = higher_rank_search(
