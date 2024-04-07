@@ -6,8 +6,8 @@ use na::DMatrix;
 use super::temperament_class::{key_to_mapping, TemperamentClass};
 use super::uv::only_unison_vector;
 use super::{
-    et_from_name, map, prime_mapping, Cents, ETMap, ETSlice, Exponent,
-    Mapping, PrimeLimit, PriorityQueue,
+    et_from_name, map, normalize_positive, prime_mapping, Cents, ETMap,
+    ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
 };
 use std::collections::HashSet;
 
@@ -138,7 +138,10 @@ impl<'a> CangwuTemperament<'a> {
                 n_results,
             );
         }
-        rts.iter().filter_map(|rt| only_unison_vector(rt)).collect()
+        rts.iter()
+            .filter_map(|rt| only_unison_vector(rt))
+            .map(|uv| normalize_positive(self.plimit, uv))
+            .collect()
     }
 }
 
