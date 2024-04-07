@@ -34,7 +34,7 @@ pub fn form_submit(evt: Event) {
     if let Some(eka) = web.input_value("prime-eka") {
         params.insert("error", eka.trim().to_string());
     }
-    if let Some(n_results) = web.input_value("nresults") {
+    if let Some(n_results) = web.input_value("n-results") {
         params.insert("nresults", n_results.trim().to_string());
     }
     let hash = web.hash_from_params(&params);
