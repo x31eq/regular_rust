@@ -24,19 +24,49 @@ type Exceptionable = Result<(), JsValue>;
 pub fn form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
-    let limit = web.unwrap(
-        web.input_value("prime-limit").trim().parse(),
-        "Unrecognized prime limit",
-    );
-    let eka = web.unwrap(
-        web.input_value("prime-eka").trim().parse(),
-        "Unrecognized badness parameter",
-    );
-    let nresults = web.unwrap(
-        web.input_value("n-results").trim().parse(),
-        "Unrecognized number of results",
-    );
-    regular_temperament_search(limit, eka, nresults)
+    let mut params = HashMap::new();
+    // The search will fail if this is missing, but the URL should make it clear why
+    if let Some(limit) = web.input_value("prime-limit") {
+        params.insert("limit", limit.trim().to_string());
+    }
+    // Same with this
+    if let Some(eka) = web.input_value("prime-eka") {
+        params.insert("error", eka.trim().to_string());
+    }
+    if let Some(n_results) = web.input_value("nresults") {
+        params.insert("nresults", n_results.trim().to_string());
+    }
+    let hash = web.hash_from_params(&params);
+    let _ = web.document
+        .location()
+        .expect("no location")
+        .set_hash(&hash);
+}
+
+fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
+    if let Some(limit) = params.get("limit") {
+        if let Ok(limit) = limit.parse() {
+            if let Some(eka) = params.get("eka") {
+                if let Ok(eka) = eka.parse() {
+                    if let Ok(nresults) = params
+                        .get("nresults")
+                        .unwrap_or(&"10".to_string())
+                        .parse()
+                    {
+                        regular_temperament_search(limit, eka, nresults);
+                    }
+                } else {
+                    web.log("Unrecognized badness parameter");
+                }
+            } else {
+                web.log("No target error");
+            }
+        } else {
+            web.log("Unrecognized prime limit");
+        }
+    } else {
+        web.log("No prime limit");
+    }
 }
 
 #[wasm_bindgen(start)]
@@ -53,8 +83,14 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    if params.get("page") == Some(&"rt".to_string()) {
-        rt_action(&web, &params);
+    match params.get("page").map(String::as_str) {
+        Some("rt") => {
+            rt_action(&web, &params);
+        },
+        Some("pregular") => {
+            pregular_action(&web, &params);
+        },
+        _ => (),
     }
 }
 
@@ -213,14 +249,15 @@ impl WebContext {
         self.document.get_element_by_id(id)
     }
 
-    pub fn input_value(&self, id: &str) -> String {
-        let element =
-            self.expect(self.element(id), "Unable to find input element");
-        self.expect(
-            element.dyn_ref::<HtmlInputElement>(),
-            "Element isn't an input element",
+    pub fn input_value(&self, id: &str) -> Option<String> {
+        let element = self.element(id)?;
+        Some(
+            self.expect(
+                element.dyn_ref::<HtmlInputElement>(),
+                "Element isn't an input element",
+            )
+            .value(),
         )
-        .value()
     }
 
     fn new_or_emptied_element(
@@ -254,6 +291,21 @@ impl WebContext {
             }
         }
         params
+    }
+
+    fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
+        let mut result = params
+            .iter()
+            .map(|(&k, v)| {
+                let mut field = k.to_string();
+                field.push('=');
+                field.push_str(v);
+                field.to_string()
+            })
+            .collect::<Vec<String>>()
+            .join("&");
+        result.insert(0, '#');
+        result
     }
 
     pub fn log(&self, message: &str) {
