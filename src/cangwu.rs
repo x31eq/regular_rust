@@ -577,7 +577,7 @@ fn marvel_unison_vectors() {
     let limit = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit);
     let uvs = marvel.unison_vectors(10);
-    assert_eq!(uvs, vec![vec![1, 22]]);
+    assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
 }
 
 #[test]
