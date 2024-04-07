@@ -4,6 +4,7 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::temperament_class::{key_to_mapping, TemperamentClass};
+use super::uv::only_unison_vector;
 use super::{
     et_from_name, map, prime_mapping, Cents, ETMap, ETSlice, Exponent,
     Mapping, PrimeLimit, PriorityQueue,
@@ -119,6 +120,26 @@ impl<'a> CangwuTemperament<'a> {
         // Return an empty result if we couldn't find anything
         // in a reasonable amount of time
         vec![]
+    }
+
+    pub fn unison_vectors(&self, n_results: usize) -> Mapping {
+        let rank = self.melody.len();
+        let dimension = self.plimit.len();
+        let n_ets = n_results + n_results / 10;
+        let ek = self.badness(0.0);
+        let seed_ets = get_equal_temperaments(self.plimit, ek, n_ets);
+        let mut rts = vec![self.melody.clone()];
+        for _ in rank..(dimension - 1) {
+            rts = higher_rank_search(
+                self.plimit,
+                &seed_ets,
+                &rts,
+                ek,
+                n_results,
+            );
+            println!("{:?}", rts);
+        }
+        rts.iter().filter_map(|rt| only_unison_vector(rt)).collect()
     }
 }
 
