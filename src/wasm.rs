@@ -59,19 +59,19 @@ fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
                     if let Ok(nresults) = nresults.parse() {
                         regular_temperament_search(limit, eka, nresults);
                     } else {
-                        web.log("Failed to parse n of results");
+                        web.log_error("Failed to parse n of results");
                     }
                 } else {
-                    web.log("Unrecognized badness parameter");
+                    web.log_error("Unrecognized badness parameter");
                 }
             } else {
-                web.log("No target error");
+                web.log_error("No target error");
             }
         } else {
-            web.log("Unrecognized prime limit");
+            web.log_error("Unrecognized prime limit");
         }
     } else {
-        web.log("No prime limit");
+        web.log_error("No prime limit");
     }
 }
 
@@ -123,10 +123,10 @@ fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
                 );
                 // hide the list that got enabled by that function
             } else {
-                web.log("Unable to make temperament class");
+                web.log_error("Unable to make temperament class");
             }
         } else {
-            web.log("Unable to parse limit");
+            web.log_error("Unable to parse limit");
         }
     }
 }
@@ -257,13 +257,8 @@ impl WebContext {
 
     pub fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
-        Some(
-            self.expect(
-                element.dyn_ref::<HtmlInputElement>(),
-                "Element isn't an input element",
-            )
-            .value(),
-        )
+        let input_element = element.dyn_ref::<HtmlInputElement>()?;
+        Some(input_element.value())
     }
 
     /// Set an input if found: log errors and carry on
@@ -273,10 +268,10 @@ impl WebContext {
             {
                 input_element.set_value(value);
             } else {
-                self.log("Not an input elemenet")
+                self.log_error("Not an input elemenet")
             }
         } else {
-            self.log("Element not found")
+            self.log_error("Element not found")
         }
     }
 
@@ -328,8 +323,8 @@ impl WebContext {
         result
     }
 
-    pub fn log(&self, message: &str) {
-        console::log_1(&message.into());
+    pub fn log_error(&self, message: &str) {
+        console::error_1(&message.into());
     }
 
     /// Unwrap a value with the potential of an exception
@@ -337,14 +332,6 @@ impl WebContext {
         match result {
             Ok(value) => value,
             Err(_) => self.fail(message),
-        }
-    }
-
-    /// Raise an exception on a none
-    pub fn expect<T>(&self, result: Option<T>, message: &str) -> T {
-        match result {
-            Some(value) => value,
-            None => self.fail(message),
         }
     }
 
