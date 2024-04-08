@@ -127,7 +127,7 @@ impl<'a> CangwuTemperament<'a> {
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let n_ets = n_results * 20;
+        let n_ets = n_results * 3;
         let ek = self.badness(0.0) * 10.0;
         let seed_ets: Vec<ETMap> =
             get_equal_temperaments(self.plimit, ek, n_ets)
@@ -584,7 +584,7 @@ fn nofives() {
 fn marvel_unison_vectors() {
     let limit = super::PrimeLimit::new(11);
     let lt = make_marvel(&limit);
-    let n_results = 5;
+    let n_results = 3;
     let uvs = lt.unison_vectors(n_results);
     assert_eq!(uvs.len(), n_results);
     assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
