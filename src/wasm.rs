@@ -565,6 +565,19 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
+    if let Some(field) = web.element("rt-unison-vectors") {
+        field.set_inner_html("");
+        let list = web.document.create_element("ul")?;
+        let tc = CangwuTemperament::new(&limit.pitches, rt.mapping());
+        for uv in tc.unison_vectors(10) {
+            let item = web.document.create_element("li")?;
+            let text = get_ratio_or_ket_string(&limit, &uv);
+            item.set_text_content(Some(&text));
+            list.append_child(&item)?;
+        }
+        field.append_child(&list)?;
+    }
+
     if let Some(field) = web.element("error") {
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
