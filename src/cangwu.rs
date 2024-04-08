@@ -127,14 +127,14 @@ impl<'a> CangwuTemperament<'a> {
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let n_ets = n_results * 2;
-        let n_lts = n_results + n_results / 2;
+        let n_ets = n_results * 20;
         let ek = self.badness(0.0) * 10.0;
         let seed_ets: Vec<ETMap> =
             get_equal_temperaments(self.plimit, ek, n_ets)
                 .drain(..)
                 .filter(|et| !self.et_belongs(et))
                 .collect();
+        println!("ETs: {:?}", seed_ets);
         let mut rts = vec![self.melody.clone()];
         for new_rank in (rank + 1)..dimension {
             rts = higher_rank_search(
@@ -142,12 +142,9 @@ impl<'a> CangwuTemperament<'a> {
                 &seed_ets,
                 &rts,
                 ek,
-                if new_rank == dimension - 1 {
-                    n_results
-                } else {
-                    n_lts
-                },
+                n_results,
             );
+            println!("RTs for rank {}: {:?}", new_rank, rts);
         }
         rts.iter()
             .filter_map(|rt| only_unison_vector(rt))
@@ -589,7 +586,7 @@ fn marvel_unison_vectors() {
     let lt = make_marvel(&limit);
     let n_results = 5;
     let uvs = lt.unison_vectors(n_results);
-    assert!(uvs.len() <= n_results);
+    assert_eq!(uvs.len(), n_results);
     assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
     assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
     assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
@@ -601,7 +598,7 @@ fn porcupine_unison_vectors() {
     let lt = make_porcupine(&limit);
     let n_results = 5;
     let uvs = lt.unison_vectors(n_results);
-    assert!(uvs.len() <= n_results);
+    assert_eq!(uvs.len(), n_results);
     assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
     assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
     assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
