@@ -127,7 +127,7 @@ impl<'a> CangwuTemperament<'a> {
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
-        let n_ets = n_results * 3;
+        let n_ets = n_results + 10;
         let ek = self.badness(0.0) * 10.0;
         let seed_ets: Vec<ETMap> =
             get_equal_temperaments(self.plimit, ek, n_ets)
