@@ -573,7 +573,7 @@ fn show_rt(
         let n_results = if (dimension - rank) == 1 {
             1
         } else {
-            ((dimension - rank) * 2).min(20)
+            (dimension - rank) * 2
         };
         for uv in rt.unison_vectors(n_results) {
             let item = web.document.create_element("li")?;
