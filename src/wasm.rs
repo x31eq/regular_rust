@@ -567,8 +567,7 @@ fn show_rt(
 
     if let Some(field) = web.element("rt-unison-vectors") {
         field.set_inner_html("");
-        let tc = CangwuTemperament::new(&limit.pitches, rt.mapping());
-        let rank = tc.melody.len();
+        let rank = rt.rank();
         let dimension = limit.pitches.len();
         if dimension > 10 {
             field.set_inner_html("<p>Unison vectors are currently too hard to find for big limits</p>");
@@ -581,8 +580,7 @@ fn show_rt(
             } else {
                 5
             };
-            // FIXME better Ek
-            for uv in tc.unison_vectors(1.0, n_results) {
+            for uv in rt.unison_vectors(n_results) {
                 let item = web.document.create_element("li")?;
                 let text = get_ratio_or_ket_string(&limit, &uv);
                 item.set_text_content(Some(&text));

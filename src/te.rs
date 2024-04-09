@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::cangwu::{rms_of_matrix, TenneyWeighted};
+use super::cangwu::{rms_of_matrix, CangwuTemperament, TenneyWeighted};
 use super::temperament_class::TemperamentClass;
 use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 
@@ -135,6 +135,11 @@ impl<'a> TETemperament<'a> {
         let tuning_map = self.pote_tuning_map();
         let comparison = tuning_map.iter().zip(self.plimit.iter());
         comparison.map(|(&x, y)| x - y).collect()
+    }
+
+    pub fn unison_vectors(&self, n_results: usize) -> Mapping {
+        let tc = CangwuTemperament::new(self.plimit, &self.melody);
+        tc.unison_vectors(self.error(), n_results)
     }
 
     /// Fokker block as steps as integers, not pitches.
