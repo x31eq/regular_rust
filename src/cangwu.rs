@@ -133,7 +133,6 @@ impl<'a> CangwuTemperament<'a> {
                 .drain(..)
                 .filter(|et| !self.et_belongs(et))
                 .collect();
-        println!("ETs: {:?}", seed_ets);
         let mut rts = vec![self.melody.clone()];
         for new_rank in (rank + 1)..dimension {
             rts = higher_rank_search(
@@ -143,7 +142,6 @@ impl<'a> CangwuTemperament<'a> {
                 ek,
                 n_results,
             );
-            println!("RTs for rank {}: {:?}", new_rank, rts);
         }
         rts.iter()
             .filter_map(only_unison_vector)
