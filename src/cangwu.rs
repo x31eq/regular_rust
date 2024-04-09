@@ -124,11 +124,10 @@ impl<'a> CangwuTemperament<'a> {
 
     /// Find unison vectors that this temperament class tempers out.
     /// Might not find as many as you ask for, but will do its best
-    pub fn unison_vectors(&self, n_results: usize) -> Mapping {
+    pub fn unison_vectors(&self, ek: f64, n_results: usize) -> Mapping {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
         let n_ets = n_results + 10;
-        let ek = self.badness(0.0) * 10.0;
         let seed_ets: Vec<ETMap> =
             get_equal_temperaments(self.plimit, ek, n_ets)
                 .drain(..)
@@ -585,7 +584,7 @@ fn marvel_unison_vectors() {
     let limit = super::PrimeLimit::new(11);
     let lt = make_marvel(&limit);
     let n_results = 3;
-    let uvs = lt.unison_vectors(n_results);
+    let uvs = lt.unison_vectors(1.5, n_results);
     assert_eq!(uvs.len(), n_results);
     assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
     assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
@@ -597,7 +596,7 @@ fn porcupine_unison_vectors() {
     let limit = super::PrimeLimit::new(11);
     let lt = make_porcupine(&limit);
     let n_results = 5;
-    let uvs = lt.unison_vectors(n_results);
+    let uvs = lt.unison_vectors(8.8, n_results);
     assert_eq!(uvs.len(), n_results);
     assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
     assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));

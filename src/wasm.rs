@@ -581,7 +581,8 @@ fn show_rt(
             } else {
                 5
             };
-            for uv in tc.unison_vectors(n_results) {
+            // FIXME better Ek
+            for uv in tc.unison_vectors(1.0, n_results) {
                 let item = web.document.create_element("li")?;
                 let text = get_ratio_or_ket_string(&limit, &uv);
                 item.set_text_content(Some(&text));
