@@ -569,25 +569,19 @@ fn show_rt(
         field.set_inner_html("");
         let rank = rt.rank();
         let dimension = limit.pitches.len();
-        if dimension > 10 {
-            field.set_inner_html("<p>Unison vectors are currently too hard to find for big limits</p>");
+        let list = web.document.create_element("ul")?;
+        let n_results = if (dimension - rank) == 1 {
+            1
         } else {
-            let list = web.document.create_element("ul")?;
-            let n_results = if (dimension - rank) == 1 {
-                1
-            } else if dimension < 9 {
-                ((dimension - rank) * 2).min(20)
-            } else {
-                5
-            };
-            for uv in rt.unison_vectors(n_results) {
-                let item = web.document.create_element("li")?;
-                let text = get_ratio_or_ket_string(&limit, &uv);
-                item.set_text_content(Some(&text));
-                list.append_child(&item)?;
-            }
-            field.append_child(&list)?;
+            ((dimension - rank) * 2).min(20)
+        };
+        for uv in rt.unison_vectors(n_results) {
+            let item = web.document.create_element("li")?;
+            let text = get_ratio_or_ket_string(&limit, &uv);
+            item.set_text_content(Some(&text));
+            list.append_child(&item)?;
         }
+        field.append_child(&list)?;
     }
 
     if let Some(field) = web.element("error") {
