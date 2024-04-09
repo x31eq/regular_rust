@@ -134,7 +134,7 @@ impl<'a> CangwuTemperament<'a> {
                 .filter(|et| !self.et_belongs(et))
                 .collect();
         let mut rts = vec![self.melody.clone()];
-        for new_rank in (rank + 1)..dimension {
+        for _ in (rank + 1)..dimension {
             rts = higher_rank_search(
                 self.plimit,
                 &seed_ets,
