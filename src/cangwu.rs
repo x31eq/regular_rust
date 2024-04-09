@@ -146,7 +146,7 @@ impl<'a> CangwuTemperament<'a> {
             println!("RTs for rank {}: {:?}", new_rank, rts);
         }
         rts.iter()
-            .filter_map(|rt| only_unison_vector(rt))
+            .filter_map(only_unison_vector)
             .map(|uv| normalize_positive(self.plimit, uv))
             .collect()
     }
