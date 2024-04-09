@@ -363,6 +363,31 @@ fn mystery() {
 }
 
 #[test]
+fn marvel_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let lt = make_marvel(&limit);
+    let n_results = 3;
+    let uvs = lt.unison_vectors(n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
+    assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
+    assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
+}
+
+#[test]
+fn porcupine_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let porcupine_vector =
+        vec![vec![22, 35, 51, 62, 76], vec![15, 24, 35, 42, 52]];
+    let lt = TETemperament::new(&limit.pitches, &porcupine_vector);
+    let n_results = 5;
+    let uvs = lt.unison_vectors(n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
+    assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
+    assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
+}
+#[test]
 fn test_maximally_even() {
     assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
     assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
