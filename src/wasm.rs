@@ -172,9 +172,10 @@ pub fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
-    let list = web
-        .element("temperament-list")
-        .expect("Couldn't find list for results");
+    let list = web.unwrap(
+        web.element("temperament-list").ok_or(()),
+        "Couldn't find list for results",
+    );
     list.set_inner_html("");
     web.set_body_class("show-list");
     web.unwrap(
