@@ -172,11 +172,15 @@ pub fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
-    web.list.set_inner_html("");
+    let list = web
+        .element("temperament-list")
+        .expect("Couldn't find list for results");
+    list.set_inner_html("");
     web.set_body_class("show-list");
     web.unwrap(
         show_equal_temperaments(
             &web,
+            &list,
             &limit,
             mappings.iter().take(n_results),
         ),
@@ -194,16 +198,15 @@ pub fn regular_temperament_search(
         headings.push_str(heading);
     }
     web.unwrap(
-        web.list.set_attribute("data-headings", &headings),
+        list.set_attribute("data-headings", &headings),
         "Programming Error: Failed to store headings",
     );
     web.unwrap(
-        web.list.set_attribute("data-label", &limit.label),
+        list.set_attribute("data-label", &limit.label),
         "Programming Error: Failed to store prime limit label",
     );
     web.unwrap(
-        web.list
-            .set_attribute("data-pitches", &join("_", &limit.pitches)),
+        list.set_attribute("data-pitches", &join("_", &limit.pitches)),
         "Programming Error: Failed to store pitches",
     );
 
@@ -221,7 +224,13 @@ pub fn regular_temperament_search(
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
             web.unwrap(
-                show_regular_temperaments(&web, &limit, visible_rts, rank),
+                show_regular_temperaments(
+                    &web,
+                    &list,
+                    &limit,
+                    visible_rts,
+                    rank,
+                ),
                 "Failed to display regular temperaments",
             );
         }
@@ -230,19 +239,13 @@ pub fn regular_temperament_search(
 
 struct WebContext {
     document: web_sys::Document,
-    list: Element,
 }
 
 impl WebContext {
     pub fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
-        if let Some(list) = document.get_element_by_id("temperament-list") {
-            WebContext { document, list }
-        } else {
-            // This is an error in the HTML
-            throw_str("Programming Error: temperament-list not found");
-        }
+        WebContext { document }
     }
 
     pub fn set_body_class(&self, value: &str) {
@@ -348,17 +351,18 @@ impl WebContext {
 
 fn show_equal_temperaments<'a>(
     web: &WebContext,
+    list: &Element,
     limit: &PrimeLimit,
     mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     // This is shamelessly coupled to the HTML
     let heading = web.document.create_element("h4")?;
     heading.set_text_content(Some("Equal Temperaments"));
-    web.list.append_child(&heading)?;
+    list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping bra")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
-    web.list.append_child(&table)?;
+    list.append_child(&table)?;
     Ok(())
 }
 
@@ -420,6 +424,7 @@ fn write_float_row(
 
 fn show_regular_temperaments<'a>(
     web: &WebContext,
+    list: &Element,
     limit: &PrimeLimit,
     rts: impl Iterator<Item = &'a Vec<ETMap>>,
     rank: usize,
@@ -427,7 +432,7 @@ fn show_regular_temperaments<'a>(
     let heading = web.document.create_element("h4")?;
     let text = format!("Rank {}", rank);
     heading.set_text_content(Some(&text));
-    web.list.append_child(&heading)?;
+    list.append_child(&heading)?;
 
     // Make another table for the next lot of results
     let table = web.document.create_element("table")?;
@@ -444,7 +449,7 @@ fn show_regular_temperaments<'a>(
         let row = rt_row(&rt, &limit, &web)?;
         table.append_child(&row)?;
     }
-    web.list.append_child(&table)?;
+    list.append_child(&table)?;
     Ok(())
 }
 
