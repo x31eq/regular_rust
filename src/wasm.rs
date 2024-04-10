@@ -44,35 +44,23 @@ pub fn form_submit(evt: Event) {
         .set_hash(&hash);
 }
 
-fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
-    if let Some(limit) = params.get("limit") {
-        web.set_input_value("prime-limit", &limit);
-        if let Ok(limit) = limit.parse() {
-            if let Some(eka) = params.get("error") {
-                web.set_input_value("prime-eka", &eka);
-                if let Ok(eka) = eka.parse() {
-                    let nresults = params
-                        .get("nresults")
-                        .cloned()
-                        .unwrap_or("10".to_string());
-                    web.set_input_value("n-results", &nresults.to_string());
-                    if let Ok(nresults) = nresults.parse() {
-                        regular_temperament_search(limit, eka, nresults);
-                    } else {
-                        web.log_error("Failed to parse n of results");
-                    }
-                } else {
-                    web.log_error("Unrecognized badness parameter");
-                }
-            } else {
-                web.log_error("No target error");
-            }
-        } else {
-            web.log_error("Unrecognized prime limit");
-        }
-    } else {
-        web.log_error("No prime limit");
-    }
+fn pregular_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    let limit = params.get("limit").ok_or("No prime limit")?;
+    web.set_input_value("prime-limit", &limit);
+    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+    let eka = params.get("error").ok_or("No target error")?;
+    web.set_input_value("prime-eka", &eka);
+    let eka = eka.parse().or(Err("Unable to parse target error"))?;
+    let nresults =
+        params.get("nresults").cloned().unwrap_or("10".to_string());
+    web.set_input_value("n-results", &nresults.to_string());
+    let nresults =
+        nresults.parse().or(Err("Failed to parse n of results"))?;
+    regular_temperament_search(limit, eka, nresults);
+    Ok(())
 }
 
 #[wasm_bindgen(start)]
@@ -94,7 +82,9 @@ fn process_hash() {
             rt_action(&web, &params);
         }
         Some("pregular") => {
-            pregular_action(&web, &params);
+            if let Err(e) = pregular_action(&web, &params) {
+                web.log_error(&e);
+            }
         }
         _ => (),
     }
