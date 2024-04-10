@@ -59,7 +59,7 @@ fn pregular_action(
     web.set_input_value("n-results", &nresults.to_string());
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
-    regular_temperament_search(limit, eka, nresults);
+    regular_temperament_search(limit, eka, nresults)?;
     Ok(())
 }
 
@@ -151,9 +151,10 @@ pub fn regular_temperament_search(
     limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
-) {
+) -> Result<(), String> {
     let dimension = limit.pitches.len();
-    let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
+    let ek =
+        ek_adjusted * 12e2 / limit.pitches.last().ok_or("no harmonics")?;
     let safety = if dimension < 100 {
         40
     } else {
@@ -162,21 +163,18 @@ pub fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
-    let list = web.unwrap(
-        web.element("temperament-list").ok_or(()),
-        "Couldn't find list for results",
-    );
+    let list = web
+        .element("temperament-list")
+        .ok_or("Couldn't find list for results")?;
     list.set_inner_html("");
     web.set_body_class("show-list");
-    web.unwrap(
-        show_equal_temperaments(
-            &web,
-            &list,
-            &limit,
-            mappings.iter().take(n_results),
-        ),
-        "Programming Error: Failed to display equal temperaments",
-    );
+    show_equal_temperaments(
+        &web,
+        &list,
+        &limit,
+        mappings.iter().take(n_results),
+    )
+    .or(Err("Failed to display equal temperaments"))?;
 
     // Store the limit in the DOM so we can get it later
     let mut items = limit.headings.iter();
@@ -202,18 +200,11 @@ pub fn regular_temperament_search(
         );
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
-            web.unwrap(
-                show_regular_temperaments(
-                    &web,
-                    &list,
-                    &limit,
-                    visible_rts,
-                    rank,
-                ),
-                "Failed to display regular temperaments",
-            );
+            show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+                .or(Err("Failed to display regular temperaments"))?
         }
     }
+    Ok(())
 }
 
 struct WebContext {
