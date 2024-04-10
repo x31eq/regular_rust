@@ -198,18 +198,6 @@ pub fn regular_temperament_search(
         headings.push_str("_");
         headings.push_str(heading);
     }
-    web.unwrap(
-        list.set_attribute("data-headings", &headings),
-        "Programming Error: Failed to store headings",
-    );
-    web.unwrap(
-        list.set_attribute("data-label", &limit.label),
-        "Programming Error: Failed to store prime limit label",
-    );
-    web.unwrap(
-        list.set_attribute("data-pitches", &join("_", &limit.pitches)),
-        "Programming Error: Failed to store pitches",
-    );
 
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..dimension {
