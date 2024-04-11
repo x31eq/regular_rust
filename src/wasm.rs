@@ -105,20 +105,19 @@ fn rt_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some((ets, limit, key)) = parse_rt_params(&params) {
-        web.set_input_value("prime-limit", &limit);
-        if let Ok(limit) = limit.parse::<PrimeLimit>() {
-            if let Some(rt) = match key {
-                Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-                None => rt_from_et_names(&limit, &ets),
-            } {
-                show_rt(&web, &limit, rt.melody)
-                    .or(Err("Failed to show the regular temperament"))?;
-            }
-        } else {
-            web.log_error("Unable to parse limit");
-        }
+    let (ets, limit, key) =
+        parse_rt_params(&params).ok_or("Missing parameter")?;
+    web.set_input_value("prime-limit", &limit);
+    let limit = limit
+        .parse::<PrimeLimit>()
+        .or(Err("Unable to parse limit"))?;
+    let rt = match key {
+        Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+        None => rt_from_et_names(&limit, &ets),
     }
+    .ok_or("Couldn't generate the regular temperament!")?;
+    show_rt(&web, &limit, rt.melody)
+        .or(Err("Failed to show the regular temperament"))?;
     Ok(())
 }
 
