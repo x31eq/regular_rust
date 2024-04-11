@@ -89,6 +89,10 @@ fn process_hash() {
         }
     } {
         web.log_error(&e);
+        if let Some(error_field) = web.element("error-report") {
+            error_field.set_text_content(Some(&e));
+        }
+        web.set_body_class("show-errors");
     }
 }
 
