@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 use na::{DMatrix, DVector};
 
-use super::cangwu::{rms_of_matrix, TenneyWeighted};
+use super::cangwu::{rms_of_matrix, CangwuTemperament, TenneyWeighted};
 use super::temperament_class::TemperamentClass;
 use super::{map, Cents, ETMap, ETSlice, Exponent, Mapping, Tuning};
 
@@ -135,6 +135,11 @@ impl<'a> TETemperament<'a> {
         let tuning_map = self.pote_tuning_map();
         let comparison = tuning_map.iter().zip(self.plimit.iter());
         comparison.map(|(&x, y)| x - y).collect()
+    }
+
+    pub fn unison_vectors(&self, n_results: usize) -> Mapping {
+        let tc = CangwuTemperament::new(self.plimit, &self.melody);
+        tc.unison_vectors(self.error(), n_results)
     }
 
     /// Fokker block as steps as integers, not pitches.
@@ -357,6 +362,31 @@ fn mystery() {
     assert_eq!(fmt_tuning_map, expected.to_string());
 }
 
+#[test]
+fn marvel_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let lt = make_marvel(&limit);
+    let n_results = 3;
+    let uvs = lt.unison_vectors(n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
+    assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
+    assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
+}
+
+#[test]
+fn porcupine_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let porcupine_vector =
+        vec![vec![22, 35, 51, 62, 76], vec![15, 24, 35, 42, 52]];
+    let lt = TETemperament::new(&limit.pitches, &porcupine_vector);
+    let n_results = 5;
+    let uvs = lt.unison_vectors(n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
+    assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
+    assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
+}
 #[test]
 fn test_maximally_even() {
     assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);

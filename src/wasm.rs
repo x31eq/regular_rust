@@ -468,7 +468,7 @@ fn rt_row(
     if let Some(name) = rt.name(&limit) {
         link.set_text_content(Some(&name));
     } else if let Some(uv) = only_unison_vector(&rt.melody) {
-        let norm_uv = normalize_positive(&limit, uv);
+        let norm_uv = normalize_positive(&limit.pitches, uv);
         let name = get_ratio_or_ket_string(&limit, &norm_uv);
         link.set_text_content(Some(&name));
     } else {
@@ -563,6 +563,25 @@ fn show_rt(
 
     if let Some(field) = web.element("rt-te-error") {
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
+    }
+
+    if let Some(field) = web.element("rt-unison-vectors") {
+        field.set_inner_html("");
+        let rank = rt.rank();
+        let dimension = limit.pitches.len();
+        let list = web.document.create_element("ul")?;
+        let n_results = if (dimension - rank) == 1 {
+            1
+        } else {
+            (dimension - rank) * 2
+        };
+        for uv in rt.unison_vectors(n_results) {
+            let item = web.document.create_element("li")?;
+            let text = get_ratio_or_ket_string(&limit, &uv);
+            item.set_text_content(Some(&text));
+            list.append_child(&item)?;
+        }
+        field.append_child(&list)?;
     }
 
     if let Some(field) = web.element("error") {

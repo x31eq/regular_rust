@@ -4,9 +4,10 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::temperament_class::{key_to_mapping, TemperamentClass};
+use super::uv::only_unison_vector;
 use super::{
-    et_from_name, map, prime_mapping, Cents, ETMap, ETSlice, Exponent,
-    Mapping, PrimeLimit, PriorityQueue,
+    et_from_name, map, normalize_positive, prime_mapping, Cents, ETMap,
+    ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
 };
 use std::collections::HashSet;
 
@@ -119,6 +120,33 @@ impl<'a> CangwuTemperament<'a> {
         // Return an empty result if we couldn't find anything
         // in a reasonable amount of time
         vec![]
+    }
+
+    /// Find unison vectors that this temperament class tempers out.
+    /// Might not find as many as you ask for, but will do its best
+    pub fn unison_vectors(&self, ek: f64, n_results: usize) -> Mapping {
+        let rank = self.melody.len();
+        let dimension = self.plimit.len();
+        let n_ets = n_results + 10;
+        let seed_ets: Vec<ETMap> =
+            get_equal_temperaments(self.plimit, ek, n_ets)
+                .drain(..)
+                .filter(|et| !self.et_belongs(et))
+                .collect();
+        let mut rts = vec![self.melody.clone()];
+        for _ in (rank + 1)..dimension {
+            rts = higher_rank_search(
+                self.plimit,
+                &seed_ets,
+                &rts,
+                ek,
+                n_results,
+            );
+        }
+        rts.iter()
+            .filter_map(only_unison_vector)
+            .map(|uv| normalize_positive(self.plimit, uv))
+            .collect()
     }
 }
 
@@ -547,6 +575,30 @@ fn nofives() {
     let limit = super::PrimeLimit::explicit(vec![2, 3, 7, 11, 13]);
     let mappings = get_equal_temperaments(&limit.pitches, 1.0, 5);
     assert_eq!(octaves(&mappings), vec![17, 41, 9, 46, 10]);
+}
+
+#[test]
+fn marvel_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let lt = make_marvel(&limit);
+    let n_results = 3;
+    let uvs = lt.unison_vectors(1.5, n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![2, 3, 1, -2, -1]));
+    assert!(uvs.contains(&vec![-5, 2, 2, -1, 0]));
+    assert!(uvs.contains(&vec![-7, -1, 1, 1, 1]));
+}
+
+#[test]
+fn porcupine_unison_vectors() {
+    let limit = super::PrimeLimit::new(11);
+    let lt = make_porcupine(&limit);
+    let n_results = 5;
+    let uvs = lt.unison_vectors(8.8, n_results);
+    assert_eq!(uvs.len(), n_results);
+    assert!(uvs.contains(&vec![-1, -3, 1, 0, 1]));
+    assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
+    assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
 }
 
 #[test]
