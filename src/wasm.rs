@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
-use wasm_bindgen::{throw_str, JsCast};
+use wasm_bindgen::JsCast;
 use web_sys::js_sys::decode_uri;
 use web_sys::{console, Element, Event, HtmlInputElement};
 
@@ -79,7 +79,9 @@ fn process_hash() {
     let params = web.get_url_params();
     match params.get("page").map(String::as_str) {
         Some("rt") => {
-            rt_action(&web, &params);
+            if let Err(e) = rt_action(&web, &params) {
+                web.log_error(&e);
+            }
         }
         Some("pregular") => {
             if let Err(e) = pregular_action(&web, &params) {
@@ -99,7 +101,10 @@ fn parse_rt_params(
     Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
 }
 
-fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
+fn rt_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
     if let Some((ets, limit, key)) = parse_rt_params(&params) {
         web.set_input_value("prime-limit", &limit);
         if let Ok(limit) = limit.parse::<PrimeLimit>() {
@@ -107,18 +112,14 @@ fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
                 Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
                 None => rt_from_et_names(&limit, &ets),
             } {
-                web.unwrap(
-                    show_rt(&web, &limit, rt.melody),
-                    "Failed to show the regular temperament",
-                );
-                // hide the list that got enabled by that function
-            } else {
-                web.log_error("Unable to make temperament class");
+                show_rt(&web, &limit, rt.melody)
+                    .or(Err("Failed to show the regular temperament"))?;
             }
         } else {
             web.log_error("Unable to parse limit");
         }
     }
+    Ok(())
 }
 
 fn rt_from_ets_and_key<'a>(
@@ -298,24 +299,6 @@ impl WebContext {
 
     pub fn log_error(&self, message: &str) {
         console::error_1(&message.into());
-    }
-
-    /// Unwrap a value with the potential of an exception
-    pub fn unwrap<T, U>(&self, result: Result<T, U>, message: &str) -> T {
-        match result {
-            Ok(value) => value,
-            Err(_) => self.fail(message),
-        }
-    }
-
-    /// Escalate an error to an exception
-    pub fn fail(&self, message: &str) -> ! {
-        console::error_1(&message.into());
-        if let Some(error_field) = self.element("error-report") {
-            error_field.set_text_content(Some(message));
-        }
-        self.set_body_class("show-errors");
-        throw_str(message);
     }
 }
 
