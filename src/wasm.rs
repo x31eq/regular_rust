@@ -77,18 +77,18 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    match params.get("page").map(String::as_str) {
-        Some("rt") => {
-            if let Err(e) = rt_action(&web, &params) {
-                web.log_error(&e);
+    if let Err(e) = {
+        match params.get("page").map(String::as_str) {
+            Some("rt") => {
+                rt_action(&web, &params)
             }
-        }
-        Some("pregular") => {
-            if let Err(e) = pregular_action(&web, &params) {
-                web.log_error(&e);
+            Some("pregular") => {
+                pregular_action(&web, &params)
             }
+            _ => Ok(()),
         }
-        _ => (),
+    } {
+        web.log_error(&e);
     }
 }
 
