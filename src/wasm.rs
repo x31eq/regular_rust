@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
-use wasm_bindgen::{throw_str, JsCast};
+use wasm_bindgen::JsCast;
 use web_sys::js_sys::decode_uri;
 use web_sys::{console, Element, Event, HtmlInputElement};
 
@@ -44,35 +44,23 @@ pub fn form_submit(evt: Event) {
         .set_hash(&hash);
 }
 
-fn pregular_action(web: &WebContext, params: &HashMap<String, String>) {
-    if let Some(limit) = params.get("limit") {
-        web.set_input_value("prime-limit", &limit);
-        if let Ok(limit) = limit.parse() {
-            if let Some(eka) = params.get("error") {
-                web.set_input_value("prime-eka", &eka);
-                if let Ok(eka) = eka.parse() {
-                    let nresults = params
-                        .get("nresults")
-                        .cloned()
-                        .unwrap_or("10".to_string());
-                    web.set_input_value("n-results", &nresults.to_string());
-                    if let Ok(nresults) = nresults.parse() {
-                        regular_temperament_search(limit, eka, nresults);
-                    } else {
-                        web.log_error("Failed to parse n of results");
-                    }
-                } else {
-                    web.log_error("Unrecognized badness parameter");
-                }
-            } else {
-                web.log_error("No target error");
-            }
-        } else {
-            web.log_error("Unrecognized prime limit");
-        }
-    } else {
-        web.log_error("No prime limit");
-    }
+fn pregular_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    let limit = params.get("limit").ok_or("No prime limit")?;
+    web.set_input_value("prime-limit", &limit);
+    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+    let eka = params.get("error").ok_or("No target error")?;
+    web.set_input_value("prime-eka", &eka);
+    let eka = eka.parse().or(Err("Unable to parse target error"))?;
+    let nresults =
+        params.get("nresults").cloned().unwrap_or("10".to_string());
+    web.set_input_value("n-results", &nresults.to_string());
+    let nresults =
+        nresults.parse().or(Err("Failed to parse n of results"))?;
+    regular_temperament_search(limit, eka, nresults)?;
+    Ok(())
 }
 
 #[wasm_bindgen(start)]
@@ -89,14 +77,22 @@ pub fn hash_change(_evt: Event) {
 fn process_hash() {
     let web = WebContext::new();
     let params = web.get_url_params();
-    match params.get("page").map(String::as_str) {
-        Some("rt") => {
-            rt_action(&web, &params);
+    if let Err(e) = {
+        match params.get("page").map(String::as_str) {
+            Some("rt") => {
+                rt_action(&web, &params)
+            }
+            Some("pregular") => {
+                pregular_action(&web, &params)
+            }
+            _ => Ok(()),
         }
-        Some("pregular") => {
-            pregular_action(&web, &params);
+    } {
+        web.log_error(&e);
+        if let Some(error_field) = web.element("error-report") {
+            error_field.set_text_content(Some(&e));
         }
-        _ => (),
+        web.set_body_class("show-errors");
     }
 }
 
@@ -109,26 +105,24 @@ fn parse_rt_params(
     Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
 }
 
-fn rt_action(web: &WebContext, params: &HashMap<String, String>) {
-    if let Some((ets, limit, key)) = parse_rt_params(&params) {
-        web.set_input_value("prime-limit", &limit);
-        if let Ok(limit) = limit.parse::<PrimeLimit>() {
-            if let Some(rt) = match key {
-                Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-                None => rt_from_et_names(&limit, &ets),
-            } {
-                web.unwrap(
-                    show_rt(&web, &limit, rt.melody),
-                    "Failed to show the regular temperament",
-                );
-                // hide the list that got enabled by that function
-            } else {
-                web.log_error("Unable to make temperament class");
-            }
-        } else {
-            web.log_error("Unable to parse limit");
-        }
+fn rt_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    let (ets, limit, key) =
+        parse_rt_params(&params).ok_or("Missing parameter")?;
+    web.set_input_value("prime-limit", &limit);
+    let limit = limit
+        .parse::<PrimeLimit>()
+        .or(Err("Unable to parse limit"))?;
+    let rt = match key {
+        Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+        None => rt_from_et_names(&limit, &ets),
     }
+    .ok_or("Couldn't generate the regular temperament!")?;
+    show_rt(&web, &limit, rt.melody)
+        .or(Err("Failed to show the regular temperament"))?;
+    Ok(())
 }
 
 fn rt_from_ets_and_key<'a>(
@@ -161,9 +155,10 @@ pub fn regular_temperament_search(
     limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
-) {
+) -> Result<(), String> {
     let dimension = limit.pitches.len();
-    let ek = ek_adjusted * 12e2 / limit.pitches.last().expect("no harmonics");
+    let ek =
+        ek_adjusted * 12e2 / limit.pitches.last().ok_or("no harmonics")?;
     let safety = if dimension < 100 {
         40
     } else {
@@ -172,16 +167,18 @@ pub fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let web = WebContext::new();
-    web.list.set_inner_html("");
+    let list = web
+        .element("temperament-list")
+        .ok_or("Couldn't find list for results")?;
+    list.set_inner_html("");
     web.set_body_class("show-list");
-    web.unwrap(
-        show_equal_temperaments(
-            &web,
-            &limit,
-            mappings.iter().take(n_results),
-        ),
-        "Programming Error: Failed to display equal temperaments",
-    );
+    show_equal_temperaments(
+        &web,
+        &list,
+        &limit,
+        mappings.iter().take(n_results),
+    )
+    .or(Err("Failed to display equal temperaments"))?;
 
     // Store the limit in the DOM so we can get it later
     let mut items = limit.headings.iter();
@@ -193,19 +190,6 @@ pub fn regular_temperament_search(
         headings.push_str("_");
         headings.push_str(heading);
     }
-    web.unwrap(
-        web.list.set_attribute("data-headings", &headings),
-        "Programming Error: Failed to store headings",
-    );
-    web.unwrap(
-        web.list.set_attribute("data-label", &limit.label),
-        "Programming Error: Failed to store prime limit label",
-    );
-    web.unwrap(
-        web.list
-            .set_attribute("data-pitches", &join("_", &limit.pitches)),
-        "Programming Error: Failed to store pitches",
-    );
 
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..dimension {
@@ -220,29 +204,22 @@ pub fn regular_temperament_search(
         );
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
-            web.unwrap(
-                show_regular_temperaments(&web, &limit, visible_rts, rank),
-                "Failed to display regular temperaments",
-            );
+            show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+                .or(Err("Failed to display regular temperaments"))?
         }
     }
+    Ok(())
 }
 
 struct WebContext {
     document: web_sys::Document,
-    list: Element,
 }
 
 impl WebContext {
     pub fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
-        if let Some(list) = document.get_element_by_id("temperament-list") {
-            WebContext { document, list }
-        } else {
-            // This is an error in the HTML
-            throw_str("Programming Error: temperament-list not found");
-        }
+        WebContext { document }
     }
 
     pub fn set_body_class(&self, value: &str) {
@@ -326,39 +303,22 @@ impl WebContext {
     pub fn log_error(&self, message: &str) {
         console::error_1(&message.into());
     }
-
-    /// Unwrap a value with the potential of an exception
-    pub fn unwrap<T, U>(&self, result: Result<T, U>, message: &str) -> T {
-        match result {
-            Ok(value) => value,
-            Err(_) => self.fail(message),
-        }
-    }
-
-    /// Escalate an error to an exception
-    pub fn fail(&self, message: &str) -> ! {
-        console::error_1(&message.into());
-        if let Some(error_field) = self.element("error-report") {
-            error_field.set_text_content(Some(message));
-        }
-        self.set_body_class("show-errors");
-        throw_str(message);
-    }
 }
 
 fn show_equal_temperaments<'a>(
     web: &WebContext,
+    list: &Element,
     limit: &PrimeLimit,
     mappings: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
     // This is shamelessly coupled to the HTML
     let heading = web.document.create_element("h4")?;
     heading.set_text_content(Some("Equal Temperaments"));
-    web.list.append_child(&heading)?;
+    list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping bra")?;
     write_mapping_matrix(&web, &table, &limit, mappings)?;
-    web.list.append_child(&table)?;
+    list.append_child(&table)?;
     Ok(())
 }
 
@@ -420,6 +380,7 @@ fn write_float_row(
 
 fn show_regular_temperaments<'a>(
     web: &WebContext,
+    list: &Element,
     limit: &PrimeLimit,
     rts: impl Iterator<Item = &'a Vec<ETMap>>,
     rank: usize,
@@ -427,7 +388,7 @@ fn show_regular_temperaments<'a>(
     let heading = web.document.create_element("h4")?;
     let text = format!("Rank {}", rank);
     heading.set_text_content(Some(&text));
-    web.list.append_child(&heading)?;
+    list.append_child(&heading)?;
 
     // Make another table for the next lot of results
     let table = web.document.create_element("table")?;
@@ -444,7 +405,7 @@ fn show_regular_temperaments<'a>(
         let row = rt_row(&rt, &limit, &web)?;
         table.append_child(&row)?;
     }
-    web.list.append_child(&table)?;
+    list.append_child(&table)?;
     Ok(())
 }
 
@@ -458,7 +419,7 @@ fn rt_row(
     let cell = web.document.create_element("td")?;
     let link = web.document.create_element("a")?;
 
-    // Setup the link as a link
+    // Set up the link as a link
     let rt = TETemperament::new(&limit.pitches, &mapping);
     link.set_attribute("href", &rt_url(&web, &limit, &rt))?;
 
