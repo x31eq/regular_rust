@@ -415,7 +415,7 @@ fn rt_row(
     let cell = web.document.create_element("td")?;
     let link = web.document.create_element("a")?;
 
-    // Setup the link as a link
+    // Set up the link as a link
     let rt = TETemperament::new(&limit.pitches, &mapping);
     link.set_attribute("href", &rt_url(&web, &limit, &rt))?;
 
