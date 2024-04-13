@@ -69,6 +69,7 @@ fn marvel7() {
         vec![19, 30, 44, 53],
     ];
     let expected = vec![-5, 2, 2, -1];
+    assert!(tempers_out(&mapping, &expected));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
@@ -83,6 +84,7 @@ fn marvel7_reordered() {
         vec![31, 49, 72, 87],
     ];
     let expected = vec![-5, 2, 2, -1];
+    assert!(tempers_out(&mapping, &expected));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
@@ -93,6 +95,7 @@ fn marvel7_reordered() {
 fn marvel7_from_reduced() {
     let mapping = vec![vec![1, 0, 0, -5], vec![0, 1, 0, 2], vec![0, 0, 1, 2]];
     let expected = vec![-5, 2, 2, -1];
+    assert!(tempers_out(&mapping, &expected));
     assert_eq!(Some(expected), only_unison_vector(&mapping));
 }
 
@@ -123,6 +126,7 @@ fn uv_1575_1573() {
         vec![121, 192, 281, 340, 419, 448],
     ];
     let expected = vec![0, 2, 2, 1, -2, -1];
+    assert!(tempers_out(&mapping, &expected));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(13).pitches, uv);
