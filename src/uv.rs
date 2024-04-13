@@ -45,9 +45,8 @@ pub fn get_ets_tempering_out(
         let mut ets: Mapping =
             get_equal_temperaments(plimit, ek, n_results + extra)
                 .into_iter()
-                .filter(|et| {
-                    unison_vectors.iter().all(|uv| dotprod(et, uv) == 0)
-                })
+                // tempers_out is applied backwards, but works anyway
+                .filter(|et| tempers_out(unison_vectors, et))
                 .collect();
         if ets.len() >= n_results {
             ets.truncate(n_results);
