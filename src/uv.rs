@@ -157,3 +157,12 @@ fn uv_1575_1573() {
         super::normalize_positive(&super::PrimeLimit::new(13).pitches, uv);
     assert_eq!(expected, uv);
 }
+
+#[test]
+fn meantone_ets() {
+    let limit = super::PrimeLimit::new(5);
+    let comma = vec![-4, 4, -1];
+    let ets =
+        get_ets_tempering_out(&limit.pitches, 3.0, &[comma.clone()], 10);
+    assert!(tempers_out(&ets, &comma));
+}
