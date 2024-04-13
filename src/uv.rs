@@ -1,7 +1,8 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::{ETMap, ETSlice, Exponent, Mapping};
+use super::cangwu::get_equal_temperaments;
+use super::{Cents, ETMap, ETSlice, Exponent, Mapping};
 
 /// Return the commatic unison vector for a mapping with
 /// only one dimension short
@@ -32,6 +33,27 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
         sq[(i, 0)] = 0.0;
     }
     None
+}
+
+pub fn get_ets_tempering_out(
+    plimit: &[Cents],
+    ek: Cents,
+    unison_vectors: &[ETMap],
+    n_results: usize,
+) -> Mapping {
+    for extra in 10..100 {
+        let ets: Mapping =
+            get_equal_temperaments(plimit, ek, n_results + extra)
+                .into_iter()
+                .filter(|et| {
+                    unison_vectors.iter().all(|uv| dotprod(et, uv) == 0)
+                })
+                .collect();
+        if ets.len() >= n_results {
+            return ets;
+        }
+    }
+    vec![]
 }
 
 pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
