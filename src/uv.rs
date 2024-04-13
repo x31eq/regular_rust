@@ -41,7 +41,8 @@ pub fn get_ets_tempering_out(
     unison_vectors: &[ETMap],
     n_results: usize,
 ) -> Mapping {
-    for extra in 10..100 {
+    let mut extra = 10;
+    for _ in 10..100 {
         let mut ets: Mapping =
             get_equal_temperaments(plimit, ek, n_results + extra)
                 .into_iter()
@@ -52,9 +53,12 @@ pub fn get_ets_tempering_out(
             ets.truncate(n_results);
             return ets;
         }
+        else {
+            extra += n_results - ets.len() + 10;
+        }
     }
     // return as many as we can find
-    get_equal_temperaments(plimit, ek, n_results + 100)
+    get_equal_temperaments(plimit, ek, n_results + extra)
 }
 
 pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
