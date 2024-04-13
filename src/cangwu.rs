@@ -263,7 +263,6 @@ pub fn filtered_equal_temperaments(
     while results.len() < n_results {
         // Filtered results can be harder to find,
         // so the initial bmax guess might have been wrong
-        bmax *= 1.1;
         let mut cap = bmax;
         while (f64::from(n_notes)) < cap / ek {
             for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
@@ -276,6 +275,7 @@ pub fn filtered_equal_temperaments(
             n_notes += 1;
             cap = cap.min(results.cap);
         }
+        bmax *= 1.1;
     }
 
     results.extract().collect()
