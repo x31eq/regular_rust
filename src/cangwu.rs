@@ -257,12 +257,10 @@ pub fn filtered_equal_temperaments(
     let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
     let mut results = PriorityQueue::new(n_results);
-    let mut n_notes = 1;
     // Start this conservatively assuming half the results will be filtered out
     let mut bmax = preliminary_badness(&plimit, ek, n_results * 2);
     while results.len() < n_results {
-        // Filtered results can be harder to find,
-        // so the initial bmax guess might have been wrong
+        let mut n_notes = 1;
         let mut cap = bmax;
         while (f64::from(n_notes)) < cap / ek {
             for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
@@ -275,6 +273,8 @@ pub fn filtered_equal_temperaments(
             n_notes += 1;
             cap = cap.min(results.cap);
         }
+        // Filtered results can be harder to find,
+        // so the initial bmax guess might have been wrong
         bmax *= 1.1;
     }
 

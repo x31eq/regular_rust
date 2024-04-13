@@ -182,3 +182,21 @@ fn marvel11_ets() {
     assert!(tempers_out(&ets, &comma1));
     assert!(tempers_out(&ets, &comma2));
 }
+
+#[test]
+fn porcupine11_ets() {
+    let limit = super::PrimeLimit::new(11);
+    let comma1 = vec![-1, -3, 1, 0, 1];
+    let comma2 = vec![6, -2, 0, -1, 0];
+    let comma3 = vec![2, -2, 2, 0, -1];
+    let ets = get_ets_tempering_out(
+        &limit.pitches,
+        3.0,
+        &[comma1.clone(), comma2.clone(), comma3.clone()],
+        5,
+    );
+    assert!(tempers_out(&ets, &comma1));
+    assert!(tempers_out(&ets, &comma2));
+    assert!(tempers_out(&ets, &comma3));
+}
+
