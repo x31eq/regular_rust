@@ -11,7 +11,7 @@
             You'll need to enable scripting for it to work,
             and even then it might not.
         </noscript>
-        <form>
+        <form class="general">
             <p>
                 <label>
                     Prime limit <input id="prime-limit" type="text" size="5">
@@ -43,12 +43,12 @@
                         >
                 </label>
             </p>
-            <button>Search</button>
+            <button id="general-search">Search</button>
         </form>
-        <form>
+        <form class="uv">
             <p>Put your commas in this box:</p>
             <div>
-                <textarea name="uvs" rows="4" cols="30"></textarea>
+                <textarea id="uv-uvs" rows="4" cols="30"></textarea>
             </div>
             <p>
                 <label>
@@ -56,7 +56,7 @@
                 </label>
                 e.g. "11" or "2.3.7.11.13"
             </p>
-            <button>Search</button>
+            <button id="uv-search">Search</button>
         </form>
         <p id="error-report">
             Oh noes!  Something went wrong and this didn't get hidden!
@@ -126,10 +126,11 @@
                 https://github.com/x31eq/regular_rust</a>.
         </p>
         <script type="module">
-            import init, { form_submit, hash_change }
+            import init, { general_form_submit, uv_form_submit, hash_change }
                 from './pkg/regular.js'
 
-            document.querySelector("form").onsubmit = form_submit
+            document.querySelector("form.general").onsubmit = general_form_submit
+            document.querySelector("form.uv").onsubmit = uv_form_submit
             window.addEventListener('hashchange', hash_change)
 
             async function run() {

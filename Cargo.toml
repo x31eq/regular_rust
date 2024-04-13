@@ -42,6 +42,7 @@ features = [
   'EventTarget',
   'HtmlElement',
   'HtmlInputElement',
+  'HtmlTextAreaElement',
   'Location',
   'Node',
   'Window',

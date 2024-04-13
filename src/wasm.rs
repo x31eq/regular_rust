@@ -3,7 +3,9 @@ use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::decode_uri;
-use web_sys::{console, Element, Event, HtmlInputElement};
+use web_sys::{
+    console, Element, Event, HtmlInputElement, HtmlTextAreaElement,
+};
 
 use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
@@ -21,7 +23,7 @@ use super::{
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
-pub fn form_submit(evt: Event) {
+pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
@@ -35,6 +37,32 @@ pub fn form_submit(evt: Event) {
     }
     if let Some(n_results) = web.input_value("n-results") {
         params.insert("nresults", n_results.trim().to_string());
+    }
+    let hash = web.hash_from_params(&params);
+    let _ = web
+        .document
+        .location()
+        .expect("no location")
+        .set_hash(&hash);
+}
+
+#[wasm_bindgen]
+pub fn uv_form_submit(evt: Event) {
+    evt.prevent_default();
+    let web = WebContext::new();
+    let mut params = HashMap::from([("page", "uv".to_string())]);
+    // This is optional for the UV search
+    if let Some(limit) = web.input_value("uv-limit") {
+        let limit = limit.trim();
+        if limit != "" {
+            params.insert("limit", limit.trim().to_string());
+        }
+    }
+    // These are quite important for a unison vector search
+    if let Some(uvs) = web.input_value("uv-uvs") {
+        // Make these a bit cleaner in the URL bar
+        let uvs: Vec<&str> = uvs.split_whitespace().collect();
+        params.insert("uvs", uvs.join("+"));
     }
     let hash = web.hash_from_params(&params);
     let _ = web
@@ -230,6 +258,9 @@ impl WebContext {
 
     pub fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
+        if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
+            return Some(text_area.value());
+        }
         let input_element = element.dyn_ref::<HtmlInputElement>()?;
         Some(input_element.value())
     }
