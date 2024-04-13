@@ -52,8 +52,7 @@ pub fn get_ets_tempering_out(
         if ets.len() >= n_results {
             ets.truncate(n_results);
             return ets;
-        }
-        else {
+        } else {
             extra += n_results - ets.len() + 10;
         }
     }
