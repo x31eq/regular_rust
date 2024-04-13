@@ -36,11 +36,11 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
 
 pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
     for etmap in mapping {
-        if dotprod(etmap, interval) == 0 {
-            return true;
+        if dotprod(etmap, interval) != 0 {
+            return false;
         }
     }
-    false
+    true
 }
 
 fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
