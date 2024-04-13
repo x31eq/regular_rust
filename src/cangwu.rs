@@ -257,21 +257,26 @@ pub fn filtered_equal_temperaments(
     let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
     let mut results = PriorityQueue::new(n_results);
-    let bmax = preliminary_badness(&plimit, ek, n_results);
     let mut n_notes = 1;
-    let mut cap = bmax;
-    while (f64::from(n_notes)) < cap / ek {
-        for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
-            if condition(&mapping) {
-                let bad = equal_temperament_badness(&plimit, ek, &mapping);
-                results.push(bad, mapping.clone());
+    let mut bmax = preliminary_badness(&plimit, ek, n_results);
+    while results.len() < n_results {
+        // Filtered results can be harder to find,
+        // so the initial bmax guess might have been wrong
+        bmax *= 1.3;
+        let mut cap = bmax;
+        while (f64::from(n_notes)) < cap / ek {
+            for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
+                if condition(&mapping) {
+                    let bad =
+                        equal_temperament_badness(&plimit, ek, &mapping);
+                    results.push(bad, mapping.clone());
+                }
             }
+            n_notes += 1;
+            cap = cap.min(results.cap);
         }
-        n_notes += 1;
-        cap = cap.min(results.cap);
     }
 
-    debug_assert_eq!(results.len(), n_results);
     results.extract().collect()
 }
 
