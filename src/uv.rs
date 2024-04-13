@@ -55,6 +55,8 @@ fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
     let expected = vec![-4, 4, -1];
     assert!(tempers_out(&mapping, &expected));
+    assert!(!tempers_out(&mapping, &[4, -1, -1]));
+    assert!(!tempers_out(&mapping, &[-3, -1, 1]));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
@@ -86,6 +88,7 @@ fn marvel7_reordered() {
     ];
     let expected = vec![-5, 2, 2, -1];
     assert!(tempers_out(&mapping, &expected));
+    assert!(!tempers_out(&mapping, &[-4, 4, -1, 0]));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
@@ -97,12 +100,14 @@ fn marvel7_from_reduced() {
     let mapping = vec![vec![1, 0, 0, -5], vec![0, 1, 0, 2], vec![0, 0, 1, 2]];
     let expected = vec![-5, 2, 2, -1];
     assert!(tempers_out(&mapping, &expected));
+    assert!(!tempers_out(&mapping, &[-4, 4, -1, 0]));
     assert_eq!(Some(expected), only_unison_vector(&mapping));
 }
 
 #[test]
 fn meantone7() {
     let mapping = vec![vec![31, 49, 72, 87], vec![19, 30, 44, 53]];
+    assert!(tempers_out(&mapping, &[-4, 4, -1, 0]));
     assert_eq!(None, only_unison_vector(&mapping));
 }
 
@@ -113,6 +118,7 @@ fn meantone7_redundant() {
         vec![19, 30, 44, 53],
         vec![12, 19, 28, 34],
     ];
+    assert!(tempers_out(&mapping, &[-4, 4, -1, 0]));
     assert_eq!(None, only_unison_vector(&mapping));
 }
 
