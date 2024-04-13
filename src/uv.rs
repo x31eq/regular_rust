@@ -49,7 +49,7 @@ pub fn get_ets_tempering_out(
     )
 }
 
-pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
+fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
     mapping.iter().all(|et| dotprod(et, interval) == 0)
 }
 

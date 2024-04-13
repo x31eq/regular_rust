@@ -363,7 +363,7 @@ fn preliminary_badness(
 ///
 /// Probably won't panic but will attempt to generate
 /// a huge vector of mappings if "bmax" is set too high.
-pub fn limited_mappings(
+fn limited_mappings(
     n_notes: Exponent,
     ek: Cents,
     bmax: Cents,
