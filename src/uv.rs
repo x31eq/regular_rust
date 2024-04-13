@@ -53,7 +53,8 @@ pub fn get_ets_tempering_out(
             return ets;
         }
     }
-    vec![]
+    // return as many as we can find
+    get_equal_temperaments(plimit, ek, n_results + 100)
 }
 
 pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
