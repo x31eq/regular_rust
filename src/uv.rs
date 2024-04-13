@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::{ETMap, Exponent, Mapping};
+use super::{ETMap, ETSlice, Exponent, Mapping};
 
 /// Return the commatic unison vector for a mapping with
 /// only one dimension short
@@ -34,10 +34,27 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     None
 }
 
+pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
+    for etmap in mapping {
+        if dotprod(etmap, interval) == 0 {
+            return true;
+        }
+    }
+    false
+}
+
+fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
+    a.iter()
+        .zip(b.iter())
+        // multiply as i64 to avoid overflows
+        .fold(0, |tot, (&m, &n)| tot + (m as i64) * (n as i64))
+}
+
 #[test]
 fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
     let expected = vec![-4, 4, -1];
+    assert!(tempers_out(&mapping, &expected));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(5).pitches, uv);

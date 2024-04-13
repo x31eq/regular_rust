@@ -79,12 +79,8 @@ fn process_hash() {
     let params = web.get_url_params();
     if let Err(e) = {
         match params.get("page").map(String::as_str) {
-            Some("rt") => {
-                rt_action(&web, &params)
-            }
-            Some("pregular") => {
-                pregular_action(&web, &params)
-            }
+            Some("rt") => rt_action(&web, &params),
+            Some("pregular") => pregular_action(&web, &params),
             _ => Ok(()),
         }
     } {
