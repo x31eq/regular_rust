@@ -177,7 +177,7 @@ fn marvel11_ets() {
         &limit.pitches,
         3.0,
         &[comma1.clone(), comma2.clone()],
-        5,
+        10,
     );
     assert!(tempers_out(&ets, &comma1));
     assert!(tempers_out(&ets, &comma2));
