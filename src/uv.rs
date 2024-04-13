@@ -42,7 +42,7 @@ pub fn get_ets_tempering_out(
     n_results: usize,
 ) -> Mapping {
     for extra in 10..100 {
-        let ets: Mapping =
+        let mut ets: Mapping =
             get_equal_temperaments(plimit, ek, n_results + extra)
                 .into_iter()
                 .filter(|et| {
@@ -50,6 +50,7 @@ pub fn get_ets_tempering_out(
                 })
                 .collect();
         if ets.len() >= n_results {
+            ets.truncate(n_results);
             return ets;
         }
     }
