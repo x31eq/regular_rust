@@ -404,7 +404,7 @@ impl<T> PriorityQueue<T> {
             if badness < self.cap {
                 self.items.push((badness, item));
                 self.sort();
-                self.items.pop();
+                self.items.truncate(self.size);
                 self.set_cap();
             }
         } else {
