@@ -258,7 +258,8 @@ pub fn filtered_equal_temperaments(
 
     let mut results = PriorityQueue::new(n_results);
     let mut n_notes = 1;
-    let mut bmax = preliminary_badness(&plimit, ek, n_results);
+    // Start this conservatively assuming half the results will be filtered out
+    let mut bmax = preliminary_badness(&plimit, ek, n_results * 2);
     while results.len() < n_results {
         // Filtered results can be harder to find,
         // so the initial bmax guess might have been wrong
