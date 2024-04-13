@@ -170,3 +170,12 @@ fn meantone_ets() {
         get_ets_tempering_out(&limit.pitches, 3.0, &[comma.clone()], 10);
     assert!(tempers_out(&ets, &comma));
 }
+
+#[test]
+fn syntonic11_ets() {
+    let limit = super::PrimeLimit::new(11);
+    let comma = vec![-4, 4, -1, 0, 0];
+    let ets =
+        get_ets_tempering_out(&limit.pitches, 3.0, &[comma.clone()], 10);
+    assert!(tempers_out(&ets, &comma));
+}
