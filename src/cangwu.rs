@@ -271,7 +271,7 @@ pub fn filtered_equal_temperaments(
         cap = cap.min(results.cap);
     }
 
-    debug_assert!(results.len() == n_results);
+    debug_assert_eq!(results.len(), n_results);
     results.extract().collect()
 }
 
