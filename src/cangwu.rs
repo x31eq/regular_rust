@@ -606,10 +606,7 @@ fn filtered_big_limit() {
     let sbyte = super::PrimeLimit::new(127).pitches;
     let even = |et: &ETMap| et[0] % 2 == 0;
     let mappings = filtered_equal_temperaments(&sbyte, even, 0.3, 8);
-    assert_eq!(
-        octaves(&mappings),
-        vec![62, 62, 50, 50, 34, 46, 60, 60]
-    );
+    assert_eq!(octaves(&mappings), vec![62, 62, 50, 50, 34, 46, 60, 60]);
 }
 
 #[test]

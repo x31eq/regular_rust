@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::cangwu::get_equal_temperaments;
+use super::cangwu::filtered_equal_temperaments;
 use super::{Cents, ETMap, ETSlice, Exponent, Mapping};
 
 /// Return the commatic unison vector for a mapping with
@@ -41,23 +41,12 @@ pub fn get_ets_tempering_out(
     unison_vectors: &[ETMap],
     n_results: usize,
 ) -> Mapping {
-    let mut extra = 10;
-    for _ in 10..100 {
-        let mut ets: Mapping =
-            get_equal_temperaments(plimit, ek, n_results + extra)
-                .into_iter()
-                // tempers_out is applied backwards, but works anyway
-                .filter(|et| tempers_out(unison_vectors, et))
-                .collect();
-        if ets.len() >= n_results {
-            ets.truncate(n_results);
-            return ets;
-        } else {
-            extra += n_results - ets.len() + 10;
-        }
-    }
-    // return as many as we can find
-    get_equal_temperaments(plimit, ek, n_results + extra)
+    filtered_equal_temperaments(
+        plimit,
+        |et| tempers_out(unison_vectors, et),
+        ek,
+        n_results,
+    )
 }
 
 pub fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
