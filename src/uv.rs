@@ -199,4 +199,3 @@ fn porcupine11_ets() {
     assert!(tempers_out(&ets, &comma2));
     assert!(tempers_out(&ets, &comma3));
 }
-

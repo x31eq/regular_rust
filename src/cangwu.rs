@@ -257,8 +257,9 @@ pub fn filtered_equal_temperaments(
     let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
     let mut results = PriorityQueue::new(n_results);
-    // Start this conservatively assuming half the results will be filtered out
-    let mut bmax = preliminary_badness(&plimit, ek, n_results * 2);
+    // Start this conservatively assuming 90% of the results will be
+    // filtered out
+    let mut bmax = preliminary_badness(&plimit, ek, n_results * 10);
     while results.len() < n_results {
         let mut n_notes = 1;
         let mut cap = bmax;
