@@ -169,11 +169,16 @@ fn syntonic11_ets() {
 }
 
 #[test]
-fn marvel7_ets() {
-    let limit = super::PrimeLimit::new(7);
-    let comma = vec![-5, 2, 2, -1];
-    let ets =
-        get_ets_tempering_out(&limit.pitches, 3.0, &[comma.clone()], 10);
-    assert!(tempers_out(&ets, &comma));
+fn marvel11_ets() {
+    let limit = super::PrimeLimit::new(11);
+    let comma1 = vec![-5, 2, 2, -1, 0];
+    let comma2 = vec![2, 3, 1, -2, -1];
+    let ets = get_ets_tempering_out(
+        &limit.pitches,
+        3.0,
+        &[comma1.clone(), comma2.clone()],
+        5,
+    );
+    assert!(tempers_out(&ets, &comma1));
+    assert!(tempers_out(&ets, &comma2));
 }
-
