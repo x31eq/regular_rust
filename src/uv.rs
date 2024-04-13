@@ -70,6 +70,7 @@ fn marvel7() {
     ];
     let expected = vec![-5, 2, 2, -1];
     assert!(tempers_out(&mapping, &expected));
+    assert!(!tempers_out(&mapping, &[-4, 4, -1, 0]));
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv =
         super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
