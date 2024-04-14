@@ -45,7 +45,7 @@ pub fn stringify(ratio: Ratio) -> String {
 
 fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
     if n == 0 {
-        return None
+        return None;
     }
     let partials = integer_partials(limit).ok()?;
     let mut result = vec![0; partials.len()];
@@ -56,7 +56,11 @@ fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
             result[i] += 1;
         }
     }
-    Some(result)
+    if remainder == 1 {
+        Some(result)
+    } else {
+        None
+    }
 }
 
 pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
@@ -154,4 +158,5 @@ fn factorize_5_limit() {
     assert_eq!(factorize(&limit, 60), Some(vec![2, 1, 1]));
     assert_eq!(factorize(&limit, 1), Some(vec![0, 0, 0]));
     assert_eq!(factorize(&limit, 0), None);
+    assert_eq!(factorize(&limit, 7), None);
 }
