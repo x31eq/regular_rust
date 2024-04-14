@@ -83,10 +83,10 @@ pub fn parse_as_vector(limit: &PrimeLimit, input: &str) -> Option<ETMap> {
     let (n, d): Ratio = if let Ok(n) = input.parse() {
         (n, 1)
     } else {
-        let (sn, sd) = input.split_once(&[':', '/'])?;
+        let (sn, sd) = input.split_once([':', '/'])?;
         (sn.parse().ok()?, sd.parse().ok()?)
     };
-    factorize_ratio(&limit, (n, d))
+    factorize_ratio(limit, (n, d))
 }
 
 /// Reverse engineer a prime limit object into a list of integers
