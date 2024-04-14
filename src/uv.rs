@@ -239,4 +239,11 @@ fn inherent_errors() {
     let ek = inherent_error(&limit, &comma);
     assert!(0.000357 < ek);
     assert!(ek < 0.000358);
+
+    // The limit does matter
+    let limit = super::PrimeLimit::new(7).pitches;
+    let comma = vec![-5, 2, 2, -1];
+    let ek = inherent_error(&limit, &comma);
+    assert!(0.000400 < ek);
+    assert!(ek < 0.000401);
 }
