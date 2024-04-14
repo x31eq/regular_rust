@@ -38,12 +38,7 @@ pub fn general_form_submit(evt: Event) {
     if let Some(n_results) = web.input_value("n-results") {
         params.insert("nresults", n_results.trim().to_string());
     }
-    let hash = web.hash_from_params(&params);
-    let _ = web
-        .document
-        .location()
-        .expect("no location")
-        .set_hash(&hash);
+    web.resubmit_with_params(&params);
 }
 
 #[wasm_bindgen]
@@ -64,12 +59,7 @@ pub fn uv_form_submit(evt: Event) {
         let uvs: Vec<&str> = uvs.split_whitespace().collect();
         params.insert("uvs", uvs.join("+"));
     }
-    let hash = web.hash_from_params(&params);
-    let _ = web
-        .document
-        .location()
-        .expect("no location")
-        .set_hash(&hash);
+    web.resubmit_with_params(&params);
 }
 
 fn pregular_action(
@@ -310,6 +300,18 @@ impl WebContext {
             }
         }
         params
+    }
+
+    /// Reset the has encoding the new params, and cause some at least of the
+    /// new page events to be fired
+    fn resubmit_with_params(&self, params: &HashMap<&str, String>) {
+        let hash = self.hash_from_params(&params);
+        self
+            .document
+            .location()
+            .expect("no location")
+            .set_hash(&hash)
+            .expect("unable to set URL hash");
     }
 
     fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
