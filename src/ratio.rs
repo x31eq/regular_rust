@@ -155,6 +155,19 @@ fn parse_7_limit() {
 fn parse_7_limit_ratios() {
     let limit = PrimeLimit::new(7);
     assert_eq!(parse_as_vector(&limit, "225:224"), Some(vec![-5, 2, 2, -1]),);
+    assert_eq!(
+        parse_as_vector(&limit, "2401:2400"),
+        Some(vec![-5, -1, -2, 4]),
+    );
+    assert_eq!(parse_as_vector(&limit, "7:4"), Some(vec![-2, 0, 0, 1]),);
+    assert_eq!(parse_as_vector(&limit, "7/4"), Some(vec![-2, 0, 0, 1]),);
+    assert_eq!(
+        parse_as_vector(&limit, "   7/4    "),
+        Some(vec![-2, 0, 0, 1]),
+    );
+    assert_eq!(parse_as_vector(&limit, "-7:4"), None);
+    assert_eq!(parse_as_vector(&limit, "99:100"), None);
+    assert_eq!(parse_as_vector(&limit, "foo"), None);
 }
 
 #[test]
