@@ -148,4 +148,7 @@ fn parse_7limit() {
 fn factorize_5_limit() {
     let limit = PrimeLimit::new(5);
     assert_eq!(factorize(&limit, 10), Some(vec![1, 0, 1]));
+    assert_eq!(factorize(&limit, 60), Some(vec![2, 1, 1]));
+    assert_eq!(factorize(&limit, 1), Some(vec![0, 0, 0]));
+    assert_eq!(factorize(&limit, 0), None);
 }
