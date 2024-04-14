@@ -43,6 +43,20 @@ pub fn stringify(ratio: Ratio) -> String {
     format!("{}:{}", numerator, denominator)
 }
 
+/// Turn the ratio encoded as a string into a vector
+/// in the given prime limit.
+/// Eventually, should work with vectors-as-strings as well
+pub fn parse_as_vector(limit: &PrimeLimit, input: &str) -> Option<ETMap> {
+    let input = input.trim();
+    let (n, d): Ratio = if let Ok(n) = input.parse() {
+        (n, 1)
+    } else {
+        let (sn, sd) = input.split_once([':', '/'])?;
+        (sn.parse().ok()?, sd.parse().ok()?)
+    };
+    factorize_ratio(limit, (n, d))
+}
+
 fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
     if n == 0 {
         return None;
@@ -73,20 +87,6 @@ pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
             .map(|(&a, &b)| a - b)
             .collect(),
     )
-}
-
-/// Turn the ratio encoded as a string into a vector
-/// in the given prime limit.
-/// Eventually, should work with vectors-as-strings as well
-pub fn parse_as_vector(limit: &PrimeLimit, input: &str) -> Option<ETMap> {
-    let input = input.trim();
-    let (n, d): Ratio = if let Ok(n) = input.parse() {
-        (n, 1)
-    } else {
-        let (sn, sd) = input.split_once([':', '/'])?;
-        (sn.parse().ok()?, sd.parse().ok()?)
-    };
-    factorize_ratio(limit, (n, d))
 }
 
 /// Reverse engineer a prime limit object into a list of integers
@@ -146,9 +146,18 @@ fn get_huge_interval_ket() {
 }
 
 #[test]
-fn parse_7limit() {
+fn parse_7_limit() {
     let limit7 = PrimeLimit::new(7);
     assert_eq!(integer_partials(&limit7), Ok(vec![2, 3, 5, 7]));
+}
+
+#[test]
+fn parse_7_limit_ratios() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(
+        parse_as_vector(&limit, "225:224"),
+        Some(vec![-5, 2, 2, -1]),
+    );
 }
 
 #[test]
