@@ -75,8 +75,8 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
         .zip(uv.iter())
         .map(|(&x, &y)| x / 12e2 * y as Cents);
     let len = limit.len() as Cents;
-    let mean = q.clone().reduce(Cents::add).unwrap() / len;
-    let rms = (q.reduce(|tot, x| tot + x * x).unwrap() / len).sqrt();
+    let mean = q.clone().fold(0.0, Cents::add) / len;
+    let rms = (q.fold(0.0, |tot, x| tot + x * x) / len).sqrt();
     (mean / rms).abs()
 }
 
@@ -232,7 +232,11 @@ fn inherent_errors() {
     let limit = super::PrimeLimit::new(11).pitches;
     let comma = vec![2, -2, 2, 0, -1];
     let ek = inherent_error(&limit, &comma);
-    // This only agrees with Python to 1 figure accuracy
-    assert!(0.0009 < ek);
-    assert!(ek < 0.0010);
+    assert!(0.0009400 < ek);
+    assert!(ek < 0.0009401);
+
+    let comma = vec![-5, 2, 2, -1, 0];
+    let ek = inherent_error(&limit, &comma);
+    assert!(0.000357 < ek);
+    assert!(ek < 0.000358);
 }
