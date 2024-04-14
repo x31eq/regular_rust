@@ -154,10 +154,7 @@ fn parse_7_limit() {
 #[test]
 fn parse_7_limit_ratios() {
     let limit = PrimeLimit::new(7);
-    assert_eq!(
-        parse_as_vector(&limit, "225:224"),
-        Some(vec![-5, 2, 2, -1]),
-    );
+    assert_eq!(parse_as_vector(&limit, "225:224"), Some(vec![-5, 2, 2, -1]),);
 }
 
 #[test]
@@ -199,23 +196,23 @@ fn test_13_limit_ratios() {
     let limit = PrimeLimit::new(13);
     assert_eq!(
         factorize_ratio(&limit, (1, 1)),
-        Some(vec![0, 0, 0, 0, 0, 0])
+        Some(vec![0, 0, 0, 0, 0, 0]),
     );
     assert_eq!(
         factorize_ratio(&limit, (144, 143)),
-        Some(vec![4, 2, 0, 0, -1, -1])
+        Some(vec![4, 2, 0, 0, -1, -1]),
     );
     assert_eq!(
         factorize_ratio(&limit, (143, 144)),
-        Some(vec![-4, -2, 0, 0, 1, 1])
+        Some(vec![-4, -2, 0, 0, 1, 1]),
     );
     assert_eq!(
         factorize_ratio(&limit, (225, 224)),
-        Some(vec![-5, 2, 2, -1, 0, 0])
+        Some(vec![-5, 2, 2, -1, 0, 0]),
     );
     assert_eq!(
         factorize_ratio(&limit, (100, 99)),
-        Some(vec![2, -2, 2, 0, -1, 0])
+        Some(vec![2, -2, 2, 0, -1, 0]),
     );
     assert_eq!(factorize_ratio(&limit, (256, 255)), None);
     assert_eq!(factorize_ratio(&limit, (1, 0)), None);
