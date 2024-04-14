@@ -229,6 +229,15 @@ fn porcupine11_ets() {
 }
 
 #[test]
+fn ek_for_search_11() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let commas = vec![vec![2, -2, 2, 0, -1], vec![-5, 2, 2, -1, 0]];
+    let ek = ek_for_search(&limit, &commas) / 12e2;
+    assert!(0.0009400 < ek);
+    assert!(ek < 0.0009401);
+}
+
+#[test]
 fn inherent_errors() {
     let limit = super::PrimeLimit::new(11).pitches;
     let comma = vec![2, -2, 2, 0, -1];
