@@ -1,5 +1,6 @@
 extern crate nalgebra as na;
 use na::DMatrix;
+use std::ops::Add;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{Cents, ETMap, ETSlice, Exponent, Mapping};
@@ -51,6 +52,29 @@ pub fn get_ets_tempering_out(
 
 fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
     mapping.iter().all(|et| dotprod(et, interval) == 0)
+}
+
+/// Choose a value for the cangwu badness parameter
+/// for a search based on these unison vectors.
+/// This is a rough guess that has to be precise for
+/// backwards compatibility reasons
+pub fn ek_for_search(limit: &[Cents], uvs: &[ETMap]) -> Cents {
+    uvs.iter()
+        .map(|uv| inherent_error(limit, uv))
+        .reduce(Cents::max)
+        .expect("no max")
+}
+
+fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
+    if uv.is_empty() {
+        // senseless question, return something to avoid panics
+        return 0.0;
+    }
+    let q = limit.iter().zip(uv.iter()).map(|(&x, &y)| x * y as Cents);
+    let len = limit.len() as Cents;
+    let mean = q.clone().reduce(Cents::add).unwrap() / len;
+    let rms = q.reduce(|tot, x| tot + x * x).unwrap() / len;
+    (mean / rms).abs()
 }
 
 fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
