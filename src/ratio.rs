@@ -12,10 +12,7 @@ pub fn get_ratio_string(limit: &PrimeLimit, rsvec: &ETMap) -> Option<String> {
 }
 
 /// Turn the ratio-space vector (typed as a mapping) into a ratio
-pub fn get_ratio(
-    limit: &PrimeLimit,
-    rsvec: &ETMap,
-) -> Option<Ratio> {
+pub fn get_ratio(limit: &PrimeLimit, rsvec: &ETMap) -> Option<Ratio> {
     let mut numerator: Length = 1;
     let mut denominator: Length = 1;
     let harmonics = integer_partials(limit).ok()?;
@@ -44,6 +41,45 @@ pub fn get_ratio_or_ket_string(limit: &PrimeLimit, rsvec: &ETMap) -> String {
 pub fn stringify(ratio: Ratio) -> String {
     let (numerator, denominator) = ratio;
     format!("{}:{}", numerator, denominator)
+}
+
+fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
+    let partials = integer_partials(limit).ok()?;
+    let mut result = vec![0; partials.len()];
+    let mut remainder = n;
+    for (i, &p) in partials.iter().enumerate() {
+        while remainder.checked_rem(p) == Some(0) {
+            remainder /= p;
+            result[i] += 1;
+        }
+    }
+    Some(result)
+}
+
+pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
+    let numerator = factorize(limit, n)?;
+    let denominator = factorize(limit, d)?;
+    Some(
+        numerator
+            .iter()
+            .zip(denominator.iter())
+            .map(|(&a, &b)| a - b)
+            .collect(),
+    )
+}
+
+/// Turn the ratio encoded as a string into a vector
+/// in the given prime limit.
+/// Eventually, should work with vectors-as-strings as well
+pub fn parse_as_vector(limit: &PrimeLimit, input: &str) -> Option<ETMap> {
+    let input = input.trim();
+    let (n, d): Ratio = if let Ok(n) = input.parse() {
+        (n, 1)
+    } else {
+        let (sn, sd) = input.split_once(&[':', '/'])?;
+        (sn.parse().ok()?, sd.parse().ok()?)
+    };
+    factorize_ratio(&limit, (n, d))
 }
 
 /// Reverse engineer a prime limit object into a list of integers
@@ -106,4 +142,10 @@ fn get_huge_interval_ket() {
 fn parse_7limit() {
     let limit7 = PrimeLimit::new(7);
     assert_eq!(integer_partials(&limit7), Ok(vec![2, 3, 5, 7]));
+}
+
+#[test]
+fn factorize_5_limit() {
+    let limit = PrimeLimit::new(5);
+    assert_eq!(factorize(&limit, 10), Some(vec![1, 0, 1]));
 }

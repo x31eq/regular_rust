@@ -306,8 +306,7 @@ impl WebContext {
     /// new page events to be fired
     fn resubmit_with_params(&self, params: &HashMap<&str, String>) {
         let hash = self.hash_from_params(&params);
-        self
-            .document
+        self.document
             .location()
             .expect("no location")
             .set_hash(&hash)
