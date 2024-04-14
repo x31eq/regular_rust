@@ -77,7 +77,8 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
     let len = limit.len() as Cents;
     let mean = q.clone().fold(0.0, Cents::add) / len;
     let rms = (q.fold(0.0, |tot, x| tot + x * x) / len).sqrt();
-    (mean / rms).abs()
+    // Calculate in octaves for consistency with Python but return cents
+    (mean / rms).abs() * 12e2
 }
 
 fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
@@ -231,19 +232,19 @@ fn porcupine11_ets() {
 fn inherent_errors() {
     let limit = super::PrimeLimit::new(11).pitches;
     let comma = vec![2, -2, 2, 0, -1];
-    let ek = inherent_error(&limit, &comma);
+    let ek = inherent_error(&limit, &comma) / 12e2;
     assert!(0.0009400 < ek);
     assert!(ek < 0.0009401);
 
     let comma = vec![-5, 2, 2, -1, 0];
-    let ek = inherent_error(&limit, &comma);
+    let ek = inherent_error(&limit, &comma) / 12e2;
     assert!(0.000357 < ek);
     assert!(ek < 0.000358);
 
     // The limit does matter
     let limit = super::PrimeLimit::new(7).pitches;
     let comma = vec![-5, 2, 2, -1];
-    let ek = inherent_error(&limit, &comma);
+    let ek = inherent_error(&limit, &comma) / 12e2;
     assert!(0.000400 < ek);
     assert!(ek < 0.000401);
 }
