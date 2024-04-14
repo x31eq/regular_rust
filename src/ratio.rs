@@ -44,6 +44,9 @@ pub fn stringify(ratio: Ratio) -> String {
 }
 
 fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
+    if n == 0 {
+        return None
+    }
     let partials = integer_partials(limit).ok()?;
     let mut result = vec![0; partials.len()];
     let mut remainder = n;
