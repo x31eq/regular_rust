@@ -4,6 +4,7 @@ use super::{join, ETMap, PrimeLimit};
 
 /// Integers in ratios can get bigger than partials
 type Length = u128;
+type Ratio = (Length, Length);
 
 /// Turn the ratio-space vector (typed as a mapping) into a ratio-string
 pub fn get_ratio_string(limit: &PrimeLimit, rsvec: &ETMap) -> Option<String> {
@@ -14,7 +15,7 @@ pub fn get_ratio_string(limit: &PrimeLimit, rsvec: &ETMap) -> Option<String> {
 pub fn get_ratio(
     limit: &PrimeLimit,
     rsvec: &ETMap,
-) -> Option<(Length, Length)> {
+) -> Option<Ratio> {
     let mut numerator: Length = 1;
     let mut denominator: Length = 1;
     let harmonics = integer_partials(limit).ok()?;
@@ -40,7 +41,7 @@ pub fn get_ratio_or_ket_string(limit: &PrimeLimit, rsvec: &ETMap) -> String {
     }
 }
 
-pub fn stringify(ratio: (Length, Length)) -> String {
+pub fn stringify(ratio: Ratio) -> String {
     let (numerator, denominator) = ratio;
     format!("{}:{}", numerator, denominator)
 }
