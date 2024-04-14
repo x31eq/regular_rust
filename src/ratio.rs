@@ -162,6 +162,17 @@ fn factorize_5_limit() {
 }
 
 #[test]
+fn factorize_13_limit() {
+    let limit = PrimeLimit::new(13);
+    assert_eq!(factorize(&limit, 1), Some(vec![0, 0, 0, 0, 0, 0]));
+    assert_eq!(factorize(&limit, 26), Some(vec![1, 0, 0, 0, 0, 1]));
+    assert_eq!(factorize(&limit, 60), Some(vec![2, 1, 1, 0, 0, 0]));
+    assert_eq!(factorize(&limit, 30030), Some(vec![1, 1, 1, 1, 1, 1]));
+    assert_eq!(factorize(&limit, 0), None);
+    assert_eq!(factorize(&limit, 17), None);
+}
+
+#[test]
 fn test_5_limit_ratios() {
     let limit = PrimeLimit::new(5);
     assert_eq!(factorize_ratio(&limit, (1, 1)), Some(vec![0, 0, 0]));
@@ -169,6 +180,35 @@ fn test_5_limit_ratios() {
     assert_eq!(factorize_ratio(&limit, (5, 4)), Some(vec![-2, 0, 1]));
     assert_eq!(factorize_ratio(&limit, (81, 80)), Some(vec![-4, 4, -1]));
     assert_eq!(factorize_ratio(&limit, (225, 224)), None);
+    assert_eq!(factorize_ratio(&limit, (1, 0)), None);
+    assert_eq!(factorize_ratio(&limit, (0, 1)), None);
+    assert_eq!(factorize_ratio(&limit, (0, 0)), None);
+}
+
+#[test]
+fn test_13_limit_ratios() {
+    let limit = PrimeLimit::new(13);
+    assert_eq!(
+        factorize_ratio(&limit, (1, 1)),
+        Some(vec![0, 0, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        factorize_ratio(&limit, (144, 143)),
+        Some(vec![4, 2, 0, 0, -1, -1])
+    );
+    assert_eq!(
+        factorize_ratio(&limit, (143, 144)),
+        Some(vec![-4, -2, 0, 0, 1, 1])
+    );
+    assert_eq!(
+        factorize_ratio(&limit, (225, 224)),
+        Some(vec![-5, 2, 2, -1, 0, 0])
+    );
+    assert_eq!(
+        factorize_ratio(&limit, (100, 99)),
+        Some(vec![2, -2, 2, 0, -1, 0])
+    );
+    assert_eq!(factorize_ratio(&limit, (256, 255)), None);
     assert_eq!(factorize_ratio(&limit, (1, 0)), None);
     assert_eq!(factorize_ratio(&limit, (0, 1)), None);
     assert_eq!(factorize_ratio(&limit, (0, 0)), None);
