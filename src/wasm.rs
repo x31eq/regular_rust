@@ -240,23 +240,23 @@ struct WebContext {
 }
 
 impl WebContext {
-    pub fn new() -> Self {
+    fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         WebContext { document }
     }
 
-    pub fn set_body_class(&self, value: &str) {
+    fn set_body_class(&self, value: &str) {
         let body = self.document.body().expect("no body");
         body.set_attribute("class", value)
             .expect("failed to set class");
     }
 
-    pub fn element(&self, id: &str) -> Option<Element> {
+    fn element(&self, id: &str) -> Option<Element> {
         self.document.get_element_by_id(id)
     }
 
-    pub fn input_value(&self, id: &str) -> Option<String> {
+    fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
         if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
             return Some(text_area.value());
@@ -266,7 +266,7 @@ impl WebContext {
     }
 
     /// Set an input if found: log errors and carry on
-    pub fn set_input_value(&self, id: &str, value: &str) {
+    fn set_input_value(&self, id: &str, value: &str) {
         if let Some(element) = self.element(id) {
             if let Some(input_element) = element.dyn_ref::<HtmlInputElement>()
             {
@@ -295,7 +295,7 @@ impl WebContext {
     }
 
     /// Get the URL-supplied parameters
-    pub fn get_url_params(&self) -> HashMap<String, String> {
+    fn get_url_params(&self) -> HashMap<String, String> {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(query) = location.hash() {
@@ -327,7 +327,7 @@ impl WebContext {
         result
     }
 
-    pub fn log_error(&self, message: &str) {
+    fn log_error(&self, message: &str) {
         console::error_1(&message.into());
     }
 }
