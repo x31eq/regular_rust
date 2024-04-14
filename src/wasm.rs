@@ -11,7 +11,7 @@ use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
     CangwuTemperament,
 };
-use super::ratio::get_ratio_or_ket_string;
+use super::ratio::{get_ratio_or_ket_string, parse_as_vector};
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::only_unison_vector;
@@ -77,7 +77,42 @@ fn pregular_action(
     web.set_input_value("n-results", &nresults.to_string());
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
-    regular_temperament_search(limit, eka, nresults)?;
+    regular_temperament_search(web, limit, eka, nresults)?;
+    Ok(())
+}
+
+fn uv_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    let limit = if let Some(limit) = params.get("limit") {
+        web.set_input_value("uv-limit", &limit);
+        limit.parse().or(Err("Unable to parse prime limit"))?
+    } else {
+        // FIXME: Determine this from the unison vectors
+        return Err("Implicit prime limit not supported".to_string());
+    };
+    let uv_strings = params
+        .get("uvs")
+        .ok_or("Unison vectors not supplied for a unison vector search")?
+        .split('+');
+    let uvs = uv_strings.filter_map(
+        |uv| parse_as_vector(&limit, uv)).collect();
+    let ekm = if let Some(multiplier) = params.get("errmul") {
+        Some(
+            multiplier.parse()
+                .or(Err("Unable to parse target error multiplier"))?,
+        )
+    } else {
+        // Let the search code sort this out
+        None
+    };
+    let nresults =
+        params.get("nresults").cloned().unwrap_or("10".to_string());
+    web.set_input_value("n-results", &nresults.to_string());
+    let nresults =
+        nresults.parse().or(Err("Failed to parse n of results"))?;
+    unison_vector_search(web, uvs, limit, ekm, nresults)?;
     Ok(())
 }
 
@@ -99,6 +134,7 @@ fn process_hash() {
         match params.get("page").map(String::as_str) {
             Some("rt") => rt_action(&web, &params),
             Some("pregular") => pregular_action(&web, &params),
+            Some("uv") => uv_action(&web, &params),
             _ => Ok(()),
         }
     } {
@@ -165,7 +201,8 @@ fn rt_from_et_names<'a>(
     CangwuTemperament::from_et_names(&limit, &ets)
 }
 
-pub fn regular_temperament_search(
+fn regular_temperament_search(
+    web: &WebContext,
     limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
@@ -180,7 +217,6 @@ pub fn regular_temperament_search(
     };
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
-    let web = WebContext::new();
     let list = web
         .element("temperament-list")
         .ok_or("Couldn't find list for results")?;
@@ -222,6 +258,17 @@ pub fn regular_temperament_search(
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
+    Ok(())
+}
+
+fn unison_vector_search(
+    web: &WebContext,
+    uvs: Mapping,
+    _limit: PrimeLimit,
+    _ek_multiplier: Option<Cents>,
+    _n_results: usize,
+) -> Result<(), String> {
+    web.log_error(&format!("Got unison vectors {uvs:?}"));
     Ok(())
 }
 
