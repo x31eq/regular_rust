@@ -160,3 +160,16 @@ fn factorize_5_limit() {
     assert_eq!(factorize(&limit, 0), None);
     assert_eq!(factorize(&limit, 7), None);
 }
+
+#[test]
+fn test_5_limit_ratios() {
+    let limit = PrimeLimit::new(5);
+    assert_eq!(factorize_ratio(&limit, (1, 1)), Some(vec![0, 0, 0]));
+    assert_eq!(factorize_ratio(&limit, (3, 2)), Some(vec![-1, 1, 0]));
+    assert_eq!(factorize_ratio(&limit, (5, 4)), Some(vec![-2, 0, 1]));
+    assert_eq!(factorize_ratio(&limit, (81, 80)), Some(vec![-4, 4, -1]));
+    assert_eq!(factorize_ratio(&limit, (225, 224)), None);
+    assert_eq!(factorize_ratio(&limit, (1, 0)), None);
+    assert_eq!(factorize_ratio(&limit, (0, 1)), None);
+    assert_eq!(factorize_ratio(&limit, (0, 0)), None);
+}
