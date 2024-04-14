@@ -70,10 +70,13 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
         // senseless question, return something to avoid panics
         return 0.0;
     }
-    let q = limit.iter().zip(uv.iter()).map(|(&x, &y)| x * y as Cents);
+    let q = limit
+        .iter()
+        .zip(uv.iter())
+        .map(|(&x, &y)| x / 12e2 * y as Cents);
     let len = limit.len() as Cents;
     let mean = q.clone().reduce(Cents::add).unwrap() / len;
-    let rms = q.reduce(|tot, x| tot + x * x).unwrap() / len;
+    let rms = (q.reduce(|tot, x| tot + x * x).unwrap() / len).sqrt();
     (mean / rms).abs()
 }
 
@@ -222,4 +225,14 @@ fn porcupine11_ets() {
     assert!(tempers_out(&ets, &comma1));
     assert!(tempers_out(&ets, &comma2));
     assert!(tempers_out(&ets, &comma3));
+}
+
+#[test]
+fn inherent_errors() {
+    let limit = super::PrimeLimit::new(11).pitches;
+    let comma = vec![2, -2, 2, 0, -1];
+    let ek = inherent_error(&limit, &comma);
+    // This only agrees with Python to 1 figure accuracy
+    assert!(0.0009 < ek);
+    assert!(ek < 0.0010);
 }
