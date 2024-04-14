@@ -96,16 +96,16 @@ fn uv_action(
         .get("uvs")
         .ok_or("Unison vectors not supplied for a unison vector search")?
         .split('+');
-    let uvs = uv_strings.filter_map(
-        |uv| parse_as_vector(&limit, uv)).collect();
+    let uvs = uv_strings
+        .filter_map(|uv| parse_as_vector(&limit, uv))
+        .collect();
     let ekm = if let Some(multiplier) = params.get("errmul") {
-        Some(
-            multiplier.parse()
-                .or(Err("Unable to parse target error multiplier"))?,
-        )
+        multiplier
+            .parse()
+            .or(Err("Unable to parse target error multiplier"))?
     } else {
-        // Let the search code sort this out
-        None
+        // Default (page 2) from the old interface
+        2.0
     };
     let nresults =
         params.get("nresults").cloned().unwrap_or("10".to_string());
@@ -265,7 +265,7 @@ fn unison_vector_search(
     web: &WebContext,
     uvs: Mapping,
     _limit: PrimeLimit,
-    _ek_multiplier: Option<Cents>,
+    _ek_multiplier: Cents,
     _n_results: usize,
 ) -> Result<(), String> {
     web.log_error(&format!("Got unison vectors {uvs:?}"));
