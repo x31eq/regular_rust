@@ -16,8 +16,8 @@ use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
-    join, map, normalize_positive, warted_et_name, Cents, ETMap, Exponent,
-    Mapping, PrimeLimit,
+    hermite_normal_form, join, map, normalize_positive, warted_et_name,
+    Cents, ETMap, Exponent, Mapping, PrimeLimit,
 };
 
 type Exceptionable = Result<(), JsValue>;
@@ -269,7 +269,20 @@ fn unison_vector_search(
     n_results: usize,
 ) -> Result<(), String> {
     let ek = ek_for_search(&limit.pitches, &uvs) * ek_multiplier;
-    let mappings = get_ets_tempering_out(&limit.pitches, ek, &uvs, n_results);
+    let dimension = limit.pitches.len();
+    let corank = hermite_normal_form(&uvs).len();
+    if corank == dimension {
+        return Err(
+            "Too many unison vectors: whole space matches".to_string()
+        );
+    }
+    let highest_rank = dimension - corank;
+    let mappings = get_ets_tempering_out(
+        &limit.pitches,
+        ek,
+        &uvs,
+        if highest_rank == 1 { 1 } else { n_results },
+    );
     let list = web
         .element("temperament-list")
         .ok_or("Couldn't find list for results")?;
