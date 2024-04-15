@@ -231,7 +231,14 @@ fn regular_temperament_search(
     .or(Err("Failed to display equal temperaments"))?;
 
     iterate_regular_temperaments(
-        &web, &list, &limit, ek, &mappings, dimension - 1, n_results, safety,
+        &web,
+        &list,
+        &limit,
+        ek,
+        &mappings,
+        dimension - 1,
+        n_results,
+        safety,
     )
 }
 
@@ -245,6 +252,7 @@ fn iterate_regular_temperaments(
     n_results: usize,
     safety: usize,
 ) -> Result<(), String> {
+    let dimension = limit.pitches.len();
     let mut items = limit.headings.iter();
     let mut headings = "".to_string();
     if let Some(heading) = items.next() {
@@ -257,8 +265,16 @@ fn iterate_regular_temperaments(
 
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..(max_rank + 1) {
-        let eff_n_results =
-            n_results + if rank == max_rank - 1 { 0 } else { safety };
+        let eff_n_results = if rank == max_rank {
+            if rank == dimension - 1 {
+                n_results
+            } else {
+                // must be a unison vector search
+                1
+            }
+        } else {
+            n_results + safety
+        };
         rts = higher_rank_search(
             &limit.pitches,
             &mappings,
@@ -282,6 +298,9 @@ fn unison_vector_search(
     ek_multiplier: Cents,
     n_results: usize,
 ) -> Result<(), String> {
+    if uvs.is_empty() {
+        return Err("No unison vectors supplied".to_string());
+    }
     let ek = ek_for_search(&limit.pitches, &uvs) * ek_multiplier;
     let dimension = limit.pitches.len();
     let corank = hermite_normal_form(&uvs).len();
