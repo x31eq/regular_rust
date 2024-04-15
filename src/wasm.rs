@@ -230,7 +230,6 @@ fn regular_temperament_search(
     )
     .or(Err("Failed to display equal temperaments"))?;
 
-    // Store the limit in the DOM so we can get it later
     let mut items = limit.headings.iter();
     let mut headings = "".to_string();
     if let Some(heading) = items.next() {
