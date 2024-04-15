@@ -252,7 +252,6 @@ fn iterate_regular_temperaments(
     n_results: usize,
     safety: usize,
 ) -> Result<(), String> {
-    let dimension = limit.pitches.len();
     let mut items = limit.headings.iter();
     let mut headings = "".to_string();
     if let Some(heading) = items.next() {
@@ -266,11 +265,11 @@ fn iterate_regular_temperaments(
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..(max_rank + 1) {
         let eff_n_results = if rank == max_rank {
-            if rank == dimension - 1 {
-                n_results
-            } else {
+            if safety == 0 {
                 // must be a unison vector search
                 1
+            } else {
+                n_results
             }
         } else {
             n_results + safety
