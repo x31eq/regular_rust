@@ -61,8 +61,7 @@ fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
 pub fn ek_for_search(limit: &[Cents], uvs: &[ETMap]) -> Cents {
     uvs.iter()
         .map(|uv| inherent_error(limit, uv))
-        .reduce(Cents::max)
-        .expect("no max")
+        .fold(0.0, Cents::max)
 }
 
 fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
