@@ -230,6 +230,21 @@ fn regular_temperament_search(
     )
     .or(Err("Failed to display equal temperaments"))?;
 
+    iterate_regular_temperaments(
+        &web, &list, &limit, ek, &mappings, dimension - 1, n_results, safety,
+    )
+}
+
+fn iterate_regular_temperaments(
+    web: &WebContext,
+    list: &Element,
+    limit: &PrimeLimit,
+    ek: Cents,
+    mappings: &Mapping,
+    max_rank: usize,
+    n_results: usize,
+    safety: usize,
+) -> Result<(), String> {
     let mut items = limit.headings.iter();
     let mut headings = "".to_string();
     if let Some(heading) = items.next() {
@@ -241,9 +256,9 @@ fn regular_temperament_search(
     }
 
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
-    for rank in 2..dimension {
+    for rank in 2..(max_rank + 1) {
         let eff_n_results =
-            n_results + if rank == dimension - 1 { 0 } else { safety };
+            n_results + if rank == max_rank - 1 { 0 } else { safety };
         rts = higher_rank_search(
             &limit.pitches,
             &mappings,
@@ -289,7 +304,20 @@ fn unison_vector_search(
     web.set_body_class("show-list");
     show_equal_temperaments(&web, &list, &limit, mappings.iter())
         .or(Err("Failed to display equal temperaments"))?;
-    Ok(())
+
+    if highest_rank == 1 {
+        return Ok(());
+    }
+    iterate_regular_temperaments(
+        web,
+        &list,
+        &limit,
+        ek,
+        &mappings,
+        highest_rank,
+        n_results,
+        0,
+    )
 }
 
 struct WebContext {
