@@ -14,7 +14,7 @@ use super::cangwu::{
 use super::ratio::{get_ratio_or_ket_string, parse_as_vector};
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
-use super::uv::only_unison_vector;
+use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
     join, map, normalize_positive, warted_et_name, Cents, ETMap, Exponent,
     Mapping, PrimeLimit,
@@ -264,11 +264,19 @@ fn regular_temperament_search(
 fn unison_vector_search(
     web: &WebContext,
     uvs: Mapping,
-    _limit: PrimeLimit,
-    _ek_multiplier: Cents,
-    _n_results: usize,
+    limit: PrimeLimit,
+    ek_multiplier: Cents,
+    n_results: usize,
 ) -> Result<(), String> {
-    web.log_error(&format!("Got unison vectors {uvs:?}"));
+    let ek = ek_for_search(&limit.pitches, &uvs) * ek_multiplier;
+    let mappings = get_ets_tempering_out(&limit.pitches, ek, &uvs, n_results);
+    let list = web
+        .element("temperament-list")
+        .ok_or("Couldn't find list for results")?;
+    list.set_inner_html("");
+    web.set_body_class("show-list");
+    show_equal_temperaments(&web, &list, &limit, mappings.iter())
+        .or(Err("Failed to display equal temperaments"))?;
     Ok(())
 }
 
