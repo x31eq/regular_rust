@@ -59,6 +59,9 @@ pub fn uv_form_submit(evt: Event) {
         let uvs: Vec<&str> = uvs.split_whitespace().collect();
         params.insert("uvs", uvs.join("+"));
     }
+    if let Some(n_results) = web.input_value("uv-n-results") {
+        params.insert("nresults", n_results.trim().to_string());
+    }
     web.resubmit_with_params(&params);
 }
 
@@ -116,9 +119,8 @@ fn uv_action(
         // Default (page 2) from the old interface
         2.0
     };
-    let nresults =
-        params.get("nresults").cloned().unwrap_or("10".to_string());
-    web.set_input_value("n-results", &nresults.to_string());
+    let nresults = params.get("nresults").cloned().unwrap_or("6".to_string());
+    web.set_input_value("uv-n-results", &nresults.to_string());
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
     unison_vector_search(web, uvs, limit, ekm, nresults)?;
