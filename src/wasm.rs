@@ -96,6 +96,8 @@ fn uv_action(
         .get("uvs")
         .ok_or("Unison vectors not supplied for a unison vector search")?
         .split('+');
+    let uv_display = uv_strings.clone().collect::<Vec<&str>>().join(" ");
+    web.set_input_value("uv-uvs", &uv_display);
     let uvs = uv_strings
         .filter_map(|uv| parse_as_vector(&limit, uv))
         .collect();
@@ -363,6 +365,10 @@ impl WebContext {
         let element = self.element(id)?;
         if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
             return Some(text_area.value());
+        } else if let Some(text_area) =
+            element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            return Some(text_area.value());
         }
         let input_element = element.dyn_ref::<HtmlInputElement>()?;
         Some(input_element.value())
@@ -371,7 +377,11 @@ impl WebContext {
     /// Set an input if found: log errors and carry on
     fn set_input_value(&self, id: &str, value: &str) {
         if let Some(element) = self.element(id) {
-            if let Some(input_element) = element.dyn_ref::<HtmlInputElement>()
+            if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>()
+            {
+                text_area.set_value(value);
+            } else if let Some(input_element) =
+                element.dyn_ref::<HtmlInputElement>()
             {
                 input_element.set_value(value);
             } else {
