@@ -85,6 +85,13 @@ fn uv_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
+    if let Some(button) = web.element("show-uv") {
+        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
+            // If the URL was typed in, the right search form
+            // might not be showing
+            button.set_checked(true);
+        }
+    }
     let limit = if let Some(limit) = params.get("limit") {
         web.set_input_value("uv-limit", &limit);
         limit.parse().or(Err("Unable to parse prime limit"))?
@@ -161,6 +168,13 @@ fn rt_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
+    if let Some(button) = web.element("show-general") {
+        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
+            // If the URL was typed in, the right search form
+            // might not be showing
+            button.set_checked(true);
+        }
+    }
     let (ets, limit, key) =
         parse_rt_params(&params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
