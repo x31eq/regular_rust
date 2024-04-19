@@ -250,17 +250,12 @@ fn regular_temperament_search(
 
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..dimension {
-        let eff_n_results = if rank == dimension - 1 {
-            n_results
-        } else {
-            n_results + safety
-        };
         rts = higher_rank_search(
             &limit.pitches,
             &mappings,
             &rts,
             ek,
-            eff_n_results,
+            n_results + if rank == dimension - 1 { 0 } else { safety },
         );
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
@@ -309,17 +304,15 @@ fn unison_vector_search(
     }
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..(highest_rank + 1) {
-        let eff_n_results = if rank == highest_rank { 1 } else { n_results };
         rts = higher_rank_search(
             &limit.pitches,
             &mappings,
             &rts,
             ek,
-            eff_n_results,
+            if rank == highest_rank { 1 } else { n_results },
         );
         if !rts.is_empty() {
-            let visible_rts = rts.iter().take(n_results);
-            show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+            show_regular_temperaments(&web, &list, &limit, rts.iter(), rank)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
