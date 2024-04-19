@@ -270,16 +270,6 @@ fn iterate_regular_temperaments(
     n_results: usize,
     safety: usize,
 ) -> Result<(), String> {
-    let mut items = limit.headings.iter();
-    let mut headings = "".to_string();
-    if let Some(heading) = items.next() {
-        headings.push_str(&heading);
-    };
-    for heading in items {
-        headings.push_str("_");
-        headings.push_str(heading);
-    }
-
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..(max_rank + 1) {
         let eff_n_results = if rank == max_rank {
