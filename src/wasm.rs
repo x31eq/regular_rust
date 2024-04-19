@@ -248,37 +248,10 @@ fn regular_temperament_search(
     )
     .or(Err("Failed to display equal temperaments"))?;
 
-    iterate_regular_temperaments(
-        &web,
-        &list,
-        &limit,
-        ek,
-        &mappings,
-        dimension - 1,
-        n_results,
-        safety,
-    )
-}
-
-fn iterate_regular_temperaments(
-    web: &WebContext,
-    list: &Element,
-    limit: &PrimeLimit,
-    ek: Cents,
-    mappings: &Mapping,
-    max_rank: usize,
-    n_results: usize,
-    safety: usize,
-) -> Result<(), String> {
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
-    for rank in 2..(max_rank + 1) {
-        let eff_n_results = if rank == max_rank {
-            if safety == 0 {
-                // must be a unison vector search
-                1
-            } else {
-                n_results
-            }
+    for rank in 2..dimension {
+        let eff_n_results = if rank == dimension - 1 {
+            n_results
         } else {
             n_results + safety
         };
@@ -334,16 +307,23 @@ fn unison_vector_search(
     if highest_rank == 1 {
         return Ok(());
     }
-    iterate_regular_temperaments(
-        web,
-        &list,
-        &limit,
-        ek,
-        &mappings,
-        highest_rank,
-        n_results,
-        0,
-    )
+    let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
+    for rank in 2..(highest_rank + 1) {
+        let eff_n_results = if rank == highest_rank { 1 } else { n_results };
+        rts = higher_rank_search(
+            &limit.pitches,
+            &mappings,
+            &rts,
+            ek,
+            eff_n_results,
+        );
+        if !rts.is_empty() {
+            let visible_rts = rts.iter().take(n_results);
+            show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+                .or(Err("Failed to display regular temperaments"))?
+        }
+    }
+    Ok(())
 }
 
 struct WebContext {
