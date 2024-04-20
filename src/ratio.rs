@@ -296,11 +296,31 @@ fn detect_13_limit() {
     if let Some((limit, intervals)) = result {
         assert_eq!(limit.label, "13");
         assert_eq!(limit.headings, vec!["2", "3", "5", "7", "11", "13"]);
-        assert_eq!(intervals, vec![
-            vec![-3, 0, -3, 1, 1, 1],
-            vec![2, -2, 2, 0, -1, 0],
-            vec![-1, 3, -2, -1, 0, 1],
-            vec![2, 3, 1, -2, -1, 0],
-        ])
+        assert_eq!(
+            intervals,
+            vec![
+                vec![-3, 0, -3, 1, 1, 1],
+                vec![2, -2, 2, 0, -1, 0],
+                vec![-1, 3, -2, -1, 0, 1],
+                vec![2, 3, 1, -2, -1, 0],
+            ],
+        )
+    }
+}
+
+/// Corner case: highest detectable limit
+#[test]
+fn detect_97_limit() {
+    let result = factorize_ratios_in_simplest_limit(&[(100, 97)]);
+    assert!(!result.is_none());
+    if let Some((limit, intervals)) = result {
+        assert_eq!(limit.label, "97");
+        assert_eq!(
+            intervals,
+            vec![vec![
+                2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, -1,
+            ]],
+        );
     }
 }
