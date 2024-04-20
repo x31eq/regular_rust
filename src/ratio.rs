@@ -89,6 +89,26 @@ pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
     )
 }
 
+pub fn parse_ratios_in_simplest_limit(
+    ratio_strings: &[&str],
+) -> Option<(PrimeLimit, Mapping)> {
+    let ratios: Vec<Ratio> = ratio_strings
+        .iter()
+        .filter_map(|ratio_string| {
+            if let Some((n, d)) = ratio_string.split_once([':', '/']) {
+                if let (Ok(n), Ok(d)) = (n.parse(), d.parse()) {
+                    Some((n, d))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect();
+    factorize_ratios_in_simplest_limit(&ratios)
+}
+
 pub fn factorize_ratios_in_simplest_limit(
     ratios: &[Ratio],
 ) -> Option<(PrimeLimit, Mapping)> {
@@ -274,6 +294,17 @@ fn detect_5_limit() {
 }
 
 #[test]
+fn parse_to_5_limit() {
+    let result = parse_ratios_in_simplest_limit(&["81:80"]);
+    assert!(!result.is_none());
+    if let Some((limit, intervals)) = result {
+        assert_eq!(limit.label, "5");
+        assert_eq!(limit.headings, vec!["2", "3", "5"]);
+        assert_eq!(intervals, vec![vec![-4, 4, -1]]);
+    }
+}
+
+#[test]
 fn detect_7_limit() {
     let result = factorize_ratios_in_simplest_limit(&[(7, 6)]);
     assert!(!result.is_none());
@@ -291,6 +322,30 @@ fn detect_13_limit() {
         (100, 99),
         (351, 350),
         (540, 539),
+    ]);
+    assert!(!result.is_none());
+    if let Some((limit, intervals)) = result {
+        assert_eq!(limit.label, "13");
+        assert_eq!(limit.headings, vec!["2", "3", "5", "7", "11", "13"]);
+        assert_eq!(
+            intervals,
+            vec![
+                vec![-3, 0, -3, 1, 1, 1],
+                vec![2, -2, 2, 0, -1, 0],
+                vec![-1, 3, -2, -1, 0, 1],
+                vec![2, 3, 1, -2, -1, 0],
+            ],
+        )
+    }
+}
+
+#[test]
+fn parse_to_13_limit() {
+    let result = parse_ratios_in_simplest_limit(&[
+        "1001:1000",
+        "100/99",
+        "351:350",
+        "540/539",
     ]);
     assert!(!result.is_none());
     if let Some((limit, intervals)) = result {
