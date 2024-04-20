@@ -11,7 +11,9 @@ use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
     CangwuTemperament,
 };
-use super::ratio::{get_ratio_or_ket_string, parse_as_vector};
+use super::ratio::{
+    get_ratio_or_ket_string, parse_as_vector, parse_ratios_in_simplest_limit,
+};
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
@@ -95,22 +97,25 @@ fn uv_action(
             button.set_checked(true);
         }
     }
-    let limit = if let Some(limit) = params.get("limit") {
-        web.set_input_value("uv-limit", &limit);
-        limit.parse().or(Err("Unable to parse prime limit"))?
-    } else {
-        // FIXME: Determine this from the unison vectors
-        return Err("Implicit prime limit not supported".to_string());
-    };
-    let uv_strings = params
+    let uv_strings: Vec<&str> = params
         .get("uvs")
         .ok_or("Unison vectors not supplied for a unison vector search")?
-        .split('+');
-    let uv_display = uv_strings.clone().collect::<Vec<&str>>().join(" ");
-    web.set_input_value("uv-uvs", &uv_display);
-    let uvs = uv_strings
-        .filter_map(|uv| parse_as_vector(&limit, uv))
+        .split('+')
         .collect();
+    let uv_display = uv_strings.join(" ");
+    web.set_input_value("uv-uvs", &uv_display);
+    let (limit, uvs) = if let Some(limit) = params.get("limit") {
+        let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+        let uvs = uv_strings
+            .iter()
+            .filter_map(|uv| parse_as_vector(&limit, uv))
+            .collect();
+        (limit, uvs)
+    } else {
+        parse_ratios_in_simplest_limit(&uv_strings)
+            .ok_or("Unable to determine prime limit from ratios")?
+    };
+    web.set_input_value("uv-limit", &limit.label);
     let ekm = if let Some(multiplier) = params.get("errmul") {
         multiplier
             .parse()
