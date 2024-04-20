@@ -324,3 +324,10 @@ fn detect_97_limit() {
         );
     }
 }
+
+/// Corner case: lowest undetectable limit
+#[test]
+fn detect_101_limit() {
+    let result = factorize_ratios_in_simplest_limit(&[(100, 101)]);
+    assert!(result.is_none());
+}
