@@ -89,7 +89,7 @@ pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
     )
 }
 
-pub fn parse_ratios_in_simplest_limit(
+pub fn parse_in_simplest_limit(
     ratio_strings: &[&str],
 ) -> Option<(PrimeLimit, Mapping)> {
     let ratios: Vec<Ratio> = ratio_strings
@@ -295,7 +295,7 @@ fn detect_5_limit() {
 
 #[test]
 fn parse_to_5_limit() {
-    let result = parse_ratios_in_simplest_limit(&["81:80"]);
+    let result = parse_in_simplest_limit(&["81:80"]);
     assert!(!result.is_none());
     if let Some((limit, intervals)) = result {
         assert_eq!(limit.label, "5");
@@ -341,7 +341,7 @@ fn detect_13_limit() {
 
 #[test]
 fn parse_to_13_limit() {
-    let result = parse_ratios_in_simplest_limit(&[
+    let result = parse_in_simplest_limit(&[
         "1001:1000",
         "100/99",
         "351:350",

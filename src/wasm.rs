@@ -12,7 +12,7 @@ use super::cangwu::{
     CangwuTemperament,
 };
 use super::ratio::{
-    get_ratio_or_ket_string, parse_as_vector, parse_ratios_in_simplest_limit,
+    get_ratio_or_ket_string, parse_as_vector, parse_in_simplest_limit,
 };
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
@@ -112,7 +112,7 @@ fn uv_action(
             .collect();
         (limit, uvs)
     } else {
-        parse_ratios_in_simplest_limit(&uv_strings)
+        parse_in_simplest_limit(&uv_strings)
             .ok_or("Unable to determine prime limit from ratios")?
     };
     web.set_input_value("uv-limit", &limit.label);
