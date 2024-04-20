@@ -1,6 +1,6 @@
 //! Utilities for dealing with vectors as ratios
 
-use super::{join, ETMap, PrimeLimit};
+use super::{join, ETMap, Mapping, PrimeLimit};
 
 /// Integers in ratios can get bigger than partials
 type Length = u128;
@@ -87,6 +87,35 @@ pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {
             .map(|(&a, &b)| a - b)
             .collect(),
     )
+}
+
+pub fn factorize_ratios_in_simplest_limit(
+    ratios: &[Ratio],
+) -> Option<(PrimeLimit, Mapping)> {
+    // For now, primes over 100 will not be recognized
+    let mut limit = PrimeLimit::new(100);
+    let mut vectors = ratios
+        .iter()
+        .map(|&r| factorize_ratio(&limit, r))
+        .collect::<Option<Mapping>>()?;
+    let limit_size = limit.pitches.len();
+    let trim_point = vectors
+        .iter()
+        .map(|interval| {
+            interval.iter().rposition(|&n| n != 0).unwrap_or(limit_size)
+        })
+        .max()?;
+    for vector in &mut vectors {
+        vector.truncate(trim_point + 1);
+    }
+    limit.pitches.truncate(trim_point + 1);
+    limit.headings.truncate(trim_point + 1);
+    limit.label = limit
+        .headings
+        .get(trim_point)
+        .expect("Over-truncated headings")
+        .to_string();
+    Some((limit, vectors))
 }
 
 /// Reverse engineer a prime limit object into a list of integers
