@@ -114,9 +114,11 @@ fn uv_action(
         parse_in_simplest_limit(&uv_strings)
             .ok_or("Unable to determine prime limit from ratios")?
     };
-    // Filter out anything larger than a whole tone as not a unison vector
     let uvs: Mapping = uvs
         .into_iter()
+        // Ensure everything's positive before the size check
+        .map(|uv| normalize_positive(&limit.pitches, uv))
+        // Filter out anything larger than a whole tone as not a unison vector
         .filter(|uv| limit.interval_size(uv) < 200.0)
         .collect();
     if uvs.is_empty() {
