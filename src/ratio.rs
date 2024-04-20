@@ -331,3 +331,9 @@ fn detect_101_limit() {
     let result = factorize_ratios_in_simplest_limit(&[(100, 101)]);
     assert!(result.is_none());
 }
+
+#[test]
+fn detect_silly_limit() {
+    let result = factorize_ratios_in_simplest_limit(&[(65536, 65535)]);
+    assert!(result.is_none());
+}
