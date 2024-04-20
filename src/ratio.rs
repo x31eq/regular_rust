@@ -261,3 +261,14 @@ fn test_13_limit_ratios() {
     assert_eq!(factorize_ratio(&limit, (0, 1)), None);
     assert_eq!(factorize_ratio(&limit, (0, 0)), None);
 }
+
+#[test]
+fn detect_5_limit() {
+    let result = factorize_ratios_in_simplest_limit(&[(81, 80)]);
+    assert!(!result.is_none());
+    if let Some((limit, intervals)) = result {
+        assert_eq!(limit.label, "5");
+        assert_eq!(limit.headings, vec!["2", "3", "5"]);
+        assert_eq!(intervals, vec![vec![-4, 4, -1]]);
+    }
+}
