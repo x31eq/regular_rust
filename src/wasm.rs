@@ -102,8 +102,7 @@ fn uv_action(
         .ok_or("Unison vectors not supplied for a unison vector search")?
         .split('+')
         .collect();
-    let uv_display = uv_strings.join(" ");
-    web.set_input_value("uv-uvs", &uv_display);
+    web.set_input_value("uv-uvs", &uv_strings.join(" "));
     let (limit, uvs) = if let Some(limit) = params.get("limit") {
         let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
         let uvs = uv_strings
@@ -115,10 +114,18 @@ fn uv_action(
         parse_in_simplest_limit(&uv_strings)
             .ok_or("Unable to determine prime limit from ratios")?
     };
+    // Filter out anything larger than a whole tone as not a unison vector
+    let uvs: Mapping = uvs
+        .into_iter()
+        .filter(|uv| limit.interval_size(uv) < 200.0)
+        .collect();
     if uvs.is_empty() {
-        return Err("No valid unison vectors in the limit".to_string())
+        return Err("No valid unison vectors in the limit".to_string());
     }
     web.set_input_value("uv-limit", &limit.label);
+    // Update the input box with the filtered unison vectors
+    let uv_strings = map(|uv| get_ratio_or_ket_string(&limit, uv), &uvs);
+    web.set_input_value("uv-uvs", &uv_strings.join(" "));
     let ekm = if let Some(multiplier) = params.get("errmul") {
         multiplier
             .parse()

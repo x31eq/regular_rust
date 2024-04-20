@@ -70,6 +70,13 @@ impl PrimeLimit {
         }
     }
 
+    pub fn interval_size(&self, interval: &ETSlice) -> Cents {
+        self.pitches
+            .iter()
+            .zip(interval.iter())
+            .fold(0.0, |tot, (&p, &i)| tot + p * (i as Cents))
+    }
+
     /// Return the characters used to specify names of
     /// ambiguous equal temperaments
     fn warts(&self) -> Vec<char> {
