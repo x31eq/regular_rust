@@ -115,6 +115,9 @@ fn uv_action(
         parse_in_simplest_limit(&uv_strings)
             .ok_or("Unable to determine prime limit from ratios")?
     };
+    if uvs.is_empty() {
+        return Err("No valid unison vectors in the limit".to_string())
+    }
     web.set_input_value("uv-limit", &limit.label);
     let ekm = if let Some(multiplier) = params.get("errmul") {
         multiplier
