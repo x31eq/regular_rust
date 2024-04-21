@@ -281,6 +281,16 @@ fn name_chinese_wart() {
 }
 
 #[test]
+fn chinese_rollover() {
+    assert_eq!(next_char('z'), '〇');
+}
+
+#[test]
+fn chinese_continuation() {
+    assert_eq!(next_char('〇'), '〡');
+}
+
+#[test]
 fn nonoctave_prime_mapping() {
     let limit = PrimeLimit::explicit(vec![3, 5, 7, 11, 13]);
     let et = prime_mapping(&limit.pitches, 19);
