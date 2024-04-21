@@ -129,8 +129,10 @@ impl FromStr for PrimeLimit {
             } else {
                 Ok(PrimeLimit::new(limit))
             }
-        } else if let Ok(primes) = src.split('.').map(str::parse).collect() {
-            Ok(PrimeLimit::explicit(primes))
+        } else if let Some(limit) =
+            PrimeLimit::from_labels(&src.split('.').collect::<Vec<&str>>())
+        {
+            Ok(limit)
         } else {
             Err(ParseLimitError {})
         }
