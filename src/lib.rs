@@ -263,9 +263,15 @@ fn next_char(current: char) -> char {
         // lets switch to Chinese characters.
         // The first proper characters (not radicals) are the
         // so-called Hangzhou numerals, so they'll do
-        '〇'
+        '〡'
     } else {
-        (current as u8 + 1) as char
+        let current_code = current as u32;
+        for i in 1..100 {
+            if let Some(c) = char::from_u32(current_code + i) {
+                return c;
+            }
+        }
+        panic!("Can't find next character")
     }
 }
 
