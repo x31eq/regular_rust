@@ -72,8 +72,7 @@ impl PrimeLimit {
                     let numerator: f64 = n.parse().ok()?;
                     let denominator: f64 = d.parse().ok()?;
                     Some(cents(numerator / denominator))
-                }
-                else {
+                } else {
                     None
                 }
             })
@@ -260,10 +259,9 @@ fn next_char(current: char) -> char {
     if current == 'z' {
         // The Python wrapped around to 'a' again,  but that can be
         // ambiguous and this code has to handle more primes, so
-        // lets switch to Chinese characters.
-        // The first proper characters (not radicals) are the
-        // so-called Hangzhou numerals, so they'll do
-        '〡'
+        // let's switch to Chinese characters.
+        // This is the start of the CJK Unified Ideographs block
+        '一'
     } else {
         let current_code = current as u32;
         for i in 1..100 {

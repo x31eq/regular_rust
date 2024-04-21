@@ -276,18 +276,18 @@ fn name_chinese_wart() {
         344, 355, 364, 367, 376, 381, 383, 390, 395, 401, 409, 412,
     ];
     let name = warted_et_name(&limit, &et);
-    assert_eq!(name, "62rsvw〡");
+    assert_eq!(name, "62rsvw一");
     assert_eq!(Some(et), et_from_name(&limit, &name));
 }
 
 #[test]
 fn chinese_rollover() {
-    assert_eq!(next_char('z'), '〡');
+    assert_eq!(next_char('z'), '一');
 }
 
 #[test]
 fn chinese_continuation() {
-    assert_eq!(next_char('〡'), '〢');
+    assert_eq!(next_char('一'), '丁');
 }
 
 #[test]
