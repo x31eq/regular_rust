@@ -45,6 +45,20 @@ fn bad_limit_from_str() {
 
 #[test]
 fn ratio_limit() {
+    let label = "2.3.7/5";
+    let limit: Result<PrimeLimit, _> = label.parse();
+    assert!(limit.is_ok());
+    let limit = limit.unwrap();
+    assert_eq!(&limit.label, "2.3.7/5");
+    assert_eq!(limit.pitches[0], 1200.0);
+    assert!(1901.9550008 < limit.pitches[1]);
+    assert!(limit.pitches[1] < 1901.9550009);
+    assert!(582.512192 < limit.pitches[2]);
+    assert!(limit.pitches[2] < 582.512193);
+}
+
+#[test]
+fn ratio_limit_from_str() {
     let primes = vec!["2", "3", "7/5"];
     let limit = PrimeLimit::from_labels(&primes);
     assert!(limit.is_some());
