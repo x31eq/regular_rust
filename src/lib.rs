@@ -69,6 +69,11 @@ impl PrimeLimit {
                 if let Ok(n) = label.parse() {
                     Some(cents(n))
                 }
+                else if let Some((n, d)) = label.split_once('/') {
+                    let numerator: f64 = n.parse().ok()?;
+                    let denominator: f64 = d.parse().ok()?;
+                    Some(cents(numerator / denominator))
+                }
                 // Only integer harmonics for now
                 else {
                     None

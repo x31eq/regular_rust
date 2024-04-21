@@ -44,6 +44,20 @@ fn bad_limit_from_str() {
 }
 
 #[test]
+fn ratio_limit() {
+    let primes = vec!["2", "3", "7/5"];
+    let limit = PrimeLimit::from_labels(&primes);
+    assert!(limit.is_some());
+    let limit = limit.unwrap();
+    assert_eq!(&limit.label, "2.3.7/5");
+    assert_eq!(limit.pitches[0], 1200.0);
+    assert!(1901.9550008 < limit.pitches[1]);
+    assert!(limit.pitches[1] < 1901.9550009);
+    assert!(582.512192 < limit.pitches[2]);
+    assert!(limit.pitches[2] < 582.512193);
+}
+
+#[test]
 fn test_join() {
     assert_eq!(&join(", ", &vec![1, 2, 3]), "1, 2, 3");
     let mut tokens = Vec::new();
