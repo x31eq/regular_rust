@@ -88,6 +88,23 @@ fn suboptimal_prime_mapping() {
 }
 
 #[test]
+fn comma_size() {
+    let limit = PrimeLimit::new(5);
+    let size = limit.interval_size(&[-4, 4, -1]);
+    assert!(21.506285967 < size);
+    assert!(size < 21.5062895968);
+}
+
+#[test]
+fn size_13() {
+    let limit = PrimeLimit::new(13);
+    // 1001:1000
+    let size = limit.interval_size(&[-3, 0, -3, 1, 1, 1]);
+    assert!(1.7303690086 < size);
+    assert!(size < 1.7303690087);
+}
+
+#[test]
 fn name_12p() {
     let limit = PrimeLimit::new(13);
     let et = prime_mapping(&limit.pitches, 12);
