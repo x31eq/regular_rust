@@ -63,7 +63,7 @@ impl PrimeLimit {
     /// Harmonic numbers or ratios specified as strings
     pub fn from_labels(labels: &[&str]) -> Option<Self> {
         let pitches = labels
-            .into_iter()
+            .iter()
             .map(|label| {
                 // Parse directly as f64: no need to insist on integer
                 if let Ok(n) = label.parse() {
@@ -80,7 +80,7 @@ impl PrimeLimit {
             .collect::<Option<_>>()?;
         let label = join(".", labels);
         // Take ownership of the labels so that they can be stored
-        let headings = labels.into_iter().map(|&s| s.to_string()).collect();
+        let headings = labels.iter().map(|&s| s.to_string()).collect();
         Some(PrimeLimit {
             label,
             pitches,
