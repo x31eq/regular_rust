@@ -3,25 +3,29 @@ use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::decode_uri;
-use web_sys::{console, Element, Event, HtmlInputElement};
+use web_sys::{
+    console, Element, Event, HtmlInputElement, HtmlTextAreaElement,
+};
 
 use super::cangwu::{
     ambiguous_et, get_equal_temperaments, higher_rank_search,
     CangwuTemperament,
 };
-use super::ratio::get_ratio_or_ket_string;
+use super::ratio::{
+    get_ratio_or_ket_string, parse_as_vector, parse_in_simplest_limit,
+};
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
-use super::uv::only_unison_vector;
+use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
-    join, map, normalize_positive, warted_et_name, Cents, ETMap, Exponent,
-    Mapping, PrimeLimit,
+    hermite_normal_form, join, map, normalize_positive, warted_et_name,
+    Cents, ETMap, Exponent, Mapping, PrimeLimit,
 };
 
 type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
-pub fn form_submit(evt: Event) {
+pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
@@ -36,12 +40,31 @@ pub fn form_submit(evt: Event) {
     if let Some(n_results) = web.input_value("n-results") {
         params.insert("nresults", n_results.trim().to_string());
     }
-    let hash = web.hash_from_params(&params);
-    let _ = web
-        .document
-        .location()
-        .expect("no location")
-        .set_hash(&hash);
+    web.resubmit_with_params(&params);
+}
+
+#[wasm_bindgen]
+pub fn uv_form_submit(evt: Event) {
+    evt.prevent_default();
+    let web = WebContext::new();
+    let mut params = HashMap::from([("page", "uv".to_string())]);
+    // This is optional for the UV search
+    if let Some(limit) = web.input_value("uv-limit") {
+        let limit = limit.trim();
+        if limit != "" {
+            params.insert("limit", limit.trim().to_string());
+        }
+    }
+    // These are quite important for a unison vector search
+    if let Some(uvs) = web.input_value("uv-uvs") {
+        // Make these a bit cleaner in the URL bar
+        let uvs: Vec<&str> = uvs.split_whitespace().collect();
+        params.insert("uvs", uvs.join("+"));
+    }
+    if let Some(n_results) = web.input_value("uv-n-results") {
+        params.insert("nresults", n_results.trim().to_string());
+    }
+    web.resubmit_with_params(&params);
 }
 
 fn pregular_action(
@@ -59,7 +82,65 @@ fn pregular_action(
     web.set_input_value("n-results", &nresults.to_string());
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
-    regular_temperament_search(limit, eka, nresults)?;
+    regular_temperament_search(web, limit, eka, nresults)?;
+    Ok(())
+}
+
+fn uv_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    if let Some(button) = web.element("show-uv") {
+        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
+            // If the URL was typed in, the right search form
+            // might not be showing
+            button.set_checked(true);
+        }
+    }
+    let uv_strings: Vec<&str> = params
+        .get("uvs")
+        .ok_or("Unison vectors not supplied for a unison vector search")?
+        .split('+')
+        .collect();
+    web.set_input_value("uv-uvs", &uv_strings.join(" "));
+    let (limit, uvs) = if let Some(limit) = params.get("limit") {
+        let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+        let uvs = uv_strings
+            .iter()
+            .filter_map(|uv| parse_as_vector(&limit, uv))
+            .collect();
+        (limit, uvs)
+    } else {
+        parse_in_simplest_limit(&uv_strings)
+            .ok_or("Unable to determine prime limit from ratios")?
+    };
+    let uvs: Mapping = uvs
+        .into_iter()
+        // Ensure everything's positive before the size check
+        .map(|uv| normalize_positive(&limit.pitches, uv))
+        // Filter out anything larger than a whole tone as not a unison vector
+        .filter(|uv| limit.interval_size(uv) < 200.0)
+        .collect();
+    if uvs.is_empty() {
+        return Err("No valid unison vectors in the limit".to_string());
+    }
+    web.set_input_value("uv-limit", &limit.label);
+    // Update the input box with the filtered unison vectors
+    let uv_strings = map(|uv| get_ratio_or_ket_string(&limit, uv), &uvs);
+    web.set_input_value("uv-uvs", &uv_strings.join(" "));
+    let ekm = if let Some(multiplier) = params.get("errmul") {
+        multiplier
+            .parse()
+            .or(Err("Unable to parse target error multiplier"))?
+    } else {
+        // Default (page 2) from the old interface
+        2.0
+    };
+    let nresults = params.get("nresults").cloned().unwrap_or("6".to_string());
+    web.set_input_value("uv-n-results", &nresults.to_string());
+    let nresults =
+        nresults.parse().or(Err("Failed to parse n of results"))?;
+    unison_vector_search(web, uvs, limit, ekm, nresults)?;
     Ok(())
 }
 
@@ -79,12 +160,9 @@ fn process_hash() {
     let params = web.get_url_params();
     if let Err(e) = {
         match params.get("page").map(String::as_str) {
-            Some("rt") => {
-                rt_action(&web, &params)
-            }
-            Some("pregular") => {
-                pregular_action(&web, &params)
-            }
+            Some("rt") => rt_action(&web, &params),
+            Some("pregular") => pregular_action(&web, &params),
+            Some("uv") => uv_action(&web, &params),
             _ => Ok(()),
         }
     } {
@@ -109,6 +187,13 @@ fn rt_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
+    if let Some(button) = web.element("show-general") {
+        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
+            // If the URL was typed in, the right search form
+            // might not be showing
+            button.set_checked(true);
+        }
+    }
     let (ets, limit, key) =
         parse_rt_params(&params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
@@ -151,7 +236,8 @@ fn rt_from_et_names<'a>(
     CangwuTemperament::from_et_names(&limit, &ets)
 }
 
-pub fn regular_temperament_search(
+fn regular_temperament_search(
+    web: &WebContext,
     limit: PrimeLimit,
     ek_adjusted: Cents,
     n_results: usize,
@@ -166,7 +252,6 @@ pub fn regular_temperament_search(
     };
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
-    let web = WebContext::new();
     let list = web
         .element("temperament-list")
         .ok_or("Couldn't find list for results")?;
@@ -180,31 +265,71 @@ pub fn regular_temperament_search(
     )
     .or(Err("Failed to display equal temperaments"))?;
 
-    // Store the limit in the DOM so we can get it later
-    let mut items = limit.headings.iter();
-    let mut headings = "".to_string();
-    if let Some(heading) = items.next() {
-        headings.push_str(&heading);
-    };
-    for heading in items {
-        headings.push_str("_");
-        headings.push_str(heading);
-    }
-
     let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
     for rank in 2..dimension {
-        let eff_n_results =
-            n_results + if rank == dimension - 1 { 0 } else { safety };
         rts = higher_rank_search(
             &limit.pitches,
             &mappings,
             &rts,
             ek,
-            eff_n_results,
+            n_results + if rank == dimension - 1 { 0 } else { safety },
         );
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
             show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+                .or(Err("Failed to display regular temperaments"))?
+        }
+    }
+    Ok(())
+}
+
+fn unison_vector_search(
+    web: &WebContext,
+    uvs: Mapping,
+    limit: PrimeLimit,
+    ek_multiplier: Cents,
+    n_results: usize,
+) -> Result<(), String> {
+    if uvs.is_empty() {
+        return Err("No unison vectors supplied".to_string());
+    }
+    let ek = ek_for_search(&limit.pitches, &uvs) * ek_multiplier;
+    let dimension = limit.pitches.len();
+    let corank = hermite_normal_form(&uvs).len();
+    if corank == dimension {
+        return Err(
+            "Too many unison vectors: whole space matches".to_string()
+        );
+    }
+    let highest_rank = dimension - corank;
+    let mappings = get_ets_tempering_out(
+        &limit.pitches,
+        ek,
+        &uvs,
+        if highest_rank == 1 { 1 } else { n_results },
+    );
+    let list = web
+        .element("temperament-list")
+        .ok_or("Couldn't find list for results")?;
+    list.set_inner_html("");
+    web.set_body_class("show-list");
+    show_equal_temperaments(&web, &list, &limit, mappings.iter())
+        .or(Err("Failed to display equal temperaments"))?;
+
+    if highest_rank == 1 {
+        return Ok(());
+    }
+    let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
+    for rank in 2..(highest_rank + 1) {
+        rts = higher_rank_search(
+            &limit.pitches,
+            &mappings,
+            &rts,
+            ek,
+            if rank == highest_rank { 1 } else { n_results },
+        );
+        if !rts.is_empty() {
+            show_regular_temperaments(&web, &list, &limit, rts.iter(), rank)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
@@ -216,32 +341,43 @@ struct WebContext {
 }
 
 impl WebContext {
-    pub fn new() -> Self {
+    fn new() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         WebContext { document }
     }
 
-    pub fn set_body_class(&self, value: &str) {
+    fn set_body_class(&self, value: &str) {
         let body = self.document.body().expect("no body");
         body.set_attribute("class", value)
             .expect("failed to set class");
     }
 
-    pub fn element(&self, id: &str) -> Option<Element> {
+    fn element(&self, id: &str) -> Option<Element> {
         self.document.get_element_by_id(id)
     }
 
-    pub fn input_value(&self, id: &str) -> Option<String> {
+    fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
+        if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
+            return Some(text_area.value());
+        } else if let Some(text_area) =
+            element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            return Some(text_area.value());
+        }
         let input_element = element.dyn_ref::<HtmlInputElement>()?;
         Some(input_element.value())
     }
 
     /// Set an input if found: log errors and carry on
-    pub fn set_input_value(&self, id: &str, value: &str) {
+    fn set_input_value(&self, id: &str, value: &str) {
         if let Some(element) = self.element(id) {
-            if let Some(input_element) = element.dyn_ref::<HtmlInputElement>()
+            if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>()
+            {
+                text_area.set_value(value);
+            } else if let Some(input_element) =
+                element.dyn_ref::<HtmlInputElement>()
             {
                 input_element.set_value(value);
             } else {
@@ -268,7 +404,7 @@ impl WebContext {
     }
 
     /// Get the URL-supplied parameters
-    pub fn get_url_params(&self) -> HashMap<String, String> {
+    fn get_url_params(&self) -> HashMap<String, String> {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location() {
             if let Ok(query) = location.hash() {
@@ -283,6 +419,17 @@ impl WebContext {
             }
         }
         params
+    }
+
+    /// Reset the has encoding the new params, and cause some at least of the
+    /// new page events to be fired
+    fn resubmit_with_params(&self, params: &HashMap<&str, String>) {
+        let hash = self.hash_from_params(&params);
+        self.document
+            .location()
+            .expect("no location")
+            .set_hash(&hash)
+            .expect("unable to set URL hash");
     }
 
     fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
@@ -300,7 +447,7 @@ impl WebContext {
         result
     }
 
-    pub fn log_error(&self, message: &str) {
+    fn log_error(&self, message: &str) {
         console::error_1(&message.into());
     }
 }

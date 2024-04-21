@@ -237,6 +237,51 @@ pub fn get_equal_temperaments(
     results.extract().collect()
 }
 
+/// Get the best equal temperament mappings for the given prime limit
+/// filtered by the condition
+///
+/// plimit: Sizes of prime harmonics in cents
+///
+/// condition: only accept results for which this is true
+///
+/// ek: The Cangwu parameter in cents/octave
+///
+/// n_results: How many to return
+pub fn filtered_equal_temperaments(
+    plimit: &[Cents],
+    mut condition: impl FnMut(&ETMap) -> bool,
+    ek: Cents,
+    n_results: usize,
+) -> Mapping {
+    // Stop weird things happening for non-standard units
+    let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
+
+    let mut results = PriorityQueue::new(n_results);
+    // Start this conservatively assuming 90% of the results will be
+    // filtered out
+    let mut bmax = preliminary_badness(&plimit, ek, n_results * 10);
+    while results.len() < n_results {
+        let mut n_notes = 1;
+        let mut cap = bmax;
+        while (f64::from(n_notes)) < cap / ek {
+            for mapping in limited_mappings(n_notes, ek, cap, &plimit) {
+                if condition(&mapping) {
+                    let bad =
+                        equal_temperament_badness(&plimit, ek, &mapping);
+                    results.push(bad, mapping.clone());
+                }
+            }
+            n_notes += 1;
+            cap = cap.min(results.cap);
+        }
+        // Filtered results can be harder to find,
+        // so the initial bmax guess might have been wrong
+        bmax *= 1.1;
+    }
+
+    results.extract().collect()
+}
+
 pub fn equal_temperament_badness(
     plimit: &[Cents],
     ek: Cents,
@@ -325,7 +370,7 @@ fn preliminary_badness(
 ///
 /// Probably won't panic but will attempt to generate
 /// a huge vector of mappings if "bmax" is set too high.
-pub fn limited_mappings(
+fn limited_mappings(
     n_notes: Exponent,
     ek: Cents,
     bmax: Cents,
@@ -561,6 +606,14 @@ fn big_limit() {
         octaves(&mappings),
         vec![62, 62, 31, 50, 50, 34, 31, 46, 60, 60]
     );
+}
+
+#[test]
+fn filtered_big_limit() {
+    let sbyte = super::PrimeLimit::new(127).pitches;
+    let even = |et: &ETMap| et[0] % 2 == 0;
+    let mappings = filtered_equal_temperaments(&sbyte, even, 0.3, 8);
+    assert_eq!(octaves(&mappings), vec![62, 62, 50, 50, 34, 46, 60, 60]);
 }
 
 #[test]

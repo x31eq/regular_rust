@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Client-side temperament finding</title>
-        <link href="finder.css" rel="stylesheet" type="text/css">
+        <link href="finder.css?0.9.4" rel="stylesheet" type="text/css">
     </head>
     <body>
         <noscript>
@@ -11,40 +11,73 @@
             You'll need to enable scripting for it to work,
             and even then it might not.
         </noscript>
-        <form>
-            <p>
-                <label>
-                    Prime limit <input id="prime-limit" type="text" size="5">
-                </label>
-                e.g. "11" or "2.3.7.11.13"
-            </p>
-            <p>
-                <label>
-                    Badness parameter
-                    <input
-                        id="prime-eka"
-                        type="text"
-                        value="1.0"
-                        inputmode="decimal"
-                        size="5"
+        <input type="radio" id="show-general" name="main-form" class="hidden" checked>
+        <label for="show-general" class="tablabel">Search by target error</label>
+        <input type="radio" id="show-uv" name="main-form" class="hidden">
+        <label for="show-uv" class="tablabel">Search by unison vectors</label>
+        <div class="general">
+            <form class="general">
+                <p>
+                    <label>
+                        Prime limit <input id="prime-limit" type="text" size="5">
+                    </label>
+                    e.g. "11" or "2.3.7.11.13"
+                </p>
+                <p>
+                    <label>
+                        Badness parameter
+                        <input
+                            id="prime-eka"
+                            type="text"
+                            value="1.0"
+                            inputmode="decimal"
+                            size="5"
+                            >
+                        cents
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        Number of results
+                        <input
+                            id="n-results"
+                            type="number"
+                            min="1"
+                            value="10"
+                            size="2"
+                            >
+                    </label>
+                </p>
+                <button id="general-search">Search</button>
+            </form>
+        </div>
+        <div class="uv">
+            <form class="uv">
+                <p>Put your commas in this box:</p>
+                <div>
+                    <textarea id="uv-uvs" rows="4" cols="30"></textarea>
+                </div>
+                <p>
+                    <label>
+                        Prime limit <input id="uv-limit" type="text" size="5">
+                    </label>
+                    e.g. "11" or "2.3.7.11.13"
+                </p>
+                <p>
+                    <label>
+                        Number of results
+                        <input
+                                id="uv-n-results"
+                                type="number"
+                                min="1"
+                                value="6"
+                                size="2"
                         >
-                    cents
-                </label>
-            </p>
-            <p>
-                <label>
-                    Number of results
-                    <input
-                        id="n-results"
-                        type="number"
-                        min="1"
-                        value="10"
-                        size="2"
-                        >
-                </label>
-            </p>
-            <button>Search</button>
-        </form>
+                    </label>
+                </p>
+                <button id="uv-search">Search</button>
+            </form>
+        </div>
         <p id="error-report">
             Oh noes!  Something went wrong and this didn't get hidden!
         </p>
@@ -113,10 +146,11 @@
                 https://github.com/x31eq/regular_rust</a>.
         </p>
         <script type="module">
-            import init, { form_submit, hash_change }
-                from './pkg/regular.js'
+            import init, { general_form_submit, uv_form_submit, hash_change }
+                from './pkg/regular.js?0.9.5'
 
-            document.querySelector("form").onsubmit = form_submit
+            document.querySelector("form.general").onsubmit = general_form_submit
+            document.querySelector("form.uv").onsubmit = uv_form_submit
             window.addEventListener('hashchange', hash_change)
 
             async function run() {

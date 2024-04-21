@@ -1,3 +1,34 @@
+input#show-general:checked ~ div.general {
+    display: block;
+}
+input#show-general:checked ~ div.uv {
+    display: none;
+}
+input#show-uv:checked ~ div.general {
+    display: none;
+}
+input#show-uv:checked ~ div.uv {
+    display: block;
+}
+
+/* Display radio buttons to look like tabs */
+input.hidden {
+    display: none;
+}
+label.tablabel {
+    display: inline-block;
+    padding: 0.3em 0.3em;
+    color: black;
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    boder-bottom: none;
+    cursor: pointer;
+}
+input[type="radio"].hidden:checked + label.tablabel {
+    background-color: white;
+    border-bottom: 1px solid white;
+}
+
 table.mapping {
     margin-top: 1em;
     margin-bottom: 1em;

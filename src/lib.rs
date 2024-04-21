@@ -60,6 +60,31 @@ impl PrimeLimit {
         }
     }
 
+    /// Harmonic numbers or ratios specified as strings
+    pub fn from_labels(labels: &[&str]) -> Option<Self> {
+        let pitches = labels
+            .into_iter()
+            .map(|label| {
+                // Parse directly as f64: no need to insist on integer
+                if let Ok(n) = label.parse() {
+                    Some(cents(n))
+                }
+                // Only integer harmonics for now
+                else {
+                    None
+                }
+            })
+            .collect::<Option<_>>()?;
+        let label = join(".", labels);
+        // Take ownership of the labels so that they can be stored
+        let headings = labels.into_iter().map(|&s| s.to_string()).collect();
+        Some(PrimeLimit {
+            label,
+            pitches,
+            headings,
+        })
+    }
+
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
         let headings = map(Cents::to_string, &pitches);
@@ -68,6 +93,13 @@ impl PrimeLimit {
             pitches,
             headings,
         }
+    }
+
+    pub fn interval_size(&self, interval: &ETSlice) -> Cents {
+        self.pitches
+            .iter()
+            .zip(interval.iter())
+            .fold(0.0, |tot, (&p, &i)| tot + p * (i as Cents))
     }
 
     /// Return the characters used to specify names of
@@ -404,7 +436,7 @@ impl<T> PriorityQueue<T> {
             if badness < self.cap {
                 self.items.push((badness, item));
                 self.sort();
-                self.items.pop();
+                self.items.truncate(self.size);
                 self.set_cap();
             }
         } else {
