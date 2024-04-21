@@ -264,9 +264,11 @@ fn next_char(current: char) -> char {
         '一'
     } else {
         let current_code = current as u32;
-        for i in 1..100 {
+        for i in 1..1000 {
             if let Some(c) = char::from_u32(current_code + i) {
-                return c;
+                if !c.is_control() && !c.is_whitespace() {
+                    return c;
+                }
             }
         }
         panic!("Can't find next character")
