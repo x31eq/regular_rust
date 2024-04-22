@@ -101,7 +101,8 @@ impl PrimeLimit {
         self.pitches
             .iter()
             .zip(interval.iter())
-            .fold(0.0, |tot, (&p, &i)| tot + p * (i as Cents))
+            .map(|(&p, &i)| p * (i as Cents))
+            .sum()
     }
 
     /// Return the characters used to specify names of
@@ -285,10 +286,11 @@ impl fmt::Display for ParseLimitError {
 }
 
 pub fn normalize_positive(limit: &[Cents], rsvec: ETMap) -> ETMap {
-    let pitch_width = limit
+    let pitch_width: Cents = limit
         .iter()
         .zip(rsvec.iter())
-        .fold(0.0, |acc, (&x, &y)| acc + x * (y as Cents));
+        .map(|(&x, &y)| x * (y as Cents))
+        .sum();
     if pitch_width < 0.0 {
         rsvec.iter().map(|x| -x).collect()
     } else {

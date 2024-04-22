@@ -1,6 +1,5 @@
 extern crate nalgebra as na;
 use na::DMatrix;
-use std::ops::Add;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{Cents, ETMap, ETSlice, Exponent, Mapping};
@@ -74,8 +73,8 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
         .zip(uv.iter())
         .map(|(&x, &y)| x / 12e2 * y as Cents);
     let len = limit.len() as Cents;
-    let mean = q.clone().fold(0.0, Cents::add) / len;
-    let rms = (q.fold(0.0, |tot, x| tot + x * x) / len).sqrt();
+    let mean = q.clone().sum::<Cents>() / len;
+    let rms = (q.map(|x| x * x).sum::<Cents>() / len).sqrt();
     // Calculate in octaves for consistency with Python but return cents
     (mean / rms).abs() * 12e2
 }
@@ -84,7 +83,8 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
     a.iter()
         .zip(b.iter())
         // multiply as i64 to avoid overflows
-        .fold(0, |tot, (&m, &n)| tot + (m as i64) * (n as i64))
+        .map(|(&m, &n)| (m as i64) * (n as i64))
+        .sum()
 }
 
 #[test]
