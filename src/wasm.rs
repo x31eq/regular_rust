@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::JsCast;
-use web_sys::js_sys::decode_uri;
+use js_sys::decode_uri;
 use web_sys::{
     console, Element, Event, HtmlInputElement, HtmlTextAreaElement,
 };
