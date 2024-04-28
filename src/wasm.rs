@@ -684,6 +684,15 @@ fn show_et(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
+    if let Some(field) = web.element("et-te-stretch") {
+        let ideal_equivalence = limit.pitches[0];
+        let tempered_equivalence = rt.tuning_map()[0];
+        let mut stretch = tempered_equivalence - ideal_equivalence;
+        // convert from steps per equivalence to steps per octave
+        stretch *= 1200.0 / ideal_equivalence;
+        field.set_text_content(Some(&format!("{:.6}", stretch)));
+    }
+
     web.set_body_class("show-et");
     if let Some(result) = web.element("equal-temperament") {
         result.scroll_into_view();
