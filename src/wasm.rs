@@ -470,8 +470,35 @@ fn show_equal_temperaments<'a>(
     list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping bra")?;
-    write_mapping_matrix(&web, &table, &limit, mappings)?;
+    write_equal_temperaments(&web, &table, &limit, mappings)?;
     list.append_child(&table)?;
+    Ok(())
+}
+
+/// Equal temperaments are shown as a mapping matrix
+/// with links to the page for the temperament
+fn write_equal_temperaments<'a>(
+    web: &WebContext,
+    table: &Element,
+    limit: &PrimeLimit,
+    values: impl Iterator<Item = &'a ETMap>,
+) -> Exceptionable {
+    write_headings(&web, &table, &limit)?;
+    let body = web.new_or_emptied_element(&table, "tbody")?;
+    for vector in values {
+        let row = web.document.create_element("tr")?;
+        let rt = TETemperament::new(&limit.pitches, &[vector.clone()]);
+        let url = rt_url(web, limit, &rt);
+        for element in vector {
+            let cell = web.document.create_element("td")?;
+            let link = web.document.create_element("a")?;
+            link.set_attribute("href", &url)?;
+            link.set_text_content(Some(&element.to_string()));
+            cell.append_child(&link)?;
+            row.append_child(&cell)?;
+        }
+        body.append_child(&row)?;
+    }
     Ok(())
 }
 
