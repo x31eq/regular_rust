@@ -68,8 +68,12 @@ table.mapping {
 .mapping td {
     text-align: right;
 }
-#regular-temperament, #temperament-list, #error-report {
+#equal-temperament, #regular-temperament, #temperament-list, #error-report {
     display: none;
+}
+.show-et #equal-temperament {
+    display: block;
+    margin-bottom: 2em;
 }
 .show-temperament #regular-temperament {
     display: block;

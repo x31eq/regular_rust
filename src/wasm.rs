@@ -205,8 +205,14 @@ fn rt_action(
         None => rt_from_et_names(&limit, &ets),
     }
     .ok_or("Couldn't generate the regular temperament!")?;
-    show_rt(&web, &limit, rt.melody)
-        .or(Err("Failed to show the regular temperament"))?;
+    if rt.melody.len() == 1 {
+        show_et(&web, &limit, rt.melody)
+            .or(Err("Failed to show the regular temperament"))?;
+    }
+    else {
+        show_rt(&web, &limit, rt.melody)
+            .or(Err("Failed to show the regular temperament"))?;
+    }
     Ok(())
 }
 
@@ -615,6 +621,76 @@ fn rt_url(
     web.hash_from_params(&params)
 }
 
+/// Set the fields about the equal temperament
+fn show_et(
+    web: &WebContext,
+    limit: &PrimeLimit,
+    mapping: Mapping,
+) -> Exceptionable {
+    let rt = TETemperament::new(&limit.pitches, &mapping);
+
+    if let Some(name_field) = web.element("et-name") {
+        name_field.set_text_content(Some(&rt_name(&limit, &rt)));
+    }
+
+    if let Some(table) = web.element("et-etmap") {
+        write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+    }
+
+    if let Some(table) = web.element("et-tuning-map") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.tuning_map(), 3)?;
+    }
+
+    if let Some(table) = web.element("et-pote-tuning-map") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.pote_tuning_map(), 3)?;
+    }
+
+    if let Some(table) = web.element("et-mistunings") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.mistunings(), 4)?;
+    }
+
+    if let Some(table) = web.element("et-pote-mistunings") {
+        write_headings(&web, &table, &limit)?;
+        write_float_row(&web, &table, &rt.pote_mistunings(), 4)?;
+    }
+
+    if let Some(field) = web.element("et-te-error") {
+        field.set_text_content(Some(&format!("{:.6}", rt.error())));
+    }
+
+    if let Some(field) = web.element("et-unison-vectors") {
+        field.set_inner_html("");
+        let rank = rt.rank();
+        let dimension = limit.pitches.len();
+        let list = web.document.create_element("ul")?;
+        let n_results = if (dimension - rank) == 1 {
+            1
+        } else {
+            (dimension - rank) * 2
+        };
+        for uv in rt.unison_vectors(n_results) {
+            let item = web.document.create_element("li")?;
+            let text = get_ratio_or_ket_string(&limit, &uv);
+            item.set_text_content(Some(&text));
+            list.append_child(&item)?;
+        }
+        field.append_child(&list)?;
+    }
+
+    if let Some(field) = web.element("et-error") {
+        field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
+    }
+
+    web.set_body_class("show-et");
+    if let Some(result) = web.element("equal-temperament") {
+        result.scroll_into_view();
+    }
+
+    Ok(())
+}
 /// Set the fields about the regular temperament
 fn show_rt(
     web: &WebContext,
