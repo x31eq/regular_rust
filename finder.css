@@ -100,10 +100,10 @@ table.mapping {
 .te, .pote {
     display: none;
 }
-input#show-te:checked ~ .te {
+input#show-te:checked ~ .te, input#et-show-te:checked ~ .te{
     display: block;
 }
-input#show-pote:checked ~ .pote {
+input#show-pote:checked ~ .pote, input#et-show-pote:checked ~ .pote {
     display: block;
 }
 .accordion td {
