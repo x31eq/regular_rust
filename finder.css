@@ -1,13 +1,13 @@
+div.general, div.uv, div.net {
+    display: none
+}
 input#show-general:checked ~ div.general {
     display: block;
 }
-input#show-general:checked ~ div.uv {
-    display: none;
-}
-input#show-uv:checked ~ div.general {
-    display: none;
-}
 input#show-uv:checked ~ div.uv {
+    display: block;
+}
+input#show-net:checked ~ div.net {
     display: block;
 }
 

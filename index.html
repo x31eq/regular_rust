@@ -15,6 +15,8 @@
         <label for="show-general" class="tablabel">Search by target error</label>
         <input type="radio" id="show-uv" name="main-form" class="hidden">
         <label for="show-uv" class="tablabel">Search by unison vectors</label>
+        <input type="radio" id="show-net" name="main-form" class="hidden">
+        <label for="show-net" class="tablabel">Find from ETs</label>
         <div class="general">
             <form class="general">
                 <p>
@@ -76,6 +78,23 @@
                     </label>
                 </p>
                 <button id="uv-search">Search</button>
+            </form>
+        </div>
+        <div class="net">
+            <form class="net">
+                <p>
+                    <label>
+                        List of steps to the octave<input id="net-steps" type="text" size="8">
+                    </label>
+                    e.g. "12" or "12f" or "12 & 19p"
+                </p>
+                <p>
+                    <label>
+                        Prime limit <input id="net-limit" type="text" size="8">
+                    </label>
+                    e.g. "11" or "2.3.7.11.13" or even "2.3.7/5.11"
+                </p>
+                <button id="net-search">Search</button>
             </form>
         </div>
         <p id="error-report">
