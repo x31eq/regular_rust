@@ -437,7 +437,7 @@ struct PriorityQueue<T> {
 impl<T> PriorityQueue<T> {
     pub fn new(size: usize) -> PriorityQueue<T> {
         PriorityQueue {
-            cap: std::f64::INFINITY,
+            cap: f64::INFINITY,
             size,
             // over-allocate because we push before we pop
             items: Vec::with_capacity(size + 1),

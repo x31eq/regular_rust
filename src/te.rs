@@ -155,7 +155,6 @@ impl<'a> TETemperament<'a> {
     pub fn fokker_block_pitches(&self, n_pitches: Exponent) -> Tuning {
         self.fokker_block_steps(n_pitches)
             .iter()
-            .cloned()
             .map(|interval| self.pitch_from_steps(&interval))
             .collect()
     }
