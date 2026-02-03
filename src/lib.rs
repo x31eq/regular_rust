@@ -266,11 +266,10 @@ fn next_char(current: char) -> char {
     } else {
         let current_code = current as u32;
         for i in 1..1000 {
-            if let Some(c) = char::from_u32(current_code + i) {
-                if !c.is_control() && !c.is_whitespace() {
+            if let Some(c) = char::from_u32(current_code + i)
+                && !c.is_control() && !c.is_whitespace() {
                     return c;
                 }
-            }
         }
         panic!("Can't find next character")
     }
@@ -379,11 +378,10 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
 
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
-        if let Some(first_non_zero) = column.iter().find(|&&n| n != 0) {
-            if *first_non_zero < 0 {
+        if let Some(first_non_zero) = column.iter().find(|&&n| n != 0)
+            && *first_non_zero < 0 {
                 *column = map(|&x| -x, column);
             }
-        }
     }
 
     if row == nrows {
