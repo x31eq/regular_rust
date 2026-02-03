@@ -1,15 +1,15 @@
 use js_sys::decode_uri;
 use std::collections::HashMap;
 use std::str::FromStr;
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::{JsValue, wasm_bindgen};
 use web_sys::{
-    console, Element, Event, HtmlInputElement, HtmlTextAreaElement,
+    Element, Event, HtmlInputElement, HtmlTextAreaElement, console,
 };
 
 use super::cangwu::{
-    ambiguous_et, get_equal_temperaments, higher_rank_search,
-    CangwuTemperament,
+    CangwuTemperament, ambiguous_et, get_equal_temperaments,
+    higher_rank_search,
 };
 use super::ratio::{
     get_ratio_or_ket_string, parse_as_vector, parse_in_simplest_limit,
@@ -18,8 +18,8 @@ use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
-    hermite_normal_form, join, map, normalize_positive, warted_et_name,
-    Cents, ETMap, Exponent, Mapping, PrimeLimit,
+    Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
+    map, normalize_positive, warted_et_name,
 };
 
 type Exceptionable = Result<(), JsValue>;
@@ -208,8 +208,7 @@ fn rt_action(
     if rt.melody.len() == 1 {
         show_et(&web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
-    }
-    else {
+    } else {
         show_rt(&web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
     }

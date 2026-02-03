@@ -1,6 +1,6 @@
 //! Utilities for dealing with vectors as ratios
 
-use super::{join, ETMap, Mapping, PrimeLimit};
+use super::{ETMap, Mapping, PrimeLimit, join};
 
 /// Integers in ratios can get bigger than partials
 type Length = u128;
@@ -70,11 +70,7 @@ fn factorize(limit: &PrimeLimit, n: Length) -> Option<ETMap> {
             result[i] += 1;
         }
     }
-    if remainder == 1 {
-        Some(result)
-    } else {
-        None
-    }
+    if remainder == 1 { Some(result) } else { None }
 }
 
 pub fn factorize_ratio(limit: &PrimeLimit, (n, d): Ratio) -> Option<ETMap> {

@@ -1,5 +1,5 @@
 use regular::{Cents, Harmonic, PrimeLimit};
-use std::io::{self, stdout, BufRead, Write};
+use std::io::{self, BufRead, Write, stdout};
 
 fn main() -> Result<(), String> {
     let (n_results, ek, limit) = command_line_args()?;

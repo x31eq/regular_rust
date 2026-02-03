@@ -3,11 +3,11 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::temperament_class::{key_to_mapping, TemperamentClass};
+use super::temperament_class::{TemperamentClass, key_to_mapping};
 use super::uv::only_unison_vector;
 use super::{
-    et_from_name, map, normalize_positive, prime_mapping, Cents, ETMap,
-    ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
+    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
+    et_from_name, map, normalize_positive, prime_mapping,
 };
 use std::collections::HashSet;
 
