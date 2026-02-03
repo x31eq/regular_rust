@@ -348,7 +348,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
         // ensures "echelon" is consistently borrowed
         let top_col = col_iter.next().expect("No columns for hermite");
         if let Some((row, &n)) =
-            top_col.iter().enumerate().find(|(_i, &n)| n != 0)
+            top_col.iter().enumerate().find(|&(ref _i, &n)| n != 0)
         {
             assert!(n > 0);
             for scol in col_iter {

@@ -2,7 +2,7 @@
 name = "regular"
 version = "0.9.8"
 authors = ["Graham Breed <gbreed@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 lazy_static = "1.4.0"
