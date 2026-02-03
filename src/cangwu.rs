@@ -457,7 +457,7 @@ fn intrange(x: f64, y: f64) -> std::ops::RangeInclusive<Exponent> {
 }
 
 #[cfg(test)]
-fn make_marvel(limit11: &super::PrimeLimit) -> CangwuTemperament {
+fn make_marvel(limit11: &super::PrimeLimit) -> CangwuTemperament<'_> {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
         vec![31, 49, 72, 87, 107],
@@ -467,7 +467,7 @@ fn make_marvel(limit11: &super::PrimeLimit) -> CangwuTemperament {
 }
 
 #[cfg(test)]
-fn make_jove(limit11: &super::PrimeLimit) -> CangwuTemperament {
+fn make_jove(limit11: &super::PrimeLimit) -> CangwuTemperament<'_> {
     let jove_vector = vec![
         vec![27, 43, 63, 76, 94],
         vec![31, 49, 72, 87, 107],
@@ -477,7 +477,7 @@ fn make_jove(limit11: &super::PrimeLimit) -> CangwuTemperament {
 }
 
 #[cfg(test)]
-fn make_porcupine(limit11: &super::PrimeLimit) -> CangwuTemperament {
+fn make_porcupine(limit11: &super::PrimeLimit) -> CangwuTemperament<'_> {
     let porcupine_vector =
         vec![vec![22, 35, 51, 62, 76], vec![15, 24, 35, 42, 52]];
     CangwuTemperament::new(&limit11.pitches, &porcupine_vector)
