@@ -146,6 +146,7 @@ fn uv_action(
 
 #[wasm_bindgen(start)]
 fn main() -> Result<(), JsValue> {
+    clear_noscript();
     process_hash();
     Ok(())
 }
@@ -153,6 +154,15 @@ fn main() -> Result<(), JsValue> {
 #[wasm_bindgen]
 pub fn hash_change(_evt: Event) {
     process_hash();
+}
+
+/// Plain <noscript> tags don't show up when scripting is disabled.
+/// If this is called, it must be working, so hide the message.
+fn clear_noscript() {
+    let web = WebContext::new();
+    if let Some(message) = web.element("noscript") {
+        message.set_inner_html("");
+    }
 }
 
 fn process_hash() {
