@@ -46,18 +46,17 @@ WebAssembly (Wasm) application
 ------------------------------
 
 You can also run the code in a web browser without Python
-or other server-side support.  You need wasm-pack:
+or other server-side support.  You need a matching version of
+wasm-bindgen-cli:
 
-https://rustwasm.github.io/wasm-pack/installer/
+cargo install wasm-bindgen-cli --version 0.2.108
 
-If you don't have curl, this might work:
+It's important that the version matches the one the build uses
+or you get a perplexing error.  Check
 
-wget -O - https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
+cargo info wasm-bindgen
 
-If that doesn't work (like your platform isn't supported)
-you can build it yourself from this repository:
-
-https://github.com/rustwasm/wasm-pack
+or whatever the tools tell you to do.
 
 Once you have it,
 
