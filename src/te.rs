@@ -48,11 +48,8 @@ impl<'a> TETemperament<'a> {
 
     /// Turn an ET name like "12 & 19" into a temperament object
     pub fn from_name(plimit: &'a PrimeLimit, name: &str) -> Option<Self> {
-        if let Some(mapping) = mapping_from_name(plimit, name) {
-            Some(TETemperament::new(&plimit.pitches, &mapping))
-        } else {
-            None
-        }
+        mapping_from_name(plimit, name)
+            .map(|mapping| TETemperament::new(&plimit.pitches, &mapping))
     }
 
     pub fn error(&self) -> f64 {
