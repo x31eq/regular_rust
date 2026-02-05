@@ -276,6 +276,35 @@ fn rt12_from_name() {
         Some(vec![vec![12, 19, 28, 34]]),
         mapping_from_name(&limit, "12p"),
     );
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34]]),
+        mapping_from_name(&limit, "12"),
+    );
+}
+
+#[test]
+fn meantone_from_name() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        mapping_from_name(&limit, "12 & 19"),
+    );
+    // The & is optional
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        mapping_from_name(&limit, "12 19"),
+    );
+    // Extra whitespace should be ignored
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        mapping_from_name(&limit, "   12  &  19  &&&& "),
+    );
+}
+
+#[test]
+fn bad_rt_from_name() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(None, mapping_from_name(&limit, "bad name"));
 }
 
 /// Test a case where a Chinese character is used for the wart
