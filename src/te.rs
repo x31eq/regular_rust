@@ -3,7 +3,10 @@ use na::{DMatrix, DVector};
 
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, map};
+use super::{
+    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, Tuning, map,
+    mapping_from_name,
+};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
@@ -41,6 +44,15 @@ impl<'a> TETemperament<'a> {
         let tuning = pinv.column_sum() * 12e2;
         rt.tuning = tuning.iter().cloned().collect();
         rt
+    }
+
+    /// Turn an ET name like "12 & 19" into a temperament object
+    pub fn from_name(plimit: &'a PrimeLimit, name: &str) -> Option<Self> {
+        if let Some(mapping) = mapping_from_name(plimit, name) {
+            Some(TETemperament::new(&plimit.pitches, &mapping))
+        } else {
+            None
+        }
     }
 
     pub fn error(&self) -> f64 {
@@ -330,6 +342,16 @@ fn pote_mistunings() {
     let expected = "0.000 -0.948 -0.155 -0.495 1.199";
     let fmt_tuning = format_float_vec(&jove.pote_mistunings(), 3);
     assert_eq!(fmt_tuning, expected.to_string());
+}
+
+#[test]
+fn marvel_from_name() {
+    let limit11 = super::PrimeLimit::new(11);
+    let expected = make_marvel(&limit11);
+    let from_name = TETemperament::from_name(&limit11, "22 & 31 & 41")
+        .expect("couldn't make marvel from name");
+    assert_eq!(expected.melody, from_name.melody);
+    assert_eq!(expected.plimit, from_name.plimit);
 }
 
 #[rustfmt::skip]
