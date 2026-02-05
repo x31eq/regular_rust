@@ -138,7 +138,9 @@ fn name_12p() {
     let et = prime_mapping(&limit.pitches, 12);
     let name = warted_et_name(&limit, &et);
     assert_eq!(name, "12p");
-    assert_eq!(Some(et), et_from_name(&limit, &name));
+    assert_eq!(Some(et.clone()), et_from_name(&limit, &name));
+    // Check that the same result comes back without the "p"
+    assert_eq!(Some(et), et_from_name(&limit, "12"));
 }
 
 #[test]
@@ -265,6 +267,15 @@ fn name_4efggg() {
     let name = warted_et_name(&limit, &et);
     assert_eq!(name, "4efggg");
     assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn rt12_from_name() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34]]),
+        mapping_from_name(&limit, "12p"),
+    );
 }
 
 /// Test a case where a Chinese character is used for the wart
