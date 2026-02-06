@@ -209,11 +209,15 @@
                 https://github.com/x31eq/regular_rust</a>.
         </p>
         <script type="module">
-            import init, { general_form_submit, uv_form_submit, hash_change }
+            import init, { general_form_submit,
+                           net_form_submit,
+                           uv_form_submit,
+                           hash_change }
                 from './pkg/regular.js?0.9.8'
 
             document.querySelector("form.general").onsubmit = general_form_submit
             document.querySelector("form.uv").onsubmit = uv_form_submit
+            document.querySelector("form.net").onsubmit = net_form_submit
             window.addEventListener('hashchange', hash_change)
 
             async function run() {

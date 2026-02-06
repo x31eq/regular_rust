@@ -67,6 +67,30 @@ pub fn uv_form_submit(evt: Event) {
     web.resubmit_with_params(&params);
 }
 
+#[wasm_bindgen]
+pub fn net_form_submit(evt: Event) {
+    evt.prevent_default();
+    let web = WebContext::new();
+    let mut params = HashMap::from([("page", "net".to_string())]);
+    // This is optional for the UV search
+    if let Some(limit) = web.input_value("net-limit") {
+        let limit = limit.trim();
+        if limit != "" {
+            params.insert("limit", limit.trim().to_string());
+        }
+    }
+    // These are quite important for a unison vector search
+    if let Some(name) = web.input_value("net-steps") {
+        // Make these a bit cleaner in the URL bar
+        let steps: Vec<&str> = name
+            .replace('&', " ")
+            .replace('+', " ")
+            .split_whitespace().collect();
+        params.insert("steps", steps.join("+"));
+    }
+    web.resubmit_with_params(&params);
+}
+
 fn pregular_action(
     web: &WebContext,
     params: &HashMap<String, String>,

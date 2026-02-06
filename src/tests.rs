@@ -294,6 +294,11 @@ fn meantone_from_name() {
         Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
         mapping_from_name(&limit, "12 19"),
     );
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        mapping_from_name(&limit, "12 + 19"),
+    );
+    // + is also supported
     // Extra whitespace should be ignored
     assert_eq!(
         Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),

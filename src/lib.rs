@@ -244,6 +244,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
 
 pub fn mapping_from_name(plimit: &PrimeLimit, name: &str) -> Option<Mapping> {
     name.replace('&', " ")
+        .replace('+', " ")
         .split_whitespace()
         .map(|etname| et_from_name(plimit, etname))
         .collect()
