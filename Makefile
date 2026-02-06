@@ -1,7 +1,7 @@
-target/release/regular: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
+target/release/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build --release
 
-target/debug/regular: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
+target/debug/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build
 
 pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs Cargo.toml
@@ -27,10 +27,10 @@ test:
 wasm: pkg/regular_bg.wasm
 
 .PHONY: release
-release: target/release/regular
+release: target/release/regular-cli
 
 .PHONY: wasm-release
 wasm-release: regular_bg.wasm
 
 .PHONY: debug
-debug: target/debug/regular
+debug: target/debug/regular-cli

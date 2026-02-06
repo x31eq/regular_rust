@@ -34,12 +34,14 @@ cargo run 5 1 cents <<FIN
 4151.317942364757
 FIN
 
-
 For other build targets, this project includes a makefile, because
 I like makefiles.  To do a faster calculation for a big limit
 (currently incomplete results):
 
-make release && target/release/regular 5 0.1 257
+make release && target/release/regular-cli 5 0.1 257
+
+The standard executable is called "regular-cli" to avoid a name clash
+with the library.
 
 
 WebAssembly (Wasm) application
