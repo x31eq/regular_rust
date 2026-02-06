@@ -285,23 +285,24 @@ fn rt12_from_name() {
 #[test]
 fn meantone_from_name() {
     let limit = PrimeLimit::new(7);
+    let expected = vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]];
     assert_eq!(
-        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        Some(expected.clone()),
         mapping_from_name(&limit, "12 & 19"),
     );
     // The & is optional
     assert_eq!(
-        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        Some(expected.clone()),
         mapping_from_name(&limit, "12 19"),
     );
     assert_eq!(
-        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        Some(expected.clone()),
         mapping_from_name(&limit, "12 + 19"),
     );
     // + is also supported
     // Extra whitespace should be ignored
     assert_eq!(
-        Some(vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]]),
+        Some(expected.clone()),
         mapping_from_name(&limit, "   12  &  19  &&&& "),
     );
 }
