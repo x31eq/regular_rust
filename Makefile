@@ -6,7 +6,7 @@ target/debug/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.t
 
 pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs Cargo.toml
 	cargo build --release --target wasm32-unknown-unknown
-	wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
+	RUSTFLAGS="-Cstrip=none" wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
 
 regular_bg.wasm: pkg/regular_bg.wasm
 	wasm-opt --enable-bulk-memory-opt -O4 pkg/regular_bg.wasm -o regular_bg.wasm
