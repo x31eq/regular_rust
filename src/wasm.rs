@@ -29,7 +29,8 @@ pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
-    // The search will fail if this is missing, but the URL should make it clear why
+    // The search will fail if this is missing, but the URL
+    // should make it clear why
     if let Some(limit) = web.input_value("prime-limit") {
         params.insert("limit", limit.trim().to_string());
     }
