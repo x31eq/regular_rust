@@ -179,6 +179,20 @@ fn net_action(
         // might not be showing
         button.set_checked(true);
     }
+    let limit = params.get("limit").ok_or("No prime limit")?;
+    web.set_input_value("net-limit", limit);
+    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+
+    let name = params.get("steps").ok_or("No list of steps")?;
+    web.set_input_value("net-steps", name);
+    if let Some(rt) = TETemperament::from_name(&limit, name) {
+        show_rt(web, &limit, rt.melody)
+            .or(Err("Failed to show the regular temperament"))?;
+    }
+    else {
+        return Err("Can't find temperament class".to_string());
+    }
+
     Ok(())
 }
 
