@@ -9,7 +9,7 @@ pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperam
 	wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
 
 regular_bg.wasm: pkg/regular_bg.wasm
-	wasm-opt -O4 pkg/regular_bg.wasm -o regular_bg.wasm
+	wasm-opt --enable-bulk-memory-opt -O4 pkg/regular_bg.wasm -o regular_bg.wasm
 
 .PHONY: doc
 doc:
