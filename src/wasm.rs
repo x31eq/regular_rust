@@ -83,7 +83,7 @@ pub fn net_form_submit(evt: Event) {
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
         // This variable must exist to avoid freeing temporary values
-        let cleaned = name.replace('&', " ").replace('+', " ");
+        let cleaned = name.replace(['&', '+'], " ");
         let steps: Vec<&str> = cleaned.split_whitespace().collect();
         params.insert("steps", steps.join("+"));
     }
