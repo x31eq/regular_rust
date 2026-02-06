@@ -114,11 +114,12 @@ fn uv_action(
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
     if let Some(button) = web.element("show-uv")
-        && let Some(button) = button.dyn_ref::<HtmlInputElement>() {
-            // If the URL was typed in, the right search form
-            // might not be showing
-            button.set_checked(true);
-        }
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
+    }
     let uv_strings: Vec<&str> = params
         .get("uvs")
         .ok_or("Unison vectors not supplied for a unison vector search")?
@@ -220,11 +221,12 @@ fn rt_action(
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
     if let Some(button) = web.element("show-general")
-        && let Some(button) = button.dyn_ref::<HtmlInputElement>() {
-            // If the URL was typed in, the right search form
-            // might not be showing
-            button.set_checked(true);
-        }
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
+    }
     let (ets, limit, key) =
         parse_rt_params(params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
@@ -444,14 +446,15 @@ impl WebContext {
         let mut params = HashMap::new();
         if let Some(location) = self.document.location()
             && let Ok(query) = location.hash()
-                && let Ok(query) = decode_uri(&query) {
-                    let query: String = query.into();
-                    for param in query.trim_start_matches('#').split('&') {
-                        if let Some((k, v)) = param.split_once('=') {
-                            params.insert(k.to_string(), v.to_string());
-                        }
-                    }
+            && let Ok(query) = decode_uri(&query)
+        {
+            let query: String = query.into();
+            for param in query.trim_start_matches('#').split('&') {
+                if let Some((k, v)) = param.split_once('=') {
+                    params.insert(k.to_string(), v.to_string());
                 }
+            }
+        }
         params
     }
 
@@ -515,7 +518,8 @@ fn write_equal_temperaments<'a>(
     let body = web.new_or_emptied_element(table, "tbody")?;
     for vector in values {
         let row = web.document.create_element("tr")?;
-        let rt = TETemperament::new(&limit.pitches, &[vector.clone()]);
+        let rt =
+            TETemperament::new(&limit.pitches, std::slice::from_ref(vector));
         let url = rt_url(web, limit, &rt);
         for element in vector {
             let cell = web.document.create_element("td")?;
@@ -837,11 +841,12 @@ fn show_rt(
     }
 
     if show_accordion(web, &rt).is_err()
-        && let Some(accordion) = web.element("rt-accordion") {
-            // This is an optional feature,
-            // so hide it if something went wrong
-            accordion.set_inner_html("<!-- accordion went wrong -->");
-        }
+        && let Some(accordion) = web.element("rt-accordion")
+    {
+        // This is an optional feature,
+        // so hide it if something went wrong
+        accordion.set_inner_html("<!-- accordion went wrong -->");
+    }
 
     // Make another RT object to get the generator tunings
     let rt = TETemperament::new(&limit.pitches, &redmap);
