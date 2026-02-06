@@ -1,5 +1,6 @@
 target/release/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build --release
+	strip target/release/regular-cli
 
 target/debug/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build
