@@ -29,7 +29,8 @@ pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
-    // The search will fail if this is missing, but the URL should make it clear why
+    // The search will fail if this is missing, but the URL
+    // should make it clear why
     if let Some(limit) = web.input_value("prime-limit") {
         params.insert("limit", limit.trim().to_string());
     }
@@ -51,7 +52,7 @@ pub fn uv_form_submit(evt: Event) {
     // This is optional for the UV search
     if let Some(limit) = web.input_value("uv-limit") {
         let limit = limit.trim();
-        if limit != "" {
+        if !limit.is_empty() {
             params.insert("limit", limit.trim().to_string());
         }
     }
@@ -67,15 +68,38 @@ pub fn uv_form_submit(evt: Event) {
     web.resubmit_with_params(&params);
 }
 
+#[wasm_bindgen]
+pub fn net_form_submit(evt: Event) {
+    evt.prevent_default();
+    let web = WebContext::new();
+    let mut params = HashMap::from([("page", "net".to_string())]);
+    // This is optional for the UV search
+    if let Some(limit) = web.input_value("net-limit") {
+        let limit = limit.trim();
+        if !limit.is_empty() {
+            params.insert("limit", limit.trim().to_string());
+        }
+    }
+    // These are quite important for a unison vector search
+    if let Some(name) = web.input_value("net-steps") {
+        // Make these a bit cleaner in the URL bar
+        // This variable must exist to avoid freeing temporary values
+        let cleaned = name.replace(['&', '+'], " ");
+        let steps: Vec<&str> = cleaned.split_whitespace().collect();
+        params.insert("steps", steps.join("+"));
+    }
+    web.resubmit_with_params(&params);
+}
+
 fn pregular_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
     let limit = params.get("limit").ok_or("No prime limit")?;
-    web.set_input_value("prime-limit", &limit);
+    web.set_input_value("prime-limit", limit);
     let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
     let eka = params.get("error").ok_or("No target error")?;
-    web.set_input_value("prime-eka", &eka);
+    web.set_input_value("prime-eka", eka);
     let eka = eka.parse().or(Err("Unable to parse target error"))?;
     let nresults =
         params.get("nresults").cloned().unwrap_or("10".to_string());
@@ -90,12 +114,12 @@ fn uv_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some(button) = web.element("show-uv") {
-        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
-            // If the URL was typed in, the right search form
-            // might not be showing
-            button.set_checked(true);
-        }
+    if let Some(button) = web.element("show-uv")
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
     }
     let uv_strings: Vec<&str> = params
         .get("uvs")
@@ -144,8 +168,36 @@ fn uv_action(
     Ok(())
 }
 
+fn net_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    if let Some(button) = web.element("show-net")
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
+    }
+    let limit = params.get("limit").ok_or("No prime limit")?;
+    web.set_input_value("net-limit", limit);
+    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
+
+    let name = params.get("steps").ok_or("No list of steps")?;
+    web.set_input_value("net-steps", name);
+    if let Some(rt) = TETemperament::from_name(&limit, name) {
+        show_rt(web, &limit, rt.melody)
+            .or(Err("Failed to show the regular temperament"))?;
+    }
+    else {
+        return Err("Can't find temperament class".to_string());
+    }
+
+    Ok(())
+}
+
 #[wasm_bindgen(start)]
-fn main() -> Result<(), JsValue> {
+fn wasm_main() -> Result<(), JsValue> {
     clear_noscript();
     process_hash();
     Ok(())
@@ -173,6 +225,7 @@ fn process_hash() {
             Some("rt") => rt_action(&web, &params),
             Some("pregular") => pregular_action(&web, &params),
             Some("uv") => uv_action(&web, &params),
+            Some("net") => net_action(&web, &params),
             _ => Ok(()),
         }
     } {
@@ -190,22 +243,22 @@ fn parse_rt_params(
     let ets = params.get("ets")?;
     let limit = params.get("limit")?;
     let key = params.get("key");
-    Some((ets.clone(), limit.clone(), key.map(|k| k.clone())))
+    Some((ets.clone(), limit.clone(), key.cloned()))
 }
 
 fn rt_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some(button) = web.element("show-general") {
-        if let Some(button) = button.dyn_ref::<HtmlInputElement>() {
-            // If the URL was typed in, the right search form
-            // might not be showing
-            button.set_checked(true);
-        }
+    if let Some(button) = web.element("show-general")
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
     }
     let (ets, limit, key) =
-        parse_rt_params(&params).ok_or("Missing parameter")?;
+        parse_rt_params(params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
     let limit = limit
         .parse::<PrimeLimit>()
@@ -216,10 +269,10 @@ fn rt_action(
     }
     .ok_or("Couldn't generate the regular temperament!")?;
     if rt.melody.len() == 1 {
-        show_et(&web, &limit, rt.melody)
+        show_et(web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
     } else {
-        show_rt(&web, &limit, rt.melody)
+        show_rt(web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
     }
     Ok(())
@@ -248,7 +301,7 @@ fn rt_from_et_names<'a>(
     ets: &str,
 ) -> Option<CangwuTemperament<'a>> {
     let ets: Vec<String> = ets.split('_').map(|s| s.to_string()).collect();
-    CangwuTemperament::from_et_names(&limit, &ets)
+    CangwuTemperament::from_et_names(limit, &ets)
 }
 
 fn regular_temperament_search(
@@ -273,7 +326,7 @@ fn regular_temperament_search(
     list.set_inner_html("");
     web.set_body_class("show-list");
     show_equal_temperaments(
-        &web,
+        web,
         &list,
         &limit,
         mappings.iter().take(n_results),
@@ -291,7 +344,7 @@ fn regular_temperament_search(
         );
         if !rts.is_empty() {
             let visible_rts = rts.iter().take(n_results);
-            show_regular_temperaments(&web, &list, &limit, visible_rts, rank)
+            show_regular_temperaments(web, &list, &limit, visible_rts, rank)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
@@ -328,7 +381,7 @@ fn unison_vector_search(
         .ok_or("Couldn't find list for results")?;
     list.set_inner_html("");
     web.set_body_class("show-list");
-    show_equal_temperaments(&web, &list, &limit, mappings.iter())
+    show_equal_temperaments(web, &list, &limit, mappings.iter())
         .or(Err("Failed to display equal temperaments"))?;
 
     if highest_rank == 1 {
@@ -344,7 +397,7 @@ fn unison_vector_search(
             if rank == highest_rank { 1 } else { n_results },
         );
         if !rts.is_empty() {
-            show_regular_temperaments(&web, &list, &limit, rts.iter(), rank)
+            show_regular_temperaments(web, &list, &limit, rts.iter(), rank)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
@@ -421,15 +474,14 @@ impl WebContext {
     /// Get the URL-supplied parameters
     fn get_url_params(&self) -> HashMap<String, String> {
         let mut params = HashMap::new();
-        if let Some(location) = self.document.location() {
-            if let Ok(query) = location.hash() {
-                if let Ok(query) = decode_uri(&query) {
-                    let query: String = query.into();
-                    for param in query.trim_start_matches('#').split('&') {
-                        if let Some((k, v)) = param.split_once('=') {
-                            params.insert(k.to_string(), v.to_string());
-                        }
-                    }
+        if let Some(location) = self.document.location()
+            && let Ok(query) = location.hash()
+            && let Ok(query) = decode_uri(&query)
+        {
+            let query: String = query.into();
+            for param in query.trim_start_matches('#').split('&') {
+                if let Some((k, v)) = param.split_once('=') {
+                    params.insert(k.to_string(), v.to_string());
                 }
             }
         }
@@ -439,7 +491,7 @@ impl WebContext {
     /// Reset the has encoding the new params, and cause some at least of the
     /// new page events to be fired
     fn resubmit_with_params(&self, params: &HashMap<&str, String>) {
-        let hash = self.hash_from_params(&params);
+        let hash = self.hash_from_params(params);
         self.document
             .location()
             .expect("no location")
@@ -479,7 +531,7 @@ fn show_equal_temperaments<'a>(
     list.append_child(&heading)?;
     let table = web.document.create_element("table")?;
     table.set_attribute("class", "mapping bra")?;
-    write_equal_temperaments(&web, &table, &limit, mappings)?;
+    write_equal_temperaments(web, &table, limit, mappings)?;
     list.append_child(&table)?;
     Ok(())
 }
@@ -492,11 +544,12 @@ fn write_equal_temperaments<'a>(
     limit: &PrimeLimit,
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
-    write_headings(&web, &table, &limit)?;
-    let body = web.new_or_emptied_element(&table, "tbody")?;
+    write_headings(web, table, limit)?;
+    let body = web.new_or_emptied_element(table, "tbody")?;
     for vector in values {
         let row = web.document.create_element("tr")?;
-        let rt = TETemperament::new(&limit.pitches, &[vector.clone()]);
+        let rt =
+            TETemperament::new(&limit.pitches, std::slice::from_ref(vector));
         let url = rt_url(web, limit, &rt);
         for element in vector {
             let cell = web.document.create_element("td")?;
@@ -517,8 +570,8 @@ fn write_mapping_matrix<'a>(
     limit: &PrimeLimit,
     values: impl Iterator<Item = &'a ETMap>,
 ) -> Exceptionable {
-    write_headings(&web, &table, &limit)?;
-    let body = web.new_or_emptied_element(&table, "tbody")?;
+    write_headings(web, table, limit)?;
+    let body = web.new_or_emptied_element(table, "tbody")?;
     for vector in values {
         let row = web.document.create_element("tr")?;
         for element in vector {
@@ -536,11 +589,11 @@ fn write_headings(
     table: &Element,
     limit: &PrimeLimit,
 ) -> Exceptionable {
-    let head = web.new_or_emptied_element(&table, "thead")?;
+    let head = web.new_or_emptied_element(table, "thead")?;
     let row = web.document.create_element("tr")?;
     for heading in limit.headings.iter() {
         let cell = web.document.create_element("th")?;
-        cell.set_text_content(Some(&heading));
+        cell.set_text_content(Some(heading));
         row.append_child(&cell)?;
     }
     head.append_child(&row)?;
@@ -554,7 +607,7 @@ fn write_float_row(
     pitches: &[Cents],
     precision: usize,
 ) -> Exceptionable {
-    let body = web.new_or_emptied_element(&table, "tbody")?;
+    let body = web.new_or_emptied_element(table, "tbody")?;
     let row = web.document.create_element("tr")?;
     for element in pitches {
         let cell = web.document.create_element("td")?;
@@ -591,7 +644,7 @@ fn show_regular_temperaments<'a>(
     table.append_child(&row)?;
 
     for rt in rts {
-        let row = rt_row(&rt, &limit, &web)?;
+        let row = rt_row(rt, limit, web)?;
         table.append_child(&row)?;
     }
     list.append_child(&table)?;
@@ -609,17 +662,17 @@ fn rt_row(
     let link = web.document.create_element("a")?;
 
     // Set up the link as a link
-    let rt = TETemperament::new(&limit.pitches, &mapping);
-    link.set_attribute("href", &rt_url(&web, &limit, &rt))?;
+    let rt = TETemperament::new(&limit.pitches, mapping);
+    link.set_attribute("href", &rt_url(web, limit, &rt))?;
 
-    let octaves = map(|et| et_name(&limit, et), &mapping);
+    let octaves = map(|et| et_name(limit, et), mapping);
     let ets = octaves.join(" & ");
 
-    if let Some(name) = rt.name(&limit) {
-        link.set_text_content(Some(&name));
+    if let Some(name) = rt.name(limit) {
+        link.set_text_content(Some(name));
     } else if let Some(uv) = only_unison_vector(&rt.melody) {
         let norm_uv = normalize_positive(&limit.pitches, uv);
-        let name = get_ratio_or_ket_string(&limit, &norm_uv);
+        let name = get_ratio_or_ket_string(limit, &norm_uv);
         link.set_text_content(Some(&name));
     } else {
         link.set_text_content(Some(&ets));
@@ -648,7 +701,7 @@ fn rt_url(
     plimit: &PrimeLimit,
     rt: &TETemperament,
 ) -> String {
-    let ets = map(|et| et_name(&plimit, &et), &rt.melody);
+    let ets = map(|et| et_name(plimit, et), &rt.melody);
     let params = HashMap::from([
         ("page", "rt".to_string()),
         ("ets", ets.join("_")),
@@ -666,31 +719,31 @@ fn show_et(
     let rt = TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("et-name") {
-        name_field.set_text_content(Some(&rt_name(&limit, &rt)));
+        name_field.set_text_content(Some(&rt_name(limit, &rt)));
     }
 
     if let Some(table) = web.element("et-etmap") {
-        write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+        write_mapping_matrix(web, &table, limit, mapping.iter())?;
     }
 
     if let Some(table) = web.element("et-tuning-map") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.tuning_map(), 3)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("et-pote-tuning-map") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.pote_tuning_map(), 3)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.pote_tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("et-mistunings") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.mistunings(), 4)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.mistunings(), 4)?;
     }
 
     if let Some(table) = web.element("et-pote-mistunings") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.pote_mistunings(), 4)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.pote_mistunings(), 4)?;
     }
 
     if let Some(field) = web.element("et-te-error") {
@@ -709,7 +762,7 @@ fn show_et(
         };
         for uv in rt.unison_vectors(n_results) {
             let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(&limit, &uv);
+            let text = get_ratio_or_ket_string(limit, &uv);
             item.set_text_content(Some(&text));
             list.append_child(&item)?;
         }
@@ -745,44 +798,44 @@ fn show_rt(
     let rt = TETemperament::new(&limit.pitches, &mapping);
 
     if let Some(name_field) = web.element("rt-name") {
-        name_field.set_text_content(Some(&rt_name(&limit, &rt)));
+        name_field.set_text_content(Some(&rt_name(limit, &rt)));
     }
 
     if let Some(table) = web.element("rt-etmap") {
-        write_mapping_matrix(&web, &table, &limit, mapping.iter())?;
+        write_mapping_matrix(web, &table, limit, mapping.iter())?;
     }
 
     let redmap = rt.reduced_mapping();
     if let Some(table) = web.element("rt-redmap") {
-        write_mapping_matrix(&web, &table, &limit, redmap.iter())?;
+        write_mapping_matrix(web, &table, limit, redmap.iter())?;
     }
 
     if let Some(table) = web.element("rt-steps") {
-        write_float_row(&web, &table, &rt.tuning, 4)?;
+        write_float_row(web, &table, &rt.tuning, 4)?;
     }
 
     if let Some(table) = web.element("rt-pote-steps") {
-        write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
+        write_float_row(web, &table, &rt.pote_tuning(), 4)?;
     }
 
     if let Some(table) = web.element("rt-tuning-map") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.tuning_map(), 3)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("rt-pote-tuning-map") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.pote_tuning_map(), 3)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.pote_tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("rt-mistunings") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.mistunings(), 4)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.mistunings(), 4)?;
     }
 
     if let Some(table) = web.element("rt-pote-mistunings") {
-        write_headings(&web, &table, &limit)?;
-        write_float_row(&web, &table, &rt.pote_mistunings(), 4)?;
+        write_headings(web, &table, limit)?;
+        write_float_row(web, &table, &rt.pote_mistunings(), 4)?;
     }
 
     if let Some(field) = web.element("rt-complexity") {
@@ -806,7 +859,7 @@ fn show_rt(
         };
         for uv in rt.unison_vectors(n_results) {
             let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(&limit, &uv);
+            let text = get_ratio_or_ket_string(limit, &uv);
             item.set_text_content(Some(&text));
             list.append_child(&item)?;
         }
@@ -817,22 +870,22 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
-    if show_accordion(&web, &rt).is_err() {
-        if let Some(accordion) = web.element("rt-accordion") {
-            // This is an optional feature,
-            // so hide it if something went wrong
-            accordion.set_inner_html("<!-- accordion went wrong -->");
-        }
+    if show_accordion(web, &rt).is_err()
+        && let Some(accordion) = web.element("rt-accordion")
+    {
+        // This is an optional feature,
+        // so hide it if something went wrong
+        accordion.set_inner_html("<!-- accordion went wrong -->");
     }
 
     // Make another RT object to get the generator tunings
     let rt = TETemperament::new(&limit.pitches, &redmap);
     if let Some(table) = web.element("rt-generators") {
-        write_float_row(&web, &table, &rt.tuning, 4)?;
+        write_float_row(web, &table, &rt.tuning, 4)?;
     }
 
     if let Some(table) = web.element("rt-pote-generators") {
-        write_float_row(&web, &table, &rt.pote_tuning(), 4)?;
+        write_float_row(web, &table, &rt.pote_tuning(), 4)?;
     }
 
     web.set_body_class("show-temperament");
@@ -844,10 +897,10 @@ fn show_rt(
 }
 
 fn rt_name(limit: &PrimeLimit, rt: &TETemperament) -> String {
-    if let Some(name) = rt.name(&limit) {
+    if let Some(name) = rt.name(limit) {
         name.to_string()
     } else {
-        let octaves = map(|et| et_name(limit, et), &rt.mapping());
+        let octaves = map(|et| et_name(limit, et), rt.mapping());
         octaves.join(" & ")
     }
 }
@@ -855,7 +908,7 @@ fn rt_name(limit: &PrimeLimit, rt: &TETemperament) -> String {
 fn et_name(limit: &PrimeLimit, et: &ETMap) -> String {
     assert!(!et.is_empty());
     if ambiguous_et(&limit.pitches, et) {
-        warted_et_name(&limit, et)
+        warted_et_name(limit, et)
     } else {
         et[0].to_string()
     }
@@ -920,7 +973,7 @@ fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
         let column = web.document.create_element("td")?;
         // Buttons are added top-down
         for (i, pitch) in pitch_stack.iter().rev().enumerate() {
-            let button = accordion_button(&web, &rt, &pitch)?;
+            let button = accordion_button(web, rt, pitch)?;
             if i == 0 {
                 let button_height = 3.0;
                 let margin = margin_for_pitch(pitch) - min_margin;
@@ -944,9 +997,9 @@ fn accordion_button(
     pitch: &[Exponent],
 ) -> Result<Element, JsValue> {
     let button = web.document.create_element("button")?;
-    button.set_attribute("data-steps", &join("_", &pitch))?;
-    button.set_text_content(Some(&join(", ", &pitch)));
-    let pitch = rt.pitch_from_steps(&pitch);
+    button.set_attribute("data-steps", &join("_", pitch))?;
+    button.set_text_content(Some(&join(", ", pitch)));
+    let pitch = rt.pitch_from_steps(pitch);
     // Tonic is middle C for now
     let freq = 264.0 * 2.0_f64.powf(pitch / 12e2);
     button.set_attribute("data-freq", &format!("{:.6}", freq))?;

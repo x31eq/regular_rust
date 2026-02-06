@@ -138,7 +138,9 @@ fn name_12p() {
     let et = prime_mapping(&limit.pitches, 12);
     let name = warted_et_name(&limit, &et);
     assert_eq!(name, "12p");
-    assert_eq!(Some(et), et_from_name(&limit, &name));
+    assert_eq!(Some(et.clone()), et_from_name(&limit, &name));
+    // Check that the same result comes back without the "p"
+    assert_eq!(Some(et), et_from_name(&limit, "12"));
 }
 
 #[test]
@@ -265,6 +267,41 @@ fn name_4efggg() {
     let name = warted_et_name(&limit, &et);
     assert_eq!(name, "4efggg");
     assert_eq!(Some(et), et_from_name(&limit, &name));
+}
+
+#[test]
+fn rt12_from_name() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34]]),
+        mapping_from_name(&limit, "12p"),
+    );
+    assert_eq!(
+        Some(vec![vec![12, 19, 28, 34]]),
+        mapping_from_name(&limit, "12"),
+    );
+}
+
+#[test]
+fn meantone_from_name() {
+    let limit = PrimeLimit::new(7);
+    let expected = vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]];
+    assert_eq!(Some(expected.clone()), mapping_from_name(&limit, "12 & 19"));
+    // The & is optional
+    assert_eq!(Some(expected.clone()), mapping_from_name(&limit, "12 19"));
+    assert_eq!(Some(expected.clone()), mapping_from_name(&limit, "12 + 19"));
+    // + is also supported
+    // Extra whitespace should be ignored
+    assert_eq!(
+        Some(expected.clone()),
+        mapping_from_name(&limit, "   12  &  19  &&&& "),
+    );
+}
+
+#[test]
+fn bad_rt_from_name() {
+    let limit = PrimeLimit::new(7);
+    assert_eq!(None, mapping_from_name(&limit, "bad name"));
 }
 
 /// Test a case where a Chinese character is used for the wart

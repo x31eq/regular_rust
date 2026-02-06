@@ -1,14 +1,16 @@
-target/release/regular: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
+target/release/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build --release
+	strip target/release/regular-cli
 
-target/debug/regular: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
+target/debug/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build
 
 pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs Cargo.toml
-	wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
+	cargo build --release --target wasm32-unknown-unknown
+	RUSTFLAGS="-Cstrip=none" wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
 
 regular_bg.wasm: pkg/regular_bg.wasm
-	wasm-opt -O4 pkg/regular_bg.wasm -o regular_bg.wasm
+	wasm-opt --strip-dwarf --strip-producers -O4 pkg/regular_bg.wasm -o regular_bg.wasm
 
 .PHONY: doc
 doc:
@@ -26,10 +28,10 @@ test:
 wasm: pkg/regular_bg.wasm
 
 .PHONY: release
-release: target/release/regular
+release: target/release/regular-cli
 
 .PHONY: wasm-release
 wasm-release: regular_bg.wasm
 
 .PHONY: debug
-debug: target/debug/regular
+debug: target/debug/regular-cli

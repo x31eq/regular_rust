@@ -9,6 +9,10 @@ lazy_static = "1.5.0"
 nalgebra = "0.34.1"
 num-integer = "0.1.46"
 
+[[bin]]
+name = "regular-cli"
+path = "src/main.rs"
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2.108"
 js-sys = "0.3.85"
@@ -20,7 +24,6 @@ crate-type = ["cdylib", "rlib"]
 opt-level = 3
 lto = true
 panic = 'abort'
-strip = true
 incremental = true
 
 [package.metadata.wasm-pack.profile.dev]
