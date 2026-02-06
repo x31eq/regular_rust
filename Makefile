@@ -5,6 +5,7 @@ target/debug/regular: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build
 
 pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs Cargo.toml
+	cargo build --release --target wasm32-unknown-unknown
 	wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
 
 regular_bg.wasm: pkg/regular_bg.wasm
