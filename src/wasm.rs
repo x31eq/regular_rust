@@ -167,6 +167,20 @@ fn uv_action(
     Ok(())
 }
 
+fn net_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    if let Some(button) = web.element("show-net")
+        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
+    {
+        // If the URL was typed in, the right search form
+        // might not be showing
+        button.set_checked(true);
+    }
+    Ok(())
+}
+
 #[wasm_bindgen(start)]
 fn wasm_main() -> Result<(), JsValue> {
     clear_noscript();
@@ -196,6 +210,7 @@ fn process_hash() {
             Some("rt") => rt_action(&web, &params),
             Some("pregular") => pregular_action(&web, &params),
             Some("uv") => uv_action(&web, &params),
+            Some("net") => net_action(&web, &params),
             _ => Ok(()),
         }
     } {
