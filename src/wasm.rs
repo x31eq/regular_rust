@@ -168,7 +168,7 @@ fn uv_action(
 }
 
 #[wasm_bindgen(start)]
-fn main() -> Result<(), JsValue> {
+fn wasm_main() -> Result<(), JsValue> {
     clear_noscript();
     process_hash();
     Ok(())
