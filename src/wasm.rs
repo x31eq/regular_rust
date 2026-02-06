@@ -85,7 +85,8 @@ pub fn net_form_submit(evt: Event) {
         let steps: Vec<&str> = name
             .replace('&', " ")
             .replace('+', " ")
-            .split_whitespace().collect();
+            .split_whitespace()
+            .collect();
         params.insert("steps", steps.join("+"));
     }
     web.resubmit_with_params(&params);
