@@ -82,11 +82,9 @@ pub fn net_form_submit(evt: Event) {
     // These are quite important for a unison vector search
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
-        let steps: Vec<&str> = name
-            .replace('&', " ")
-            .replace('+', " ")
-            .split_whitespace()
-            .collect();
+        // This variable must exist to avoid freeing temporary values
+        let cleaned = name.replace('&', " ").replace('+', " ");
+        let steps: Vec<&str> = cleaned.split_whitespace().collect();
         params.insert("steps", steps.join("+"));
     }
     web.resubmit_with_params(&params);
