@@ -268,13 +268,11 @@ fn tuning() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "3.96487 17.32226 14.05909";
-    let fmt_tuning = format_float_vec(&marvel.tuning, 5);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.tuning, 5, expected);
 
     let jove = make_jove(&limit11);
     let expected = "6.00023 17.78766 11.87013";
-    let fmt_tuning = format_float_vec(&jove.tuning, 5);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.tuning, 5, expected);
 }
 
 #[test]
@@ -282,13 +280,11 @@ fn tuning_map() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "1200.640 1901.403 2785.025 3369.655 4151.204";
-    let fmt_tuning = format_float_vec(&marvel.tuning_map(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.tuning_map(), 3, expected);
 
     let jove = make_jove(&limit11);
     let expected = "1200.099 1901.163 2786.388 3368.609 4152.859";
-    let fmt_tuning = format_float_vec(&jove.tuning_map(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.tuning_map(), 3, expected);
 }
 
 #[test]
@@ -296,13 +292,11 @@ fn mistunings() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "0.640 -0.552 -1.288 0.829 -0.114";
-    let fmt_tuning = format_float_vec(&marvel.mistunings(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.mistunings(), 3, expected);
 
     let jove = make_jove(&limit11);
     let expected = "0.099 -0.792 0.074 -0.217 1.541";
-    let fmt_tuning = format_float_vec(&jove.mistunings(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.mistunings(), 3, expected);
 }
 
 #[test]
@@ -310,13 +304,11 @@ fn pote_tuning() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "3.96276 17.31303 14.05160";
-    let fmt_tuning = format_float_vec(&marvel.pote_tuning(), 5);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.pote_tuning(), 5, expected);
 
     let jove = make_jove(&limit11);
     let expected = "5.99973 17.78620 11.86915";
-    let fmt_tuning = format_float_vec(&jove.pote_tuning(), 5);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.pote_tuning(), 5, expected);
 }
 
 #[test]
@@ -324,13 +316,11 @@ fn pote_tuning_map() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "1200.000 1900.389 2783.540 3367.858 4148.990";
-    let fmt_tuning = format_float_vec(&marvel.pote_tuning_map(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.pote_tuning_map(), 3, expected);
 
     let jove = make_jove(&limit11);
     let expected = "1200.000 1901.007 2786.159 3368.331 4152.517";
-    let fmt_tuning = format_float_vec(&jove.pote_tuning_map(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.pote_tuning_map(), 3, expected);
 }
 
 #[test]
@@ -338,13 +328,11 @@ fn pote_mistunings() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     let expected = "0.000 -1.566 -2.773 -0.968 -2.328";
-    let fmt_tuning = format_float_vec(&marvel.pote_mistunings(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&marvel.pote_mistunings(), 3, expected);
 
     let jove = make_jove(&limit11);
     let expected = "0.000 -0.948 -0.155 -0.495 1.199";
-    let fmt_tuning = format_float_vec(&jove.pote_mistunings(), 3);
-    assert_eq!(fmt_tuning, expected.to_string());
+    check_float_vec(&jove.pote_mistunings(), 3, expected);
 }
 
 #[test]
@@ -370,17 +358,14 @@ fn mystery() {
     assert_between!(0.51238, mystery.error(), 0.51239);
     assert_between!(1.89606, mystery.adjusted_error(), 1.89607);
 
-    let fmt_tuning_map = format_float_vec(&mystery.tuning_map(), 3);
     let expected = "1199.507 1902.667 2787.209 3366.282 4152.166 4441.702";
-    assert_eq!(fmt_tuning_map, expected.to_string());
+    check_float_vec(&mystery.tuning_map(), 3, expected);
 
-    let fmt_errors = format_float_vec(&mystery.mistunings(), 3);
     let expected = "-0.493 0.712 0.896 -2.544 0.848 1.175";
-    assert_eq!(fmt_errors, expected.to_string());
+    check_float_vec(&mystery.mistunings(), 3, expected);
 
-    let fmt_tuning_map = format_float_vec(&mystery.pote_tuning_map(), 3);
     let expected = "1200.000 1903.448 2788.354 3367.664 4153.871 4443.527";
-    assert_eq!(fmt_tuning_map, expected.to_string());
+    check_float_vec(&mystery.pote_tuning_map(), 3, expected);
 }
 
 #[test]
@@ -551,17 +536,11 @@ fn rt_fokker_block() {
 fn tuned_block() {
     let limit11 = super::PrimeLimit::new(11);
     let block = make_marvel(&limit11).fokker_block_pitches(22);
-    let fmt_block = format_float_vec(&block, 3);
-    let expected = format_float_vec(
-        &vec![
-            49.405, 116.133, 165.538, 232.266, 281.671, 331.076, 383.745,
-            433.150, 499.878, 549.283, 598.689, 665.416, 714.821, 767.490,
-            816.895, 866.301, 933.028, 982.434, 1049.161, 1098.566, 1165.294,
-            1200.640,
-        ],
-        3,
-    );
-    assert_eq!(fmt_block, expected);
+    let expected = "49.405 116.133 165.538 232.266 281.671 331.076 383.745 \
+        433.150 499.878 549.283 598.689 665.416 714.821 767.490 \
+        816.895 866.301 933.028 982.434 1049.161 1098.566 1165.294 \
+        1200.640";
+    check_float_vec(&block, 3, expected);
 }
 
 #[test]
@@ -586,12 +565,12 @@ fn pitches() {
 }
 
 #[cfg(test)]
-fn format_float_vec(tuning: &Tuning, decimals: usize) -> String {
-    let mut result = "".to_string();
+fn check_float_vec(tuning: &Tuning, decimals: usize, expected: &str) {
+    let mut formatted = "".to_string();
     for pitch in tuning.iter() {
-        result.push_str(" ");
-        result.push_str(&format!("{:.*}", decimals, pitch));
+        formatted.push_str(" ");
+        formatted.push_str(&format!("{:.*}", decimals, pitch));
     }
-    result.remove(0);
-    result
+    formatted.remove(0);
+    assert_eq!(formatted, expected.to_string());
 }
