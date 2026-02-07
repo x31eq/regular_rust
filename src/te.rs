@@ -232,29 +232,35 @@ fn make_jove(limit11: &super::PrimeLimit) -> TETemperament<'_> {
     TETemperament::new(&limit11.pitches, &jove_vector)
 }
 
+#[cfg(test)]
+macro_rules! assert_between {
+    ($min: expr, $x: expr, $max: expr) => {{
+        // sanity check
+        assert!($min < $max);
+        assert!($min < $x);
+        assert!($x < $max);
+    }};
+}
+
 #[test]
 fn complexity() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
-    assert!(0.155663 < marvel.complexity());
-    assert!(marvel.complexity() < 0.155664);
+    assert_between!(0.155663, marvel.complexity(), 0.155664);
 
     let jove = make_jove(&limit11);
     // Less precision here because it disagrees with Python.
-    assert!(0.17475 < jove.complexity());
-    assert!(jove.complexity() < 0.174755);
+    assert_between!(0.17475, jove.complexity(), 0.174755);
 }
 
 #[test]
 fn error() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
-    assert!(0.43069 < marvel.error());
-    assert!(marvel.error() < 0.43070);
+    assert_between!(0.43069, marvel.error(), 0.43070);
 
     let jove = make_jove(&limit11);
-    assert!(0.30486 < jove.error());
-    assert!(jove.error() < 0.30487);
+    assert_between!(0.30486, jove.error(), 0.30487);
 }
 
 #[test]
@@ -360,12 +366,9 @@ fn mystery() {
     ];
     let limit13 = super::PrimeLimit::new(13);
     let mystery = TETemperament::new(&limit13.pitches, &mystery_vector);
-    assert!(4.83894 < mystery.complexity());
-    assert!(mystery.complexity() < 4.83895);
-    assert!(0.51238 < mystery.error());
-    assert!(mystery.error() < 0.51239);
-    assert!(1.89606 < mystery.adjusted_error());
-    assert!(mystery.adjusted_error() < 1.89607);
+    assert_between!(4.83894, mystery.complexity(), 4.83895);
+    assert_between!(0.51238, mystery.error(), 0.51239);
+    assert_between!(1.89606, mystery.adjusted_error(), 1.89607);
 
     let fmt_tuning_map = format_float_vec(&mystery.tuning_map(), 3);
     let expected = "1199.507 1902.667 2787.209 3366.282 4152.166 4441.702";

@@ -188,8 +188,7 @@ fn net_action(
     if let Some(rt) = TETemperament::from_name(&limit, name) {
         show_rt(web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
-    }
-    else {
+    } else {
         return Err("Can't find temperament class".to_string());
     }
 
