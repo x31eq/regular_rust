@@ -491,6 +491,17 @@ impl<T> PriorityQueue<T> {
     }
 }
 
+#[cfg(test)]
+#[macro_export]
+macro_rules! assert_between {
+    ($min: expr, $x: expr, $max: expr) => {{
+        // sanity check
+        assert!($min < $max);
+        assert!($min < $x);
+        assert!($x < $max);
+    }};
+}
+
 pub mod cangwu;
 pub mod names;
 pub mod ratio;
