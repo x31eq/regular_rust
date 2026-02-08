@@ -73,12 +73,8 @@ pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "rt".to_string())]);
-    // FIXME: should be required
     if let Some(limit) = web.input_value("net-limit") {
-        let limit = limit.trim();
-        if !limit.is_empty() {
-            params.insert("limit", limit.trim().to_string());
-        }
+        params.insert("limit", limit.trim().to_string());
     }
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
