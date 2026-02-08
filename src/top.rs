@@ -58,10 +58,10 @@ impl<'a> TOPTemperament<'a> {
             // error*p - tuned_prime >= -p and error*p + tuned_prime >= p
             // tuned_prime - error*p <= p and error*p + tuned_prime >= p
             let mut constraint = tuned_prime.clone();
-            constraint.push((error, -1.0));
+            constraint.push((error, -p));
             problem.add_constraint(&constraint, ComparisonOp::Le, p);
             constraint.pop();
-            constraint.push((error, 1.0));
+            constraint.push((error, p));
             problem.add_constraint(&constraint, ComparisonOp::Ge, p);
         }
         let solution = problem.solve().unwrap();
@@ -76,8 +76,8 @@ fn meantone() {
     let mut meantone = TOPTemperament::new(&limit5.pitches, &meantone_vector);
     meantone.optimize();
     assert_eq!(meantone.tuning.len(), 2);
-    super::assert_between!(30.56, meantone.tuning[0], 30.57);
-    super::assert_between!(20.05, meantone.tuning[1], 20.06);
+    super::assert_between!(6.07, meantone.tuning[0], 6.08);
+    super::assert_between!(35.03, meantone.tuning[1], 35.04);
     // Check that the octave looks like an octave
     let tempered_octave =
         meantone.tuning[0] * 19.0 + meantone.tuning[1] * 31.0;
