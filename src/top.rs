@@ -73,8 +73,7 @@ impl<'a> TOPTemperament<'a> {
 fn meantone() {
     let limit5 = super::PrimeLimit::new(5);
     let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
-    let mut meantone = TOPTemperament::new(&limit5.pitches, &meantone_vector);
-    meantone.optimize();
+    let meantone = TOPTemperament::new(&limit5.pitches, &meantone_vector);
     assert_eq!(meantone.tuning.len(), 2);
     super::assert_between!(6.07, meantone.tuning[0], 6.08);
     super::assert_between!(35.03, meantone.tuning[1], 35.04);
