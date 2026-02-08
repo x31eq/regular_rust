@@ -79,10 +79,10 @@ fn meantone() {
     super::assert_between!(6.07, meantone.tuning[0], 6.08);
     super::assert_between!(35.03, meantone.tuning[1], 35.04);
     let tempered_fourth = meantone.tuning[0] * 8.0 + meantone.tuning[1] * 13.0;
-    // primerr.pdf says 504.348 and this is giving 504.134
+    // TE is 504.348 and this is giving 504.134
     super::assert_between!(504.1, tempered_fourth, 504.5);
     let tempered_octave =
         meantone.tuning[0] * 19.0 + meantone.tuning[1] * 31.0;
-    // primerr.pdf says 1201.397 and this is giving 1201.699
+    // TE is 1201.397 and this is giving 1201.699
     super::assert_between!(1201.3, tempered_octave, 1201.8);
 }
