@@ -6,8 +6,8 @@ use na::DMatrix;
 use super::temperament_class::{TemperamentClass, key_to_mapping};
 use super::uv::only_unison_vector;
 use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
-    et_from_name, map, normalize_positive, prime_mapping,
+    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue, map,
+    mapping_from_name, normalize_positive, prime_mapping,
 };
 use std::collections::HashSet;
 
@@ -52,10 +52,12 @@ impl<'a> CangwuTemperament<'a> {
         plimit: &'a PrimeLimit,
         ets: &[String],
     ) -> Option<Self> {
-        let ets: Option<Mapping> =
-            ets.iter().map(|name| et_from_name(plimit, name)).collect();
-        let plimit = &plimit.pitches;
-        ets.map(|melody| CangwuTemperament { plimit, melody })
+        mapping_from_name(plimit, &ets.join("_")).map(|melody| {
+            CangwuTemperament {
+                plimit: &plimit.pitches,
+                melody,
+            }
+        })
     }
 
     pub fn from_ets_and_key(
