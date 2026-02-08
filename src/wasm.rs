@@ -72,21 +72,16 @@ pub fn uv_form_submit(evt: Event) {
 pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
-    let mut params = HashMap::from([("page", "net".to_string())]);
-    // This is optional for the UV search
+    let mut params = HashMap::from([("page", "rt".to_string())]);
     if let Some(limit) = web.input_value("net-limit") {
-        let limit = limit.trim();
-        if !limit.is_empty() {
-            params.insert("limit", limit.trim().to_string());
-        }
+        params.insert("limit", limit.trim().to_string());
     }
-    // These are quite important for a unison vector search
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
         // This variable must exist to avoid freeing temporary values
-        let cleaned = name.replace(['&', '+'], " ");
+        let cleaned = name.replace(['&', '+', '_'], " ");
         let steps: Vec<&str> = cleaned.split_whitespace().collect();
-        params.insert("steps", steps.join("+"));
+        params.insert("ets", steps.join("_"));
     }
     web.resubmit_with_params(&params);
 }
@@ -168,31 +163,16 @@ fn uv_action(
     Ok(())
 }
 
+/// Only needed for backwards compatibility for the short time when
+/// there was a different page for the net search
 fn net_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some(button) = web.element("show-net")
-        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
-    {
-        // If the URL was typed in, the right search form
-        // might not be showing
-        button.set_checked(true);
-    }
-    let limit = params.get("limit").ok_or("No prime limit")?;
-    web.set_input_value("net-limit", limit);
-    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
-
-    let name = params.get("steps").ok_or("No list of steps")?;
-    web.set_input_value("net-steps", name);
-    if let Some(rt) = TETemperament::from_name(&limit, name) {
-        show_rt(web, &limit, rt.melody)
-            .or(Err("Failed to show the regular temperament"))?;
-    } else {
-        return Err("Can't find temperament class".to_string());
-    }
-
-    Ok(())
+    let steps = params.get("steps").ok_or("No list of steps")?;
+    let mut params = params.clone();
+    params.insert("ets".to_string(), steps.to_string().replace('+', "_"));
+    rt_action(web, &params)
 }
 
 #[wasm_bindgen(start)]
@@ -249,13 +229,6 @@ fn rt_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some(button) = web.element("show-general")
-        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
-    {
-        // If the URL was typed in, the right search form
-        // might not be showing
-        button.set_checked(true);
-    }
     let (ets, limit, key) =
         parse_rt_params(params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
@@ -264,7 +237,7 @@ fn rt_action(
         .or(Err("Unable to parse limit"))?;
     let rt = match key {
         Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-        None => rt_from_et_names(&limit, &ets),
+        None => CangwuTemperament::from_name(&limit, &ets),
     }
     .ok_or("Couldn't generate the regular temperament!")?;
     if rt.melody.len() == 1 {
@@ -293,14 +266,6 @@ fn rt_from_ets_and_key<'a>(
         .collect::<Result<Vec<_>, _>>()
         .ok()?;
     CangwuTemperament::from_ets_and_key(&limit.pitches, &ets, &key)
-}
-
-fn rt_from_et_names<'a>(
-    limit: &'a PrimeLimit,
-    ets: &str,
-) -> Option<CangwuTemperament<'a>> {
-    let ets: Vec<String> = ets.split('_').map(|s| s.to_string()).collect();
-    CangwuTemperament::from_et_names(limit, &ets)
 }
 
 fn regular_temperament_search(

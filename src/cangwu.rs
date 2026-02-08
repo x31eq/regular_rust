@@ -6,11 +6,12 @@ use na::DMatrix;
 use super::temperament_class::{TemperamentClass, key_to_mapping};
 use super::uv::only_unison_vector;
 use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue,
-    et_from_name, map, normalize_positive, prime_mapping,
+    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, PriorityQueue, map,
+    mapping_from_name, normalize_positive, prime_mapping,
 };
 use std::collections::HashSet;
 
+/// Temperament class with a prime limit but no tuning
 pub struct CangwuTemperament<'a> {
     plimit: &'a [Cents],
     pub melody: Mapping,
@@ -48,20 +49,16 @@ impl<'a> CangwuTemperament<'a> {
         CangwuTemperament { plimit, melody }
     }
 
-    pub fn from_et_names(
-        plimit: &'a PrimeLimit,
-        ets: &[String],
-    ) -> Option<Self> {
-        if let Some(melody) =
-            ets.iter().map(|name| et_from_name(plimit, name)).collect()
-        {
-            let plimit = &plimit.pitches;
-            Some(CangwuTemperament { plimit, melody })
-        } else {
-            None
-        }
+    /// Turn an ET name like "12 & 19" into a temperament object
+    pub fn from_name(plimit: &'a PrimeLimit, name: &str) -> Option<Self> {
+        mapping_from_name(plimit, name).map(|melody| CangwuTemperament {
+            plimit: &plimit.pitches,
+            melody,
+        })
     }
 
+    /// Strange legacy method because the Python web app used to
+    /// define things like this
     pub fn from_ets_and_key(
         plimit: &'a [Cents],
         ets: &ETSlice,
@@ -694,28 +691,21 @@ fn test_ambiguity_31_13() {
 }
 
 #[test]
-fn marvel_from_et_names() {
-    let limit = super::PrimeLimit::new(11);
-    let original = make_marvel(&limit);
-    let named = CangwuTemperament::from_et_names(
-        &limit,
-        &vec!["22".to_string(), "31".to_string(), "41".to_string()],
-    );
-    assert!(named.is_some());
-    if let Some(rt) = named {
-        assert_eq!(original.melody, rt.melody);
-    }
+fn marvel_from_name() {
+    let limit11 = super::PrimeLimit::new(11);
+    let expected = make_marvel(&limit11);
+    let from_name = CangwuTemperament::from_name(&limit11, "22 & 31 & 41")
+        .expect("couldn't make marvel from name");
+    assert_eq!(expected.melody, from_name.melody);
+    assert_eq!(expected.plimit, from_name.plimit);
 }
 
 #[test]
-fn meantone_from_et_names() {
+fn meantone_from_name() {
     let limit = super::PrimeLimit::new(13);
     let expected =
         vec![vec![31, 49, 72, 87, 107, 115], vec![12, 19, 28, 34, 42, 45]];
-    let named = CangwuTemperament::from_et_names(
-        &limit,
-        &vec!["31".to_string(), "12f".to_string()],
-    );
+    let named = CangwuTemperament::from_name(&limit, "31 & 12f");
     assert!(named.is_some());
     if let Some(rt) = named {
         assert_eq!(rt.melody, expected);
