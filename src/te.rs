@@ -5,7 +5,6 @@ use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
 use super::{
     Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, Tuning, map,
-    mapping_from_name,
 };
 
 pub struct TETemperament<'a> {
@@ -44,12 +43,6 @@ impl<'a> TETemperament<'a> {
         let tuning = pinv.column_sum() * 12e2;
         rt.tuning = tuning.iter().cloned().collect();
         rt
-    }
-
-    /// Turn an ET name like "12 & 19" into a temperament object
-    pub fn from_name(plimit: &'a PrimeLimit, name: &str) -> Option<Self> {
-        mapping_from_name(plimit, name)
-            .map(|mapping| TETemperament::new(&plimit.pitches, &mapping))
     }
 
     pub fn error(&self) -> f64 {
