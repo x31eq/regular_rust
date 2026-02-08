@@ -57,6 +57,8 @@ impl<'a> CangwuTemperament<'a> {
         })
     }
 
+    /// Strange legacy method because the Python web app used to
+    /// define things like this
     pub fn from_ets_and_key(
         plimit: &'a [Cents],
         ets: &ETSlice,
