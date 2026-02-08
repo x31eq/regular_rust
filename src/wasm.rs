@@ -72,7 +72,7 @@ pub fn uv_form_submit(evt: Event) {
 pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
-    let mut params = HashMap::from([("page", "net".to_string())]);
+    let mut params = HashMap::from([("page", "rt".to_string())]);
     // This is optional for the UV search
     if let Some(limit) = web.input_value("net-limit") {
         let limit = limit.trim();
@@ -80,13 +80,12 @@ pub fn net_form_submit(evt: Event) {
             params.insert("limit", limit.trim().to_string());
         }
     }
-    // These are quite important for a unison vector search
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
         // This variable must exist to avoid freeing temporary values
-        let cleaned = name.replace(['&', '+'], " ");
+        let cleaned = name.replace(['&', '+', '_'], " ");
         let steps: Vec<&str> = cleaned.split_whitespace().collect();
-        params.insert("steps", steps.join("+"));
+        params.insert("ets", steps.join("_"));
     }
     web.resubmit_with_params(&params);
 }
