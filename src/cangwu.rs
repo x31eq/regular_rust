@@ -52,14 +52,10 @@ impl<'a> CangwuTemperament<'a> {
         plimit: &'a PrimeLimit,
         ets: &[String],
     ) -> Option<Self> {
-        if let Some(melody) =
-            ets.iter().map(|name| et_from_name(plimit, name)).collect()
-        {
-            let plimit = &plimit.pitches;
-            Some(CangwuTemperament { plimit, melody })
-        } else {
-            None
-        }
+        let ets: Option<Mapping> =
+            ets.iter().map(|name| et_from_name(plimit, name)).collect();
+        let plimit = &plimit.pitches;
+        ets.map(|melody| CangwuTemperament { plimit, melody })
     }
 
     pub fn from_ets_and_key(
