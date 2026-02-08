@@ -11,6 +11,7 @@ use super::{
 };
 use std::collections::HashSet;
 
+/// Temperament class with a prime limit but no tuning
 pub struct CangwuTemperament<'a> {
     plimit: &'a [Cents],
     pub melody: Mapping,
@@ -54,13 +55,6 @@ impl<'a> CangwuTemperament<'a> {
             plimit: &plimit.pitches,
             melody,
         })
-    }
-
-    pub fn from_et_names(
-        plimit: &'a PrimeLimit,
-        ets: &[String],
-    ) -> Option<Self> {
-        Self::from_name(plimit, &ets.join("_"))
     }
 
     pub fn from_ets_and_key(
@@ -714,28 +708,11 @@ fn marvel_from_name() {
 }
 
 #[test]
-fn marvel_from_et_names() {
-    let limit = super::PrimeLimit::new(11);
-    let original = make_marvel(&limit);
-    let named = CangwuTemperament::from_et_names(
-        &limit,
-        &vec!["22".to_string(), "31".to_string(), "41".to_string()],
-    );
-    assert!(named.is_some());
-    if let Some(rt) = named {
-        assert_eq!(original.melody, rt.melody);
-    }
-}
-
-#[test]
-fn meantone_from_et_names() {
+fn meantone_from_name() {
     let limit = super::PrimeLimit::new(13);
     let expected =
         vec![vec![31, 49, 72, 87, 107, 115], vec![12, 19, 28, 34, 42, 45]];
-    let named = CangwuTemperament::from_et_names(
-        &limit,
-        &vec!["31".to_string(), "12f".to_string()],
-    );
+    let named = CangwuTemperament::from_name(&limit, "31 & 12f");
     assert!(named.is_some());
     if let Some(rt) = named {
         assert_eq!(rt.melody, expected);
