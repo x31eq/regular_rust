@@ -73,7 +73,7 @@ pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
     let web = WebContext::new();
     let mut params = HashMap::from([("page", "rt".to_string())]);
-    // This is optional for the UV search
+    // FIXME: should be required
     if let Some(limit) = web.input_value("net-limit") {
         let limit = limit.trim();
         if !limit.is_empty() {
@@ -167,32 +167,16 @@ fn uv_action(
     Ok(())
 }
 
+/// Only needed for backwards compatibility for the short time when
+/// there was a different page for the net search
 fn net_action(
     web: &WebContext,
     params: &HashMap<String, String>,
 ) -> Result<(), String> {
-    if let Some(button) = web.element("show-net")
-        && let Some(button) = button.dyn_ref::<HtmlInputElement>()
-    {
-        // If the URL was typed in, the right search form
-        // might not be showing
-        button.set_checked(true);
-    }
-    let limit = params.get("limit").ok_or("No prime limit")?;
-    web.set_input_value("net-limit", limit);
-    let limit = limit.parse().or(Err("Unable to parse prime limit"))?;
-
-    let name = params.get("steps").ok_or("No list of steps")?;
-    web.set_input_value("net-steps", name);
-    if let Some(rt) = TETemperament::from_name(&limit, name) {
-        show_rt(web, &limit, rt.melody)
-            .or(Err("Failed to show the regular temperament"))?;
-    }
-    else {
-        return Err("Can't find temperament class".to_string());
-    }
-
-    Ok(())
+    let steps = params.get("steps").ok_or("No list of steps")?;
+    let mut params = params.clone();
+    params.insert("ets".to_string(), steps.to_string().replace('+', "_"));
+    rt_action(web, &params)
 }
 
 #[wasm_bindgen(start)]
