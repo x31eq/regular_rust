@@ -3,9 +3,7 @@ use na::{DMatrix, DVector};
 
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
-use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, PrimeLimit, Tuning, map,
-};
+use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, map};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
