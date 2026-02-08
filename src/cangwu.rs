@@ -704,6 +704,16 @@ fn test_ambiguity_31_13() {
 }
 
 #[test]
+fn marvel_from_name() {
+    let limit11 = super::PrimeLimit::new(11);
+    let expected = make_marvel(&limit11);
+    let from_name = CangwuTemperament::from_name(&limit11, "22 & 31 & 41")
+        .expect("couldn't make marvel from name");
+    assert_eq!(expected.melody, from_name.melody);
+    assert_eq!(expected.plimit, from_name.plimit);
+}
+
+#[test]
 fn marvel_from_et_names() {
     let limit = super::PrimeLimit::new(11);
     let original = make_marvel(&limit);
