@@ -237,7 +237,7 @@ fn rt_action(
         .or(Err("Unable to parse limit"))?;
     let rt = match key {
         Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
-        None => rt_from_et_names(&limit, &ets),
+        None => CangwuTemperament::from_name(&limit, &ets),
     }
     .ok_or("Couldn't generate the regular temperament!")?;
     if rt.melody.len() == 1 {
@@ -266,14 +266,6 @@ fn rt_from_ets_and_key<'a>(
         .collect::<Result<Vec<_>, _>>()
         .ok()?;
     CangwuTemperament::from_ets_and_key(&limit.pitches, &ets, &key)
-}
-
-fn rt_from_et_names<'a>(
-    limit: &'a PrimeLimit,
-    ets: &str,
-) -> Option<CangwuTemperament<'a>> {
-    let ets: Vec<String> = ets.split('_').map(|s| s.to_string()).collect();
-    CangwuTemperament::from_et_names(limit, &ets)
 }
 
 fn regular_temperament_search(
