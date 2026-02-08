@@ -81,7 +81,8 @@ fn meantone() {
     // Herman Miller post to tuning list 2007-05-30 gives
     // TOP period: 	1201.698520
     // TOP generator: 	504.134131
-    let tempered_fourth = meantone.tuning[0] * 8.0 + meantone.tuning[1] * 13.0;
+    let tempered_fourth =
+        meantone.tuning[0] * 8.0 + meantone.tuning[1] * 13.0;
     super::assert_between!(504.134, tempered_fourth, 504.135);
     let tempered_octave =
         meantone.tuning[0] * 19.0 + meantone.tuning[1] * 31.0;
