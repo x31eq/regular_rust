@@ -520,16 +520,12 @@ fn et15_from_porcupine() {
 fn badness() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
-    assert!(0.16948 < marvel.badness(1.0));
-    assert!(marvel.badness(1.0) < 0.16949);
-    assert!(0.06882 < marvel.badness(0.1));
-    assert!(marvel.badness(0.1) < 0.06883);
+    super::assert_between!(0.16948, marvel.badness(1.0), 0.16949);
+    super::assert_between!(0.06882, marvel.badness(0.1), 0.06883);
 
     let jove = make_jove(&limit11);
-    assert!(0.18269 < jove.badness(1.0));
-    assert!(jove.badness(1.0) < 0.18270);
-    assert!(0.05606 < jove.badness(0.1));
-    assert!(jove.badness(0.1) < 0.05607);
+    super::assert_between!(0.18269, jove.badness(1.0), 0.18270);
+    super::assert_between!(0.05606, jove.badness(0.1), 0.05607);
 }
 
 #[rustfmt::skip]
@@ -545,10 +541,8 @@ fn mystery() {
     assert_eq!(mystery.key(), vec![0, 1, 1, 1, 1,
                                    29, 46, 0, 14, 33, 40]);
     assert_eq!(mystery.rank(), 2);
-    assert!(5.43717 < mystery.badness(1.0));
-    assert!(mystery.badness(1.0) < 5.43718);
-    assert!(2.52619 < mystery.badness(0.1));
-    assert!(mystery.badness(0.1) < 2.52620);
+    super::assert_between!(5.43717, mystery.badness(1.0), 5.43718);
+    super::assert_between!(2.52619, mystery.badness(0.1), 2.52620);
 }
 
 #[rustfmt::skip]
@@ -568,14 +562,11 @@ fn ragismic() {
         1, 0, 0, 1,
     ]);
     assert_eq!(ragismic.rank(), 3);
-    assert!(0.17 < ragismic.badness(1.0));
-    assert!(ragismic.badness(1.0) < 0.18);
-    assert!(0.01 < ragismic.badness(0.1));
-    assert!(ragismic.badness(0.1) < 0.02);
+    assert_between!(0.17, ragismic.badness(1.0), 0.18);
+    assert_between!(0.01, ragismic.badness(0.1), 0.02);
     let ragismic =
         super::te::TETemperament::new(&limit7.pitches, &ragismic_vector);
-    assert!(0.17 < ragismic.complexity());
-    assert!(ragismic.complexity() < 1.8);
+    assert_between!(0.17, ragismic.complexity(), 1.8);
 }
 
 #[test]
