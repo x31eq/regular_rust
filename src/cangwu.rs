@@ -48,16 +48,19 @@ impl<'a> CangwuTemperament<'a> {
         CangwuTemperament { plimit, melody }
     }
 
+    /// Turn an ET name like "12 & 19" into a temperament object
+    pub fn from_name(plimit: &'a PrimeLimit, name: &str) -> Option<Self> {
+        mapping_from_name(plimit, name).map(|melody| CangwuTemperament {
+            plimit: &plimit.pitches,
+            melody,
+        })
+    }
+
     pub fn from_et_names(
         plimit: &'a PrimeLimit,
         ets: &[String],
     ) -> Option<Self> {
-        mapping_from_name(plimit, &ets.join("_")).map(|melody| {
-            CangwuTemperament {
-                plimit: &plimit.pitches,
-                melody,
-            }
-        })
+        Self::from_name(plimit, &ets.join("_"))
     }
 
     pub fn from_ets_and_key(
