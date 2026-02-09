@@ -105,6 +105,9 @@ fn meantone() {
     super::assert_between!(504.134, tempered_fourth, 504.135);
     let tempered_octave = meantone.pitch_from_steps(&[19, 31]);
     super::assert_between!(1201.698, tempered_octave, 1201.699);
+    // another way of getting the octave
+    let tempered_octave = meantone.tuning_map()[0];
+    super::assert_between!(1201.698, tempered_octave, 1201.699);
 }
 
 // Duplicate of TemperamentClass test
