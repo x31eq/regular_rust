@@ -335,6 +335,7 @@ fn tuned_block() {
     check_float_vec(&block, 3, expected);
 }
 
+// Duplicate of TemperamentClass test
 #[test]
 fn generators() {
     let limit11 = super::PrimeLimit::new(11);

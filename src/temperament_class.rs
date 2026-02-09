@@ -435,6 +435,13 @@ fn tc_fokker_block() {
 }
 
 #[test]
+fn generators() {
+    let marvel = make_marvel();
+    let twotoe = marvel.generators_from_primes(&vec![3, 0, 0, -1, 0]);
+    assert_eq!(twotoe, vec![4, 6, 8]);
+}
+
+#[test]
 fn test_maximally_even() {
     assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
     assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
