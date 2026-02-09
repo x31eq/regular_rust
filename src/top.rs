@@ -50,6 +50,15 @@ impl<'a> TOPTemperament<'a> {
         rt
     }
 
+    pub fn error(&self) -> Cents {
+        // no .max() for f64
+        self.weighted_tuning_map()
+            .iter()
+            .map(|&m| (m - 1.0).abs())
+            .fold(f64::NEG_INFINITY, f64::max)
+            * 12e2
+    }
+
     pub fn optimize(&mut self) {
         let mut problem = Problem::new(OptimizationDirection::Minimize);
         let error = problem.add_var(1.0, (0.0, f64::INFINITY));
@@ -81,6 +90,12 @@ impl<'a> TOPTemperament<'a> {
 }
 
 #[cfg(test)]
+fn make_meantone(limit5: &super::PrimeLimit) -> TOPTemperament<'_> {
+    let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
+    TOPTemperament::new(&limit5.pitches, &meantone_vector)
+}
+
+#[cfg(test)]
 fn make_marvel(limit11: &super::PrimeLimit) -> TOPTemperament<'_> {
     let marvel_vector = vec![
         vec![22, 35, 51, 62, 76],
@@ -91,10 +106,9 @@ fn make_marvel(limit11: &super::PrimeLimit) -> TOPTemperament<'_> {
 }
 
 #[test]
-fn meantone() {
+fn meantone_tuning() {
     let limit5 = super::PrimeLimit::new(5);
-    let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
-    let meantone = TOPTemperament::new(&limit5.pitches, &meantone_vector);
+    let meantone = make_meantone(&limit5);
     assert_eq!(meantone.tuning.len(), 2);
     super::assert_between!(6.07, meantone.tuning[0], 6.08);
     super::assert_between!(35.03, meantone.tuning[1], 35.04);
@@ -111,6 +125,14 @@ fn meantone() {
     // another way of getting the fourth
     let tempered_fourth = meantone.pitch_from_primes(&[2, -1, 0]);
     super::assert_between!(504.134, tempered_fourth, 504.135);
+}
+
+#[test]
+fn meantone_error() {
+    let limit5 = super::PrimeLimit::new(5);
+    let meantone = make_meantone(&limit5);
+    // this gives 1.6985, primerr.pdf says 1.707
+    super::assert_between!(1.69, meantone.error(), 1.71)
 }
 
 // Duplicate of TemperamentClass test

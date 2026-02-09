@@ -54,6 +54,7 @@ impl<'a> TETemperament<'a> {
         rt
     }
 
+    /// Optimal TE error
     pub fn error(&self) -> f64 {
         self.badness() / self.complexity()
     }

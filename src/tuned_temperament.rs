@@ -19,6 +19,14 @@ pub trait TunedTemperament: TemperamentClass {
         (melody * tuning).iter().cloned().collect()
     }
 
+    fn weighted_tuning_map(&self) -> Tuning {
+        self.tuning_map()
+            .iter()
+            .zip(self.plimit())
+            .map(|(&t, &p)| t / p)
+            .collect()
+    }
+
     fn mistunings(&self) -> Tuning {
         let tuning_map = self.tuning_map();
         let comparison = tuning_map.iter().zip(self.plimit().iter());
