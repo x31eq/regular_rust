@@ -55,7 +55,7 @@ impl<'a> TOPTemperament<'a> {
         self.weighted_tuning_map()
             .iter()
             .map(|&m| (m - 1.0).abs())
-            .fold(f64::NEG_INFINITY, f64::max)
+            .fold(0.0, f64::max)
             * 12e2
     }
 
