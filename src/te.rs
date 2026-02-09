@@ -4,7 +4,7 @@ use na::DMatrix;
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
 use super::tuned_temperament::TunedTemperament;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, map};
+use super::{Cents, ETMap, Exponent, Mapping, Tuning, map};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
@@ -19,10 +19,6 @@ impl TemperamentClass for TETemperament<'_> {
 }
 
 impl TunedTemperament for TETemperament<'_> {
-    fn mapping(&self) -> &Mapping {
-        &self.melody
-    }
-
     fn plimit(&self) -> &[Cents] {
         self.plimit
     }
@@ -96,18 +92,6 @@ impl<'a> TETemperament<'a> {
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
         self.unstretched_tuning_map()
-    }
-
-    pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
-        self.tuning
-            .iter()
-            .zip(interval)
-            .map(|(&x, &y)| x * y as Cents)
-            .sum()
-    }
-
-    pub fn pitch_from_primes(&self, interval: &ETSlice) -> Cents {
-        self.pitch_from_steps(&self.generators_from_primes(interval))
     }
 
     /// Strictly, pure equivalence interval TE
