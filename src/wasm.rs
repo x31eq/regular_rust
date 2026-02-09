@@ -249,6 +249,11 @@ fn rt_action(
         show_rt(web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
     }
+
+    web.set_body_class("show-temperament");
+    if let Some(result) = web.element("regular-temperament") {
+        result.scroll_into_view();
+    }
     Ok(())
 }
 
