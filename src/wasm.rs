@@ -888,6 +888,9 @@ fn show_rt(
             field.set_text_content(Some(&format!("{:.6}", rt.error())));
         }
     }
+    else {
+        web.log_error("Failed to calculate TOP tuning");
+    }
 
     // Now another RT object for TOP family generator tunings
     if let Ok(rt) = TOPTemperament::new(&limit.pitches, &redmap) {
@@ -898,6 +901,9 @@ fn show_rt(
         if let Some(table) = web.element("rt-toppo-generators") {
             write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
         }
+    }
+    else {
+        web.log_error("Failed to calculate TOP generator tuning");
     }
     Ok(())
 }
