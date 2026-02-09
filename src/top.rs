@@ -1,4 +1,4 @@
-use microlp::{ComparisonOp, OptimizationDirection, Problem};
+use microlp::{ComparisonOp, Error, OptimizationDirection, Problem};
 
 use super::cangwu::TenneyWeighted;
 use super::temperament_class::TemperamentClass;
@@ -39,15 +39,15 @@ impl TenneyWeighted for TOPTemperament<'_> {
 
 impl<'a> TOPTemperament<'a> {
     /// Upgrade vectors into a struct of nalgebra objects
-    pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
+    pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Result<Self, Error> {
         let melody = melody.to_vec();
         let mut rt = TOPTemperament {
             plimit,
             melody: melody.to_vec(),
             tuning: vec![0.0],
         };
-        rt.optimize();
-        rt
+        rt.optimize()?;
+        Ok(rt)
     }
 
     pub fn error(&self) -> Cents {
@@ -69,7 +69,7 @@ impl<'a> TOPTemperament<'a> {
         (max - min) / (max + min) * 12e2
     }
 
-    pub fn optimize(&mut self) {
+    pub fn optimize(&mut self) -> Result<(), Error> {
         let mut problem = Problem::new(OptimizationDirection::Minimize);
         let error = problem.add_var(1.0, (0.0, f64::INFINITY));
         let mut vars = Vec::new();
@@ -94,8 +94,9 @@ impl<'a> TOPTemperament<'a> {
             constraint.push((error, p));
             problem.add_constraint(&constraint, ComparisonOp::Ge, p);
         }
-        let solution = problem.solve().unwrap();
+        let solution = problem.solve()?;
         self.tuning = vars.iter().map(|&v| solution[v]).collect();
+        Ok(())
     }
 }
 
@@ -103,6 +104,7 @@ impl<'a> TOPTemperament<'a> {
 fn make_meantone(limit5: &super::PrimeLimit) -> TOPTemperament<'_> {
     let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
     TOPTemperament::new(&limit5.pitches, &meantone_vector)
+        .expect("Couldn't optimize meantone")
 }
 
 #[cfg(test)]
@@ -113,6 +115,7 @@ fn make_marvel(limit11: &super::PrimeLimit) -> TOPTemperament<'_> {
         vec![41, 65, 95, 115, 142],
     ];
     TOPTemperament::new(&limit11.pitches, &marvel_vector)
+        .expect("Couldn't make marvel")
 }
 
 #[test]
