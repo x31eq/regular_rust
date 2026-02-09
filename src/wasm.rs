@@ -16,6 +16,7 @@ use super::ratio::{
 };
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
+use super::top::TOPTemperament;
 use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
@@ -698,7 +699,7 @@ fn show_et(
 
     if let Some(table) = web.element("et-pote-tuning-map") {
         write_headings(web, &table, limit)?;
-        write_float_row(web, &table, &rt.pote_tuning_map(), 3)?;
+        write_float_row(web, &table, &rt.unstretched_tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("et-mistunings") {
@@ -708,7 +709,7 @@ fn show_et(
 
     if let Some(table) = web.element("et-pote-mistunings") {
         write_headings(web, &table, limit)?;
-        write_float_row(web, &table, &rt.pote_mistunings(), 4)?;
+        write_float_row(web, &table, &rt.unstretched_mistunings(), 4)?;
     }
 
     if let Some(field) = web.element("et-te-error") {
@@ -780,7 +781,7 @@ fn show_rt(
     }
 
     if let Some(table) = web.element("rt-pote-steps") {
-        write_float_row(web, &table, &rt.pote_tuning(), 4)?;
+        write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
     }
 
     if let Some(table) = web.element("rt-tuning-map") {
@@ -790,7 +791,7 @@ fn show_rt(
 
     if let Some(table) = web.element("rt-pote-tuning-map") {
         write_headings(web, &table, limit)?;
-        write_float_row(web, &table, &rt.pote_tuning_map(), 3)?;
+        write_float_row(web, &table, &rt.unstretched_tuning_map(), 3)?;
     }
 
     if let Some(table) = web.element("rt-mistunings") {
@@ -800,7 +801,7 @@ fn show_rt(
 
     if let Some(table) = web.element("rt-pote-mistunings") {
         write_headings(web, &table, limit)?;
-        write_float_row(web, &table, &rt.pote_mistunings(), 4)?;
+        write_float_row(web, &table, &rt.unstretched_mistunings(), 4)?;
     }
 
     if let Some(field) = web.element("rt-complexity") {
@@ -850,14 +851,54 @@ fn show_rt(
     }
 
     if let Some(table) = web.element("rt-pote-generators") {
-        write_float_row(web, &table, &rt.pote_tuning(), 4)?;
+        write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
     }
 
-    web.set_body_class("show-temperament");
-    if let Some(result) = web.element("regular-temperament") {
-        result.scroll_into_view();
+    // Now do it all again with TOP
+    if let Ok(rt) = TOPTemperament::new(&limit.pitches, &mapping) {
+        if let Some(table) = web.element("rt-top-steps") {
+            write_float_row(web, &table, &rt.tuning, 4)?;
+        }
+
+        if let Some(table) = web.element("rt-toppo-steps") {
+            write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
+        }
+
+        if let Some(table) = web.element("rt-top-tuning-map") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.tuning_map(), 3)?;
+        }
+
+        if let Some(table) = web.element("rt-toppo-tuning-map") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.unstretched_tuning_map(), 3)?;
+        }
+
+        if let Some(table) = web.element("rt-top-mistunings") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.mistunings(), 4)?;
+        }
+
+        if let Some(table) = web.element("rt-toppo-mistunings") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.unstretched_mistunings(), 4)?;
+        }
+
+        if let Some(field) = web.element("rt-top-error") {
+            field.set_text_content(Some(&format!("{:.6}", rt.error())));
+        }
     }
 
+    // Now another RT object for TOP family generator tunings
+    if let Ok(rt) = TOPTemperament::new(&limit.pitches, &redmap) {
+        if let Some(table) = web.element("rt-top-generators") {
+            write_float_row(web, &table, &rt.tuning, 4)?;
+        }
+
+        if let Some(table) = web.element("rt-toppo-generators") {
+            write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
+        }
+    }
     Ok(())
 }
 
