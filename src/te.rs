@@ -96,9 +96,7 @@ impl<'a> TETemperament<'a> {
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_mistunings(&self) -> Tuning {
-        let tuning_map = self.pote_tuning_map();
-        let comparison = tuning_map.iter().zip(self.plimit.iter());
-        comparison.map(|(&x, y)| x - y).collect()
+        self.unstretched_mistunings()
     }
 
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {

@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
-use na::{DMatrix, DVector};
-use super::{Cents, ETSlice, Tuning, map};
 use super::temperament_class::TemperamentClass;
+use super::{Cents, ETSlice, Tuning, map};
+use na::{DMatrix, DVector};
 
 pub trait TunedTemperament: TemperamentClass {
     fn plimit(&self) -> &[Cents];
@@ -36,6 +36,12 @@ pub trait TunedTemperament: TemperamentClass {
 
     fn unstretched_tuning_map(&self) -> Tuning {
         map(|x| x / self.stretch(), &self.tuning_map())
+    }
+
+    fn unstretched_mistunings(&self) -> Tuning {
+        let tuning_map = self.unstretched_tuning_map();
+        let comparison = tuning_map.iter().zip(self.plimit().iter());
+        comparison.map(|(&x, y)| x - y).collect()
     }
 
     fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
