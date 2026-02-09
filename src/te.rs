@@ -98,19 +98,6 @@ impl<'a> TETemperament<'a> {
         self.unstretched_tuning_map()
     }
 
-    pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
-        map(
-            |mapping| {
-                mapping
-                    .iter()
-                    .zip(interval.iter())
-                    .map(|(&x, &y)| x * y)
-                    .sum()
-            },
-            &self.melody,
-        )
-    }
-
     pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
         self.tuning
             .iter()

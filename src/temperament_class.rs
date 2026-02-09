@@ -1,5 +1,5 @@
 use super::names::NAMES_BY_LIMIT;
-use super::{ETMap, ETSlice, Mapping, PrimeLimit};
+use super::{ETMap, ETSlice, Mapping, PrimeLimit, map};
 
 pub trait TemperamentClass {
     fn mapping(&self) -> &Mapping;
@@ -48,6 +48,19 @@ pub trait TemperamentClass {
         melody.insert(0, et.to_vec());
         let new_rt = StubTemperamentClass { melody };
         self.rank() == new_rt.rank()
+    }
+
+    fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
+        map(
+            |mapping| {
+                mapping
+                    .iter()
+                    .zip(interval.iter())
+                    .map(|(&x, &y)| x * y)
+                    .sum()
+            },
+            &self.mapping(),
+        )
     }
 }
 
