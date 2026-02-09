@@ -2,6 +2,7 @@ use microlp::{ComparisonOp, OptimizationDirection, Problem};
 
 use super::cangwu::TenneyWeighted;
 use super::temperament_class::TemperamentClass;
+use super::tuned_temperament::TunedTemperament;
 use super::{Cents, ETMap, Mapping, Tuning};
 
 pub struct TOPTemperament<'a> {
@@ -13,6 +14,16 @@ pub struct TOPTemperament<'a> {
 impl TemperamentClass for TOPTemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
+    }
+}
+
+impl TunedTemperament for TOPTemperament<'_> {
+    fn plimit(&self) -> &[Cents] {
+        self.plimit
+    }
+
+    fn tuning(&self) -> &Tuning {
+        &self.tuning
     }
 }
 
