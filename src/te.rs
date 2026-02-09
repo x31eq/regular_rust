@@ -276,6 +276,7 @@ fn porcupine_unison_vectors() {
     assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
 }
 
+// Duplicate of TemperamentClass test
 #[test]
 fn fokker_block() {
     let limit11 = super::PrimeLimit::new(11);

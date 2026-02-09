@@ -389,6 +389,52 @@ fn big_fokker_block() {
 }
 
 #[test]
+fn tc_fokker_block() {
+    let marvel = make_marvel();
+    assert_eq!(
+        marvel.fokker_block_steps(22),
+        vec![
+            vec![1, 1, 2],
+            vec![2, 3, 4],
+            vec![3, 4, 6],
+            vec![4, 6, 8],
+            vec![5, 7, 10],
+            vec![6, 8, 12],
+            vec![7, 10, 13],
+            vec![8, 11, 15],
+            vec![9, 13, 17],
+            vec![10, 14, 19],
+            vec![11, 15, 21],
+            vec![12, 17, 23],
+            vec![13, 18, 25],
+            vec![14, 20, 26],
+            vec![15, 21, 28],
+            vec![16, 22, 30],
+            vec![17, 24, 32],
+            vec![18, 25, 34],
+            vec![19, 27, 36],
+            vec![20, 28, 38],
+            vec![21, 30, 40],
+            vec![22, 31, 41],
+        ]
+    );
+    assert_eq!(
+        marvel.fokker_block_steps(7),
+        vec![
+            vec![3, 4, 6],
+            vec![6, 9, 12],
+            vec![9, 13, 18],
+            vec![12, 18, 24],
+            vec![15, 22, 30],
+            vec![19, 27, 36],
+            vec![22, 31, 41],
+        ]
+    );
+    let empty_scale: Mapping = Vec::new();
+    assert_eq!(marvel.fokker_block_steps(0), empty_scale);
+}
+
+#[test]
 fn test_maximally_even() {
     assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
     assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
