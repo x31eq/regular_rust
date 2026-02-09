@@ -61,7 +61,7 @@ impl<'a> TOPTemperament<'a> {
 
     /// TOP-equivalent error for current tuning
     /// after applying an optimal stretch
-    pub fn optimal_sretch_error(&self) -> Cents {
+    pub fn optimal_stretch_error(&self) -> Cents {
         let wmap = self.weighted_tuning_map();
         // no .max() or .min() for f64
         let max = wmap.iter().copied().fold(f64::NEG_INFINITY, f64::max);
@@ -145,15 +145,21 @@ fn meantone_error() {
     let limit5 = super::PrimeLimit::new(5);
     let meantone = make_meantone(&limit5);
     // this gives 1.6985, primerr.pdf says 1.707
-    super::assert_between!(1.69, meantone.error(), 1.71)
+    super::assert_between!(1.69, meantone.error(), 1.71);
 }
 
 #[test]
-fn meantone_optimal_sretch_error() {
+fn meantone_optimal_stretch_error() {
     let limit5 = super::PrimeLimit::new(5);
-    let meantone = make_meantone(&limit5);
+    let mut meantone = make_meantone(&limit5);
     // same value as above
-    super::assert_between!(1.69, meantone.optimal_sretch_error(), 1.71)
+    super::assert_between!(1.69, meantone.optimal_stretch_error(), 1.71);
+    meantone.tuning = meantone.unstretched_tuning();
+    assert_between!(1199.999999, meantone.tuning_map()[0], 1200.000001);
+    // this figure is unchanged
+    super::assert_between!(1.69, meantone.optimal_stretch_error(), 1.71);
+    // this one got worse by the stretch being unoptimized
+    assert!(meantone.error() > 1.71);
 }
 
 // Duplicate of TemperamentClass test
