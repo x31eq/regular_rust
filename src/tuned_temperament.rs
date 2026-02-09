@@ -31,7 +31,7 @@ pub trait TunedTemperament: TemperamentClass {
     }
 
     fn unstretched_tuning(&self) -> Tuning {
-        map(|x| x / self.stretch(), &self.tuning())
+        map(|x| x / self.stretch(), self.tuning())
     }
 
     fn unstretched_tuning_map(&self) -> Tuning {

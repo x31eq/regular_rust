@@ -59,7 +59,7 @@ pub trait TemperamentClass {
                     .map(|(&x, &y)| x * y)
                     .sum()
             },
-            &self.mapping(),
+            self.mapping(),
         )
     }
 
@@ -67,10 +67,9 @@ pub trait TemperamentClass {
     /// This might not actually be a periodicity block
     /// because there's no check on n_pitches
     fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
-        let octaves = map(|row| row[0], &self.mapping());
+        let octaves = map(|row| row[0], self.mapping());
         fokker_block(n_pitches, octaves)
     }
-
 }
 
 /// Reverse engineer a key to get a mapping suitable for
