@@ -16,6 +16,7 @@ use super::ratio::{
 };
 use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
+use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::{
     Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
