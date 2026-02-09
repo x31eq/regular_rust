@@ -508,6 +508,7 @@ pub mod ratio;
 pub mod te;
 pub mod temperament_class;
 pub mod top;
+pub mod tuned_temperament;
 pub mod uv;
 
 #[cfg(target_arch = "wasm32")]

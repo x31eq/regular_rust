@@ -1,8 +1,9 @@
 extern crate nalgebra as na;
-use na::{DMatrix, DVector};
+use na::DMatrix;
 
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
+use super::tuned_temperament::TunedTemperament;
 use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, map};
 
 pub struct TETemperament<'a> {
@@ -14,6 +15,20 @@ pub struct TETemperament<'a> {
 impl TemperamentClass for TETemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
+    }
+}
+
+impl TunedTemperament for TETemperament<'_> {
+    fn mapping(&self) -> &Mapping {
+        &self.melody
+    }
+
+    fn plimit(&self) -> &[Cents] {
+        self.plimit
+    }
+
+    fn tuning(&self) -> &Tuning {
+        &self.tuning
     }
 }
 
@@ -73,36 +88,14 @@ impl<'a> TETemperament<'a> {
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
     }
 
-    pub fn tuning_map(&self) -> Tuning {
-        let rank = self.melody.len();
-        let dimension = self.plimit.len();
-        let tuning = DVector::from_vec(self.tuning.clone());
-        let mapping = &self.melody;
-        let flattened = mapping
-            .iter()
-            .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
-        let melody = DMatrix::from_iterator(dimension, rank, flattened);
-        (melody * tuning).iter().cloned().collect()
-    }
-
-    pub fn mistunings(&self) -> Tuning {
-        let tuning_map = self.tuning_map();
-        let comparison = tuning_map.iter().zip(self.plimit.iter());
-        comparison.map(|(&x, y)| x - y).collect()
-    }
-
-    fn stretch(&self) -> f64 {
-        self.tuning_map()[0] / self.plimit[0]
-    }
-
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning(&self) -> Tuning {
-        map(|x| x / self.stretch(), &self.tuning)
+        self.unstretched_tuning()
     }
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
-        map(|x| x / self.stretch(), &self.tuning_map())
+        self.unstretched_tuning_map()
     }
 
     pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
