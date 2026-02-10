@@ -602,7 +602,7 @@ fn show_regular_temperaments<'a>(
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for column_heading in &["Name", "ETs", "complexity", "error"] {
+    for column_heading in &["Name", "ETs", "complexity", "TE error"] {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(column_heading));
         row.append_child(&cell)?;
