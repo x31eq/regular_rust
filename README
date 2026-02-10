@@ -64,10 +64,14 @@ Once you have it,
 
 make wasm
 
-and run a web server from the project root.  For example,
+and run a web server from the project root.  As an example,
+the "server" script runs a server on port 1578, assuming you
+have Python3 and a POSIX shell.  So you can go to
 
-python3 -m http.server
+http://127.0.0.1:1578/
 
+in your web browser and it should all be working.  1578 is a
+good 31-limit equal temperament.
 
 If you have wasm-opt, you can also try
 
