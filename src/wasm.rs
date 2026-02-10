@@ -667,13 +667,13 @@ fn rt_row(
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
-    cell.set_text_content(Some(&format!("{:.3} cents/octave", rt.error())));
+    cell.set_text_content(Some(&format!("{:.3} cent/oct", rt.error())));
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
     if let Ok(top_rt) = TOPTemperament::new(&limit.pitches, mapping) {
         cell.set_text_content(Some(&format!(
-            "{:.3} cents/octave",
+            "{:.3} cent/oct",
             top_rt.error()
         )));
     } else {
