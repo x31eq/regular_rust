@@ -1,0 +1,3 @@
+#!/bin/sh
+# Clippy ignores the WASM code by default
+cargo clippy --target wasm32-unknown-unknown
