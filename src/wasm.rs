@@ -750,7 +750,6 @@ fn show_et(
 
     // Now do the TOP fields
     if let Ok(rt) = TOPTemperament::new(&limit.pitches, &mapping) {
-
         if let Some(table) = web.element("et-top-tuning-map") {
             write_headings(web, &table, limit)?;
             write_float_row(web, &table, &rt.tuning_map(), 3)?;
@@ -773,6 +772,13 @@ fn show_et(
 
         if let Some(field) = web.element("et-top-error") {
             field.set_text_content(Some(&format!("{:.6}", rt.error())));
+        }
+
+        if let Some(field) = web.element("et-top-stretch") {
+            field.set_text_content(Some(&format!(
+                "{:.6}",
+                (rt.stretch() - 1.0) * 1200.0
+            )));
         }
     }
 
@@ -920,8 +926,7 @@ fn show_rt(
         if let Some(field) = web.element("rt-top-error") {
             field.set_text_content(Some(&format!("{:.6}", rt.error())));
         }
-    }
-    else {
+    } else {
         web.log_error("Failed to calculate TOP tuning");
     }
 
@@ -934,8 +939,7 @@ fn show_rt(
         if let Some(table) = web.element("rt-toppo-generators") {
             write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
         }
-    }
-    else {
+    } else {
         web.log_error("Failed to calculate TOP generator tuning");
     }
     Ok(())

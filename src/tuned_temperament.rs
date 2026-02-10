@@ -46,7 +46,6 @@ pub trait TunedTemperament: TemperamentClass {
         map(|x| x / self.stretch(), &self.tuning_map())
     }
 
-
     fn unstretched_mistunings(&self) -> Tuning {
         let tuning_map = self.unstretched_tuning_map();
         let comparison = tuning_map.iter().zip(self.plimit().iter());
