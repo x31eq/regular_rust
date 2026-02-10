@@ -740,11 +740,7 @@ fn show_et(
     }
 
     if let Some(field) = web.element("et-te-stretch") {
-        let ideal_equivalence = limit.pitches[0];
-        let tempered_equivalence = rt.tuning_map()[0];
-        let mut stretch = tempered_equivalence - ideal_equivalence;
-        // convert from steps per equivalence to steps per octave
-        stretch *= 1200.0 / ideal_equivalence;
+        let stretch = (rt.stretch() - 1.0) * 1200.0;
         field.set_text_content(Some(&format!("{:.6}", stretch)));
     }
 
@@ -775,10 +771,8 @@ fn show_et(
         }
 
         if let Some(field) = web.element("et-top-stretch") {
-            field.set_text_content(Some(&format!(
-                "{:.6}",
-                (rt.stretch() - 1.0) * 1200.0
-            )));
+            let stretch = (rt.stretch() - 1.0) * 1200.0;
+            field.set_text_content(Some(&format!("{:.6}", stretch)));
         }
     }
 
