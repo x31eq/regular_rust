@@ -603,7 +603,7 @@ fn show_regular_temperaments<'a>(
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
     for column_heading in
-        &["Name", "ETs", "complexity", "TE error", "TOP error"]
+        &["Name", "ETs", "complexity", "error", "TE error", "TOP error"]
     {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(column_heading));
@@ -655,6 +655,10 @@ fn rt_row(
 
     let cell = web.document.create_element("td")?;
     cell.set_text_content(Some(&format!("{:.3}", rt.complexity())));
+    row.append_child(&cell)?;
+
+    let cell = web.document.create_element("td")?;
+    cell.set_text_content(Some(&format!("{:.3} cents", rt.adjusted_error())));
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
