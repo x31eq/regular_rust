@@ -1,5 +1,5 @@
 use super::names::NAMES_BY_LIMIT;
-use super::{ETMap, ETSlice, Mapping, PrimeLimit};
+use super::{ETMap, ETSlice, Exponent, Mapping, PrimeLimit, map};
 
 pub trait TemperamentClass {
     fn mapping(&self) -> &Mapping;
@@ -49,6 +49,27 @@ pub trait TemperamentClass {
         let new_rt = StubTemperamentClass { melody };
         self.rank() == new_rt.rank()
     }
+
+    fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
+        map(
+            |mapping| {
+                mapping
+                    .iter()
+                    .zip(interval.iter())
+                    .map(|(&x, &y)| x * y)
+                    .sum()
+            },
+            self.mapping(),
+        )
+    }
+
+    /// Fokker block as steps as integers, not pitches.
+    /// This might not actually be a periodicity block
+    /// because there's no check on n_pitches
+    fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
+        let octaves = map(|row| row[0], self.mapping());
+        fokker_block(n_pitches, octaves)
+    }
 }
 
 /// Reverse engineer a key to get a mapping suitable for
@@ -67,6 +88,49 @@ pub fn key_to_mapping(n_primes: usize, key: &ETSlice) -> Option<Mapping> {
         result.push(new_vec);
     }
     Some(result)
+}
+
+fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
+    // Make the first coordinate special
+    let columns = octaves.iter().cloned().min().expect("Empty ET map");
+    let scales = map(
+        |&m| {
+            if (m + columns) <= n_pitches && columns != m && columns > 0 {
+                let correction = (n_pitches - m) / columns;
+                let eff_m = m + columns * correction;
+                maximally_even(n_pitches, eff_m, 1)
+                    .iter()
+                    .zip(maximally_even(n_pitches, columns, 1))
+                    .map(|(&x, y)| x - correction * y)
+                    .collect()
+            } else {
+                maximally_even(n_pitches, m, 1)
+            }
+        },
+        &octaves,
+    );
+    (0..n_pitches)
+        .map(|pitch| {
+            assert!(pitch >= 0);
+            map(|scale| scale[pitch as usize], &scales)
+        })
+        .collect()
+}
+
+/// A maximally even d from n scale
+fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
+    if d == 0 {
+        return Vec::new();
+    }
+    // Nothing can be negative because of the way / and % work
+    assert!(d > 0);
+    assert!(n >= 0);
+    assert!(rotation >= 0);
+    let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
+    let tonic = raw_scale
+        .next()
+        .expect("Empty maximally even scale: check assertions");
+    raw_scale.map(|pitch| pitch - tonic).collect()
 }
 
 struct StubTemperamentClass {
@@ -242,4 +306,149 @@ fn jove_key_to_mapping() {
 fn rank() {
     assert_eq!(make_marvel().rank(), 3);
     assert_eq!(make_jove().rank(), 3);
+}
+
+#[test]
+fn test_fokker_block() {
+    assert_eq!(
+        fokker_block(7, vec![7, 12]),
+        vec![
+            vec![1, 2],
+            vec![2, 4],
+            vec![3, 5],
+            vec![4, 7],
+            vec![5, 9],
+            vec![6, 11],
+            vec![7, 12],
+        ]
+    );
+    assert_eq!(
+        fokker_block(6, vec![6, 5, 17]),
+        vec![
+            vec![1, 1, 3],
+            vec![2, 2, 6],
+            vec![3, 3, 9],
+            vec![4, 4, 12],
+            vec![5, 5, 15],
+            vec![6, 5, 17],
+        ]
+    );
+    assert_eq!(
+        fokker_block(6, vec![5, 17]),
+        vec![
+            vec![1, 3],
+            vec![2, 6],
+            vec![3, 9],
+            vec![4, 12],
+            vec![5, 15],
+            vec![5, 17],
+        ]
+    );
+}
+
+#[test]
+fn big_fokker_block() {
+    // Check that something sensible happens
+    // when simple maximally even sets won't do
+    assert_eq!(
+        fokker_block(12, vec![3, 6]),
+        vec![
+            vec![0, 1],
+            vec![0, 2],
+            vec![1, 1],
+            vec![1, 2],
+            vec![1, 3],
+            vec![1, 4],
+            vec![2, 3],
+            vec![2, 4],
+            vec![2, 5],
+            vec![2, 6],
+            vec![3, 5],
+            vec![3, 6],
+        ]
+    );
+
+    // This should be symmetrical
+    assert_eq!(
+        fokker_block(12, vec![6, 3]),
+        vec![
+            vec![1, 0],
+            vec![2, 0],
+            vec![1, 1],
+            vec![2, 1],
+            vec![3, 1],
+            vec![4, 1],
+            vec![3, 2],
+            vec![4, 2],
+            vec![5, 2],
+            vec![6, 2],
+            vec![5, 3],
+            vec![6, 3],
+        ]
+    );
+}
+
+#[test]
+fn tc_fokker_block() {
+    let marvel = make_marvel();
+    assert_eq!(
+        marvel.fokker_block_steps(22),
+        vec![
+            vec![1, 1, 2],
+            vec![2, 3, 4],
+            vec![3, 4, 6],
+            vec![4, 6, 8],
+            vec![5, 7, 10],
+            vec![6, 8, 12],
+            vec![7, 10, 13],
+            vec![8, 11, 15],
+            vec![9, 13, 17],
+            vec![10, 14, 19],
+            vec![11, 15, 21],
+            vec![12, 17, 23],
+            vec![13, 18, 25],
+            vec![14, 20, 26],
+            vec![15, 21, 28],
+            vec![16, 22, 30],
+            vec![17, 24, 32],
+            vec![18, 25, 34],
+            vec![19, 27, 36],
+            vec![20, 28, 38],
+            vec![21, 30, 40],
+            vec![22, 31, 41],
+        ]
+    );
+    assert_eq!(
+        marvel.fokker_block_steps(7),
+        vec![
+            vec![3, 4, 6],
+            vec![6, 9, 12],
+            vec![9, 13, 18],
+            vec![12, 18, 24],
+            vec![15, 22, 30],
+            vec![19, 27, 36],
+            vec![22, 31, 41],
+        ]
+    );
+    let empty_scale: Mapping = Vec::new();
+    assert_eq!(marvel.fokker_block_steps(0), empty_scale);
+}
+
+#[test]
+fn generators() {
+    let marvel = make_marvel();
+    let twotoe = marvel.generators_from_primes(&vec![3, 0, 0, -1, 0]);
+    assert_eq!(twotoe, vec![4, 6, 8]);
+}
+
+#[test]
+fn test_maximally_even() {
+    assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
+    assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
+    assert_eq!(maximally_even(5, 19, 2), vec![4, 8, 12, 15, 19]);
+    assert_eq!(maximally_even(3, 0, 0), vec![0, 0, 0]);
+    for i in 0..10 {
+        assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
+    }
+    assert_eq!(maximally_even(0, 10, 11).len(), 0);
 }

@@ -6,6 +6,7 @@ edition = "2024"
 
 [dependencies]
 lazy_static = "1.5.0"
+microlp = "0.2.11"
 nalgebra = "0.34.1"
 num-integer = "0.1.46"
 

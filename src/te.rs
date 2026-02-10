@@ -1,9 +1,10 @@
 extern crate nalgebra as na;
-use na::{DMatrix, DVector};
+use na::DMatrix;
 
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, map};
+use super::tuned_temperament::TunedTemperament;
+use super::{Cents, ETMap, Exponent, Mapping, Tuning};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
@@ -14,6 +15,16 @@ pub struct TETemperament<'a> {
 impl TemperamentClass for TETemperament<'_> {
     fn mapping(&self) -> &Mapping {
         &self.melody
+    }
+}
+
+impl TunedTemperament for TETemperament<'_> {
+    fn plimit(&self) -> &[Cents] {
+        self.plimit
+    }
+
+    fn tuning(&self) -> &Tuning {
+        &self.tuning
     }
 }
 
@@ -43,6 +54,7 @@ impl<'a> TETemperament<'a> {
         rt
     }
 
+    /// Optimal TE error
     pub fn error(&self) -> f64 {
         self.badness() / self.complexity()
     }
@@ -73,81 +85,24 @@ impl<'a> TETemperament<'a> {
         rms_of_matrix(&(m - translation.transpose())) * 1200.0
     }
 
-    pub fn tuning_map(&self) -> Tuning {
-        let rank = self.melody.len();
-        let dimension = self.plimit.len();
-        let tuning = DVector::from_vec(self.tuning.clone());
-        let mapping = &self.melody;
-        let flattened = mapping
-            .iter()
-            .flat_map(|mapping| mapping.iter().map(|&m| m as f64));
-        let melody = DMatrix::from_iterator(dimension, rank, flattened);
-        (melody * tuning).iter().cloned().collect()
-    }
-
-    pub fn mistunings(&self) -> Tuning {
-        let tuning_map = self.tuning_map();
-        let comparison = tuning_map.iter().zip(self.plimit.iter());
-        comparison.map(|(&x, y)| x - y).collect()
-    }
-
-    fn stretch(&self) -> f64 {
-        self.tuning_map()[0] / self.plimit[0]
-    }
-
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning(&self) -> Tuning {
-        map(|x| x / self.stretch(), &self.tuning)
+        self.unstretched_tuning()
     }
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_tuning_map(&self) -> Tuning {
-        map(|x| x / self.stretch(), &self.tuning_map())
-    }
-
-    pub fn generators_from_primes(&self, interval: &ETSlice) -> ETMap {
-        map(
-            |mapping| {
-                mapping
-                    .iter()
-                    .zip(interval.iter())
-                    .map(|(&x, &y)| x * y)
-                    .sum()
-            },
-            &self.melody,
-        )
-    }
-
-    pub fn pitch_from_steps(&self, interval: &ETSlice) -> Cents {
-        self.tuning
-            .iter()
-            .zip(interval)
-            .map(|(&x, &y)| x * y as Cents)
-            .sum()
-    }
-
-    pub fn pitch_from_primes(&self, interval: &ETSlice) -> Cents {
-        self.pitch_from_steps(&self.generators_from_primes(interval))
+        self.unstretched_tuning_map()
     }
 
     /// Strictly, pure equivalence interval TE
     pub fn pote_mistunings(&self) -> Tuning {
-        let tuning_map = self.pote_tuning_map();
-        let comparison = tuning_map.iter().zip(self.plimit.iter());
-        comparison.map(|(&x, y)| x - y).collect()
+        self.unstretched_mistunings()
     }
 
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let tc = CangwuTemperament::new(self.plimit, &self.melody);
         tc.unison_vectors(self.error(), n_results)
-    }
-
-    /// Fokker block as steps as integers, not pitches.
-    /// This might not actually be a periodicity block
-    /// because there's no check on n_pitches
-    pub fn fokker_block_steps(&self, n_pitches: Exponent) -> Mapping {
-        let octaves = map(|row| row[0], &self.melody);
-        fokker_block(n_pitches, octaves)
     }
 
     /// This might not actually be a periodicity block
@@ -158,49 +113,6 @@ impl<'a> TETemperament<'a> {
             .map(|interval| self.pitch_from_steps(interval))
             .collect()
     }
-}
-
-/// A maximally even d from n scale
-fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
-    if d == 0 {
-        return Vec::new();
-    }
-    // Nothing can be negative because of the way / and % work
-    assert!(d > 0);
-    assert!(n >= 0);
-    assert!(rotation >= 0);
-    let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
-    let tonic = raw_scale
-        .next()
-        .expect("Empty maximally even scale: check assertions");
-    raw_scale.map(|pitch| pitch - tonic).collect()
-}
-
-fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
-    // Make the first coordinate special
-    let columns = octaves.iter().cloned().min().expect("Empty ET map");
-    let scales = map(
-        |&m| {
-            if (m + columns) <= n_pitches && columns != m && columns > 0 {
-                let correction = (n_pitches - m) / columns;
-                let eff_m = m + columns * correction;
-                maximally_even(n_pitches, eff_m, 1)
-                    .iter()
-                    .zip(maximally_even(n_pitches, columns, 1))
-                    .map(|(&x, y)| x - correction * y)
-                    .collect()
-            } else {
-                maximally_even(n_pitches, m, 1)
-            }
-        },
-        &octaves,
-    );
-    (0..n_pitches)
-        .map(|pitch| {
-            assert!(pitch >= 0);
-            map(|scale| scale[pitch as usize], &scales)
-        })
-        .collect()
 }
 
 #[cfg(test)]
@@ -364,100 +276,10 @@ fn porcupine_unison_vectors() {
     assert!(uvs.contains(&vec![6, -2, 0, -1, 0]));
     assert!(uvs.contains(&vec![2, -2, 2, 0, -1]));
 }
-#[test]
-fn test_maximally_even() {
-    assert_eq!(maximally_even(7, 12, 0), vec![1, 3, 5, 6, 8, 10, 12]);
-    assert_eq!(maximally_even(7, 12, 1), vec![2, 4, 5, 7, 9, 11, 12]);
-    assert_eq!(maximally_even(5, 19, 2), vec![4, 8, 12, 15, 19]);
-    assert_eq!(maximally_even(3, 0, 0), vec![0, 0, 0]);
-    for i in 0..10 {
-        assert_eq!(maximally_even(2, 22, i), vec![11, 22]);
-    }
-    assert_eq!(maximally_even(0, 10, 11).len(), 0);
-}
 
+// Duplicate of TemperamentClass test
 #[test]
-fn test_fokker_block() {
-    assert_eq!(
-        fokker_block(7, vec![7, 12]),
-        vec![
-            vec![1, 2],
-            vec![2, 4],
-            vec![3, 5],
-            vec![4, 7],
-            vec![5, 9],
-            vec![6, 11],
-            vec![7, 12],
-        ]
-    );
-    assert_eq!(
-        fokker_block(6, vec![6, 5, 17]),
-        vec![
-            vec![1, 1, 3],
-            vec![2, 2, 6],
-            vec![3, 3, 9],
-            vec![4, 4, 12],
-            vec![5, 5, 15],
-            vec![6, 5, 17],
-        ]
-    );
-    assert_eq!(
-        fokker_block(6, vec![5, 17]),
-        vec![
-            vec![1, 3],
-            vec![2, 6],
-            vec![3, 9],
-            vec![4, 12],
-            vec![5, 15],
-            vec![5, 17],
-        ]
-    );
-}
-
-#[test]
-fn big_fokker_block() {
-    // Check that something sensible happens
-    // when simple maximally even sets won't do
-    assert_eq!(
-        fokker_block(12, vec![3, 6]),
-        vec![
-            vec![0, 1],
-            vec![0, 2],
-            vec![1, 1],
-            vec![1, 2],
-            vec![1, 3],
-            vec![1, 4],
-            vec![2, 3],
-            vec![2, 4],
-            vec![2, 5],
-            vec![2, 6],
-            vec![3, 5],
-            vec![3, 6],
-        ]
-    );
-
-    // This should be symmetrical
-    assert_eq!(
-        fokker_block(12, vec![6, 3]),
-        vec![
-            vec![1, 0],
-            vec![2, 0],
-            vec![1, 1],
-            vec![2, 1],
-            vec![3, 1],
-            vec![4, 1],
-            vec![3, 2],
-            vec![4, 2],
-            vec![5, 2],
-            vec![6, 2],
-            vec![5, 3],
-            vec![6, 3],
-        ]
-    );
-}
-
-#[test]
-fn rt_fokker_block() {
+fn fokker_block() {
     let limit11 = super::PrimeLimit::new(11);
     let marvel = make_marvel(&limit11);
     assert_eq!(
@@ -514,6 +336,7 @@ fn tuned_block() {
     check_float_vec(&block, 3, expected);
 }
 
+// Duplicate of TemperamentClass test
 #[test]
 fn generators() {
     let limit11 = super::PrimeLimit::new(11);
