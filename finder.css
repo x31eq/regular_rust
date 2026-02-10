@@ -97,7 +97,7 @@ table.mapping {
     border-right-width: 0;
     margin: 0;
 }
-.te, .pote, .top {
+.te, .pote, .top, .toppo {
     display: none;
 }
 input#show-te:checked ~ .te, input#et-show-te:checked ~ .te{
@@ -107,6 +107,9 @@ input#show-pote:checked ~ .pote, input#et-show-pote:checked ~ .pote {
     display: block;
 }
 input#show-top:checked ~ .top, input#et-show-top:checked ~ .top {
+    display: block;
+}
+input#show-toppo:checked ~ .toppo, input#et-show-toppo:checked ~ .toppo {
     display: block;
 }
 .accordion td {
