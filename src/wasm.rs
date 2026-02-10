@@ -753,6 +753,34 @@ fn show_et(
         field.set_text_content(Some(&format!("{:.6}", stretch)));
     }
 
+    // Now do the TOP fields
+    if let Ok(rt) = TOPTemperament::new(&limit.pitches, &mapping) {
+
+        if let Some(table) = web.element("et-top-tuning-map") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.tuning_map(), 3)?;
+        }
+
+        if let Some(table) = web.element("et-toppo-tuning-map") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.unstretched_tuning_map(), 3)?;
+        }
+
+        if let Some(table) = web.element("et-top-mistunings") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.mistunings(), 4)?;
+        }
+
+        if let Some(table) = web.element("et-toppo-mistunings") {
+            write_headings(web, &table, limit)?;
+            write_float_row(web, &table, &rt.unstretched_mistunings(), 4)?;
+        }
+
+        if let Some(field) = web.element("et-top-error") {
+            field.set_text_content(Some(&format!("{:.6}", rt.error())));
+        }
+    }
+
     web.set_body_class("show-et");
     if let Some(result) = web.element("equal-temperament") {
         result.scroll_into_view();
