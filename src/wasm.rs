@@ -249,11 +249,6 @@ fn rt_action(
         show_rt(web, &limit, rt.melody)
             .or(Err("Failed to show the regular temperament"))?;
     }
-
-    web.set_body_class("show-temperament");
-    if let Some(result) = web.element("regular-temperament") {
-        result.scroll_into_view();
-    }
     Ok(())
 }
 
@@ -885,6 +880,11 @@ fn show_rt(
 
     if let Some(table) = web.element("rt-pote-generators") {
         write_float_row(web, &table, &rt.unstretched_tuning(), 4)?;
+    }
+
+    web.set_body_class("show-temperament");
+    if let Some(result) = web.element("regular-temperament") {
+        result.scroll_into_view();
     }
 
     // Now do it all again with TOP
