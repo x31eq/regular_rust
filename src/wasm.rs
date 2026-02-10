@@ -602,9 +602,14 @@ fn show_regular_temperaments<'a>(
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for column_heading in
-        &["Name", "ETs", "complexity", "error", "TE error", "TOP error"]
-    {
+    for column_heading in &[
+        "Name",
+        "ETs",
+        "complexity",
+        "error",
+        "TE error",
+        "TOP error",
+    ] {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(column_heading));
         row.append_child(&cell)?;
@@ -662,12 +667,15 @@ fn rt_row(
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
-    cell.set_text_content(Some(&format!("{:.3} cents", rt.error())));
+    cell.set_text_content(Some(&format!("{:.3} cent/oct", rt.error())));
     row.append_child(&cell)?;
 
     let cell = web.document.create_element("td")?;
     if let Ok(top_rt) = TOPTemperament::new(&limit.pitches, mapping) {
-        cell.set_text_content(Some(&format!("{:.3} cents", top_rt.error())));
+        cell.set_text_content(Some(&format!(
+            "{:.3} cent/oct",
+            top_rt.error()
+        )));
     } else {
         cell.set_text_content(Some("n/a"));
     }
