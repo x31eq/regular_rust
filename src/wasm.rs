@@ -739,22 +739,7 @@ fn show_et(
     }
 
     if let Some(field) = web.element("et-unison-vectors") {
-        field.set_inner_html("");
-        let rank = rt.rank();
-        let dimension = limit.pitches.len();
-        let list = web.document.create_element("ul")?;
-        let n_results = if (dimension - rank) == 1 {
-            1
-        } else {
-            (dimension - rank) * 2
-        };
-        for uv in rt.unison_vectors(n_results) {
-            let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(limit, &uv);
-            item.set_text_content(Some(&text));
-            list.append_child(&item)?;
-        }
-        field.append_child(&list)?;
+        list_unison_vectors(web, limit, &rt, &field)?;
     }
 
     if let Some(field) = web.element("et-error") {
@@ -864,22 +849,7 @@ fn show_rt(
     }
 
     if let Some(field) = web.element("rt-unison-vectors") {
-        field.set_inner_html("");
-        let rank = rt.rank();
-        let dimension = limit.pitches.len();
-        let list = web.document.create_element("ul")?;
-        let n_results = if (dimension - rank) == 1 {
-            1
-        } else {
-            (dimension - rank) * 2
-        };
-        for uv in rt.unison_vectors(n_results) {
-            let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(limit, &uv);
-            item.set_text_content(Some(&text));
-            list.append_child(&item)?;
-        }
-        field.append_child(&list)?;
+        list_unison_vectors(web, limit, &rt, &field)?;
     }
 
     if let Some(field) = web.element("error") {
@@ -958,6 +928,31 @@ fn show_rt(
     } else {
         web.log_error("Failed to calculate TOP generator tuning");
     }
+    Ok(())
+}
+
+fn list_unison_vectors(
+    web: &WebContext,
+    limit: &PrimeLimit,
+    rt: &TETemperament,
+    field: &Element,
+) -> Exceptionable {
+    field.set_inner_html("");
+    let rank = rt.rank();
+    let dimension = limit.pitches.len();
+    let list = web.document.create_element("ul")?;
+    let n_results = if (dimension - rank) == 1 {
+        1
+    } else {
+        (dimension - rank) * 2
+    };
+    for uv in rt.unison_vectors(n_results) {
+        let item = web.document.create_element("li")?;
+        let text = get_ratio_or_ket_string(limit, &uv);
+        item.set_text_content(Some(&text));
+        list.append_child(&item)?;
+    }
+    field.append_child(&list)?;
     Ok(())
 }
 
