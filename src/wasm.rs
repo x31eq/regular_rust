@@ -365,6 +365,7 @@ fn unison_vector_search(
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
+    list.scroll_into_view();
     Ok(())
 }
 
