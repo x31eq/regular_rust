@@ -832,7 +832,17 @@ fn list_unison_vectors(
     for uv in rt.unison_vectors(n_results) {
         let item = web.document.create_element("li")?;
         let text = get_ratio_or_ket_string(limit, &uv);
-        item.set_text_content(Some(&text));
+        let link = web.document.create_element("a")?;
+        link.set_text_content(Some(&text));
+        let params = HashMap::from([
+            ("page", "uv".to_string()),
+            ("limit", limit.label.clone()),
+            ("uvs", text),
+            ("nresults", 10.to_string()),
+        ]);
+        let url = web.hash_from_params(&params);
+        link.set_attribute("href", &url)?;
+        item.append_child(&link)?;
         list.append_child(&item)?;
     }
     field.append_child(&list)?;
