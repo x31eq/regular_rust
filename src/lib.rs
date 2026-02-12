@@ -514,5 +514,8 @@ pub mod uv;
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
 
+#[cfg(target_arch = "wasm32")]
+pub mod web_context;
+
 #[cfg(test)]
 mod tests;
