@@ -2,9 +2,7 @@ use js_sys::decode_uri;
 use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::JsValue;
-use web_sys::{
-    Element, HtmlInputElement, HtmlTextAreaElement, console,
-};
+use web_sys::{Element, HtmlInputElement, HtmlTextAreaElement, console};
 
 pub struct WebContext {
     pub document: web_sys::Document,
