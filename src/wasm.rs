@@ -161,6 +161,7 @@ fn uv_action(
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
     unison_vector_search(web, uvs, limit, ekm, nresults)?;
+    other_searches(web, params, ekm)?;
     Ok(())
 }
 
@@ -319,19 +320,19 @@ fn regular_temperament_search(
 fn other_searches(
     web: &WebContext,
     params: &HashMap<String, String>,
-    ek_adjusted: Cents,
+    error: Cents,
 ) -> Result<(), String> {
     let mut new_params: HashMap<&str, String> = params
         .iter()
         .map(|(k, v)| (k.as_str(), v.clone()))
         .collect();
     if let Some(link) = web.element("simpler-search") {
-        new_params.insert("error", format!("{:.3}", ek_adjusted * 1.1));
+        new_params.insert("error", format!("{:.3}", error * 1.1));
         link.set_attribute("href", &web.hash_from_params(&new_params))
             .or(Err("Failed to set simpler search link"))?;
     }
     if let Some(link) = web.element("accurate-search") {
-        new_params.insert("error", format!("{:.3}", ek_adjusted * 0.9));
+        new_params.insert("error", format!("{:.3}", error * 0.9));
         link.set_attribute("href", &web.hash_from_params(&new_params))
             .or(Err("Failed to set more accurate search link"))?;
     }
