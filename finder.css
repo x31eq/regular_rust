@@ -68,7 +68,7 @@ table.mapping {
 .mapping td {
     text-align: right;
 }
-#equal-temperament, #regular-temperament, #temperament-list, #error-report {
+#equal-temperament, #regular-temperament, #temperament-list, #other-searches, #error-report {
     display: none;
 }
 .show-et #equal-temperament {
@@ -80,6 +80,9 @@ table.mapping {
     margin-bottom: 2em;
 }
 .show-list #temperament-list {
+    display: block;
+}
+.show-list #other-searches {
     display: block;
 }
 .show-errors #error-report {

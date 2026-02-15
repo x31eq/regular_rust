@@ -1,11 +1,8 @@
-use js_sys::decode_uri;
 use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::{JsValue, wasm_bindgen};
-use web_sys::{
-    Element, Event, HtmlInputElement, HtmlTextAreaElement, console,
-};
+use web_sys::{Element, Event, HtmlInputElement};
 
 use super::cangwu::{
     CangwuTemperament, ambiguous_et, get_equal_temperaments,
@@ -19,6 +16,7 @@ use super::temperament_class::TemperamentClass;
 use super::top::TOPTemperament;
 use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
+use super::web_context::WebContext;
 use super::{
     Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
     map, normalize_positive, warted_et_name,
@@ -81,7 +79,7 @@ pub fn net_form_submit(evt: Event) {
     if let Some(name) = web.input_value("net-steps") {
         // Make these a bit cleaner in the URL bar
         // This variable must exist to avoid freeing temporary values
-        let cleaned = name.replace(['&', '+', '_'], " ");
+        let cleaned = name.replace(['&', '+', '_', ','], " ");
         let steps: Vec<&str> = cleaned.split_whitespace().collect();
         params.insert("ets", steps.join("_"));
     }
@@ -104,6 +102,7 @@ fn pregular_action(
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
     regular_temperament_search(web, limit, eka, nresults)?;
+    other_searches(web, params, eka)?;
     Ok(())
 }
 
@@ -317,6 +316,28 @@ fn regular_temperament_search(
     Ok(())
 }
 
+fn other_searches(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+    ek_adjusted: Cents,
+) -> Result<(), String> {
+    let mut new_params: HashMap<&str, String> = params
+        .iter()
+        .map(|(k, v)| (k.as_str(), v.clone()))
+        .collect();
+    if let Some(link) = web.element("simpler-search") {
+        new_params.insert("error", format!("{:.3}", ek_adjusted * 1.1));
+        link.set_attribute("href", &web.hash_from_params(&new_params))
+            .or(Err("Failed to set simpler search link"))?;
+    }
+    if let Some(link) = web.element("accurate-search") {
+        new_params.insert("error", format!("{:.3}", ek_adjusted * 0.9));
+        link.set_attribute("href", &web.hash_from_params(&new_params))
+            .or(Err("Failed to set more accurate search link"))?;
+    }
+    Ok(())
+}
+
 fn unison_vector_search(
     web: &WebContext,
     uvs: Mapping,
@@ -367,122 +388,8 @@ fn unison_vector_search(
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
+    list.scroll_into_view();
     Ok(())
-}
-
-struct WebContext {
-    document: web_sys::Document,
-}
-
-impl WebContext {
-    fn new() -> Self {
-        let window = web_sys::window().expect("no window");
-        let document = window.document().expect("no document");
-        WebContext { document }
-    }
-
-    fn set_body_class(&self, value: &str) {
-        let body = self.document.body().expect("no body");
-        body.set_attribute("class", value)
-            .expect("failed to set class");
-    }
-
-    fn element(&self, id: &str) -> Option<Element> {
-        self.document.get_element_by_id(id)
-    }
-
-    fn input_value(&self, id: &str) -> Option<String> {
-        let element = self.element(id)?;
-        if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
-            return Some(text_area.value());
-        } else if let Some(text_area) =
-            element.dyn_ref::<HtmlTextAreaElement>()
-        {
-            return Some(text_area.value());
-        }
-        let input_element = element.dyn_ref::<HtmlInputElement>()?;
-        Some(input_element.value())
-    }
-
-    /// Set an input if found: log errors and carry on
-    fn set_input_value(&self, id: &str, value: &str) {
-        if let Some(element) = self.element(id) {
-            if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>()
-            {
-                text_area.set_value(value);
-            } else if let Some(input_element) =
-                element.dyn_ref::<HtmlInputElement>()
-            {
-                input_element.set_value(value);
-            } else {
-                self.log_error("Not an input elemenet")
-            }
-        } else {
-            self.log_error("Element not found")
-        }
-    }
-
-    fn new_or_emptied_element(
-        &self,
-        parent: &Element,
-        name: &str,
-    ) -> Result<Element, JsValue> {
-        if let Some(existing) = parent.query_selector(name)? {
-            existing.set_inner_html("");
-            Ok(existing)
-        } else {
-            let child = self.document.create_element(name)?;
-            parent.append_child(&child)?;
-            Ok(child)
-        }
-    }
-
-    /// Get the URL-supplied parameters
-    fn get_url_params(&self) -> HashMap<String, String> {
-        let mut params = HashMap::new();
-        if let Some(location) = self.document.location()
-            && let Ok(query) = location.hash()
-            && let Ok(query) = decode_uri(&query)
-        {
-            let query: String = query.into();
-            for param in query.trim_start_matches('#').split('&') {
-                if let Some((k, v)) = param.split_once('=') {
-                    params.insert(k.to_string(), v.to_string());
-                }
-            }
-        }
-        params
-    }
-
-    /// Reset the has encoding the new params, and cause some at least of the
-    /// new page events to be fired
-    fn resubmit_with_params(&self, params: &HashMap<&str, String>) {
-        let hash = self.hash_from_params(params);
-        self.document
-            .location()
-            .expect("no location")
-            .set_hash(&hash)
-            .expect("unable to set URL hash");
-    }
-
-    fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
-        let mut result = params
-            .iter()
-            .map(|(&k, v)| {
-                let mut field = k.to_string();
-                field.push('=');
-                field.push_str(v);
-                field.to_string()
-            })
-            .collect::<Vec<String>>()
-            .join("&");
-        result.insert(0, '#');
-        result
-    }
-
-    fn log_error(&self, message: &str) {
-        console::error_1(&message.into());
-    }
 }
 
 fn show_equal_temperaments<'a>(
@@ -739,22 +646,7 @@ fn show_et(
     }
 
     if let Some(field) = web.element("et-unison-vectors") {
-        field.set_inner_html("");
-        let rank = rt.rank();
-        let dimension = limit.pitches.len();
-        let list = web.document.create_element("ul")?;
-        let n_results = if (dimension - rank) == 1 {
-            1
-        } else {
-            (dimension - rank) * 2
-        };
-        for uv in rt.unison_vectors(n_results) {
-            let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(limit, &uv);
-            item.set_text_content(Some(&text));
-            list.append_child(&item)?;
-        }
-        field.append_child(&list)?;
+        list_unison_vectors(web, limit, &rt, &field)?;
     }
 
     if let Some(field) = web.element("et-error") {
@@ -864,22 +756,7 @@ fn show_rt(
     }
 
     if let Some(field) = web.element("rt-unison-vectors") {
-        field.set_inner_html("");
-        let rank = rt.rank();
-        let dimension = limit.pitches.len();
-        let list = web.document.create_element("ul")?;
-        let n_results = if (dimension - rank) == 1 {
-            1
-        } else {
-            (dimension - rank) * 2
-        };
-        for uv in rt.unison_vectors(n_results) {
-            let item = web.document.create_element("li")?;
-            let text = get_ratio_or_ket_string(limit, &uv);
-            item.set_text_content(Some(&text));
-            list.append_child(&item)?;
-        }
-        field.append_child(&list)?;
+        list_unison_vectors(web, limit, &rt, &field)?;
     }
 
     if let Some(field) = web.element("error") {
@@ -958,6 +835,41 @@ fn show_rt(
     } else {
         web.log_error("Failed to calculate TOP generator tuning");
     }
+    Ok(())
+}
+
+fn list_unison_vectors(
+    web: &WebContext,
+    limit: &PrimeLimit,
+    rt: &TETemperament,
+    field: &Element,
+) -> Exceptionable {
+    field.set_inner_html("");
+    let rank = rt.rank();
+    let dimension = limit.pitches.len();
+    let list = web.document.create_element("ul")?;
+    let n_results = if (dimension - rank) == 1 {
+        1
+    } else {
+        (dimension - rank) * 2
+    };
+    for uv in rt.unison_vectors(n_results) {
+        let item = web.document.create_element("li")?;
+        let text = get_ratio_or_ket_string(limit, &uv);
+        let link = web.document.create_element("a")?;
+        link.set_text_content(Some(&text));
+        let params = HashMap::from([
+            ("page", "uv".to_string()),
+            ("limit", limit.label.clone()),
+            ("uvs", text),
+            ("nresults", 10.to_string()),
+        ]);
+        let url = web.hash_from_params(&params);
+        link.set_attribute("href", &url)?;
+        item.append_child(&link)?;
+        list.append_child(&item)?;
+    }
+    field.append_child(&list)?;
     Ok(())
 }
 
