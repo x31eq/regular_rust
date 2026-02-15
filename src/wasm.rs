@@ -148,7 +148,7 @@ fn uv_action(
     // Update the input box with the filtered unison vectors
     let uv_strings = map(|uv| get_ratio_or_ket_string(&limit, uv), &uvs);
     web.set_input_value("uv-uvs", &uv_strings.join(" "));
-    let ekm = if let Some(multiplier) = params.get("errmul") {
+    let ekm = if let Some(multiplier) = params.get("error") {
         multiplier
             .parse()
             .or(Err("Unable to parse target error multiplier"))?
