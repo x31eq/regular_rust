@@ -16,13 +16,11 @@ use super::temperament_class::TemperamentClass;
 use super::top::TOPTemperament;
 use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
-use super::web_context::WebContext;
+use super::web_context::{Exceptionable, WebContext};
 use super::{
     Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
     map, normalize_positive, warted_et_name,
 };
-
-type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
 pub fn general_form_submit(evt: Event) {
@@ -328,13 +326,71 @@ fn other_searches(
         .collect();
     if let Some(link) = web.element("simpler-search") {
         new_params.insert("error", format!("{:.3}", error * 1.1));
-        link.set_attribute("href", &web.hash_from_params(&new_params))
+        web.set_target(&link, &new_params)
             .or(Err("Failed to set simpler search link"))?;
     }
     if let Some(link) = web.element("accurate-search") {
         new_params.insert("error", format!("{:.3}", error * 0.9));
-        link.set_attribute("href", &web.hash_from_params(&new_params))
+        web.set_target(&link, &new_params)
             .or(Err("Failed to set more accurate search link"))?;
+    }
+    if let Some(more_more) = web.element("more-more") {
+        more_more.set_inner_html("");
+        if let Some(limit) = params.get("limit")
+            && let Ok(old_limit) = limit.parse()
+        {
+            let old_plimit = PrimeLimit::new(old_limit);
+            let old_dimension = old_plimit.pitches.len();
+            // Add a lower-limit link
+            if old_dimension > 2
+                && !params.contains_key("uvs")
+                && let Some(new_limit) =
+                    old_plimit.headings.iter().rev().nth(1)
+            {
+                let link = web
+                    .document
+                    .create_element("a")
+                    .or(Err("Can't make link"))?;
+                link.set_text_content(Some(&format!("{}-limit", new_limit)));
+                let mut new_params: HashMap<&str, String> = params
+                    .iter()
+                    .map(|(k, v)| (k.as_str(), v.clone()))
+                    .collect();
+                new_params.insert("limit", new_limit.to_string());
+                web.set_target(&link, &new_params)
+                    .or(Err("Can't set lower limit search URL"))?;
+                more_more
+                    .append_child(&link)
+                    .or(Err("Can't add lower-limit link"))?;
+                more_more
+                    .append_with_str_1(" ")
+                    .or(Err("Can't add space"))?;
+            }
+            // Add a higher-limit link
+            let mut n = old_limit;
+            loop {
+                n += 1;
+                if PrimeLimit::new(n).pitches.len() != old_dimension {
+                    // Distinct prime limit
+                    let link = web
+                        .document
+                        .create_element("a")
+                        .or(Err("Can't make link"))?;
+                    link.set_text_content(Some(&format!("{}-limit", n)));
+                    let mut new_params: HashMap<&str, String> = params
+                        .iter()
+                        .map(|(k, v)| (k.as_str(), v.clone()))
+                        .collect();
+                    new_params.insert("limit", n.to_string());
+                    web.set_target(&link, &new_params)
+                        .or(Err("Can't set higher limit search URL"))?;
+                    more_more
+                        .append_child(&link)
+                        .or(Err("Can't add higher-limit link"))?;
+                    break;
+                }
+            }
+        }
     }
     Ok(())
 }
