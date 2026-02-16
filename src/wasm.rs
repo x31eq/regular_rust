@@ -343,28 +343,6 @@ fn other_searches(
         {
             let old_dimension = PrimeLimit::new(old_limit).pitches.len();
             let mut n = old_limit;
-            loop {
-                n += 1;
-                if PrimeLimit::new(n).pitches.len() != old_dimension {
-                    // Distinct prime limit
-                    let link = web
-                        .new_or_emptied_element(&more_more, "a")
-                        .or(Err("Can't make link"))?;
-                    link.set_text_content(Some(&format!("{}-limit", n)));
-                    let mut new_params: HashMap<&str, String> = params
-                        .iter()
-                        .map(|(k, v)| (k.as_str(), v.clone()))
-                        .collect();
-                    new_params.insert("limit", format!("{}", n));
-                    link.set_attribute(
-                        "href",
-                        &web.hash_from_params(&new_params),
-                    )
-                    .or(Err("Can't set higher limit search URL"))?;
-                    break;
-                }
-            }
-            n = old_limit;
             if old_dimension > 2 && !params.contains_key("uvs") {
                 let link = web
                     .document
@@ -392,11 +370,37 @@ fn other_searches(
                         .or(Err("Can't set lower limit search URL"))?;
                     }
                 }
-                more_more.append_with_str_1(" ")
-                    .or(Err("Can't add space"))?;
                 more_more
                     .append_child(&link)
-                    .or(Err("Can't add higher-limit link"))?;
+                    .or(Err("Can't add lower-limit link"))?;
+                more_more.append_with_str_1(" ")
+                    .or(Err("Can't add space"))?;
+            }
+            n = old_limit;
+            loop {
+                n += 1;
+                if PrimeLimit::new(n).pitches.len() != old_dimension {
+                    // Distinct prime limit
+                    let link = web
+                        .document
+                        .create_element("a")
+                        .or(Err("Can't make link"))?;
+                    link.set_text_content(Some(&format!("{}-limit", n)));
+                    let mut new_params: HashMap<&str, String> = params
+                        .iter()
+                        .map(|(k, v)| (k.as_str(), v.clone()))
+                        .collect();
+                    new_params.insert("limit", format!("{}", n));
+                    link.set_attribute(
+                        "href",
+                        &web.hash_from_params(&new_params),
+                    )
+                    .or(Err("Can't set higher limit search URL"))?;
+                    more_more
+                        .append_child(&link)
+                        .or(Err("Can't add higher-limit link"))?;
+                    break;
+                }
             }
         }
     }
