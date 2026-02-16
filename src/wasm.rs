@@ -16,13 +16,11 @@ use super::temperament_class::TemperamentClass;
 use super::top::TOPTemperament;
 use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
-use super::web_context::WebContext;
+use super::web_context::{Exceptionable, WebContext};
 use super::{
     Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
     map, normalize_positive, warted_et_name,
 };
-
-type Exceptionable = Result<(), JsValue>;
 
 #[wasm_bindgen]
 pub fn general_form_submit(evt: Event) {
@@ -328,12 +326,12 @@ fn other_searches(
         .collect();
     if let Some(link) = web.element("simpler-search") {
         new_params.insert("error", format!("{:.3}", error * 1.1));
-        link.set_attribute("href", &web.hash_from_params(&new_params))
+        web.set_target(&link, &new_params)
             .or(Err("Failed to set simpler search link"))?;
     }
     if let Some(link) = web.element("accurate-search") {
         new_params.insert("error", format!("{:.3}", error * 0.9));
-        link.set_attribute("href", &web.hash_from_params(&new_params))
+        web.set_target(&link, &new_params)
             .or(Err("Failed to set more accurate search link"))?;
     }
     if let Some(more_more) = web.element("more-more") {
@@ -359,11 +357,8 @@ fn other_searches(
                     .map(|(k, v)| (k.as_str(), v.clone()))
                     .collect();
                 new_params.insert("limit", new_limit.to_string());
-                link.set_attribute(
-                    "href",
-                    &web.hash_from_params(&new_params),
-                )
-                .or(Err("Can't set lower limit search URL"))?;
+                web.set_target(&link, &new_params)
+                    .or(Err("Can't set lower limit search URL"))?;
                 more_more
                     .append_child(&link)
                     .or(Err("Can't add lower-limit link"))?;
@@ -387,11 +382,8 @@ fn other_searches(
                         .map(|(k, v)| (k.as_str(), v.clone()))
                         .collect();
                     new_params.insert("limit", n.to_string());
-                    link.set_attribute(
-                        "href",
-                        &web.hash_from_params(&new_params),
-                    )
-                    .or(Err("Can't set higher limit search URL"))?;
+                    web.set_target(&link, &new_params)
+                        .or(Err("Can't set higher limit search URL"))?;
                     more_more
                         .append_child(&link)
                         .or(Err("Can't add higher-limit link"))?;

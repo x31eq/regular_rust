@@ -4,6 +4,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::JsValue;
 use web_sys::{Element, HtmlInputElement, HtmlTextAreaElement, console};
 
+pub type Exceptionable = Result<(), JsValue>;
+
 pub struct WebContext {
     pub document: web_sys::Document,
 }
@@ -97,6 +99,15 @@ impl WebContext {
             .expect("no location")
             .set_hash(&hash)
             .expect("unable to set URL hash");
+    }
+
+    /// Set the target (href) of a link to a local resubmit
+    pub fn set_target(
+        &self,
+        link: &Element,
+        params: &HashMap<&str, String>,
+    ) -> Exceptionable {
+        link.set_attribute("href", &self.hash_from_params(&params))
     }
 
     pub fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
