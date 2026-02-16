@@ -341,42 +341,38 @@ fn other_searches(
         if let Some(limit) = params.get("limit")
             && let Ok(old_limit) = limit.parse()
         {
-            let old_dimension = PrimeLimit::new(old_limit).pitches.len();
-            let mut n = old_limit;
-            if old_dimension > 2 && !params.contains_key("uvs") {
+            let old_plimit = PrimeLimit::new(old_limit);
+            let old_dimension = old_plimit.pitches.len();
+            // Add a lower-limit link
+            if old_dimension > 2
+                && !params.contains_key("uvs")
+                && let Some(new_limit) =
+                    old_plimit.headings.iter().rev().nth(1)
+            {
                 let link = web
                     .document
                     .create_element("a")
                     .or(Err("Can't make link"))?;
-                loop {
-                    n -= 1;
-                    let new_dimension = PrimeLimit::new(n).pitches.len();
-                    if new_dimension == old_dimension - 2 {
-                        // Gone past the next smallest limit
-                        break;
-                    }
-                    if new_dimension != old_dimension {
-                        // Distinct prime limit
-                        link.set_text_content(Some(&format!("{}-limit", n)));
-                        let mut new_params: HashMap<&str, String> = params
-                            .iter()
-                            .map(|(k, v)| (k.as_str(), v.clone()))
-                            .collect();
-                        new_params.insert("limit", format!("{}", n));
-                        link.set_attribute(
-                            "href",
-                            &web.hash_from_params(&new_params),
-                        )
-                        .or(Err("Can't set lower limit search URL"))?;
-                    }
-                }
+                link.set_text_content(Some(&format!("{}-limit", new_limit)));
+                let mut new_params: HashMap<&str, String> = params
+                    .iter()
+                    .map(|(k, v)| (k.as_str(), v.clone()))
+                    .collect();
+                new_params.insert("limit", format!("{}", new_limit));
+                link.set_attribute(
+                    "href",
+                    &web.hash_from_params(&new_params),
+                )
+                .or(Err("Can't set lower limit search URL"))?;
                 more_more
                     .append_child(&link)
                     .or(Err("Can't add lower-limit link"))?;
-                more_more.append_with_str_1(" ")
+                more_more
+                    .append_with_str_1(" ")
                     .or(Err("Can't add space"))?;
             }
-            n = old_limit;
+            // Add a higher-limit link
+            let mut n = old_limit;
             loop {
                 n += 1;
                 if PrimeLimit::new(n).pitches.len() != old_dimension {
