@@ -336,6 +336,35 @@ fn other_searches(
         link.set_attribute("href", &web.hash_from_params(&new_params))
             .or(Err("Failed to set more accurate search link"))?;
     }
+    if let Some(more_more) = web.element("more-more") {
+        more_more.set_inner_html("");
+        if let Some(limit) = params.get("limit")
+            && let Ok(mut n) = limit.parse()
+        {
+            let plimit = PrimeLimit::new(n);
+            loop {
+                n += 1;
+                if PrimeLimit::new(n).pitches.len() != plimit.pitches.len() {
+                    // Distinct prime limit
+                    let link = web
+                        .new_or_emptied_element(&more_more, "a")
+                        .or(Err("Can't make link"))?;
+                    link.set_text_content(Some(&format!("{}-limit", n)));
+                    let mut new_params: HashMap<&str, String> = params
+                        .iter()
+                        .map(|(k, v)| (k.as_str(), v.clone()))
+                        .collect();
+                    new_params.insert("limit", format!("{}", n));
+                    link.set_attribute(
+                        "href",
+                        &web.hash_from_params(&new_params),
+                    )
+                    .or(Err("Can't set higher limit search URL"))?;
+                    break;
+                }
+            }
+        }
+    }
     Ok(())
 }
 
