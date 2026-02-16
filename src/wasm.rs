@@ -339,12 +339,13 @@ fn other_searches(
     if let Some(more_more) = web.element("more-more") {
         more_more.set_inner_html("");
         if let Some(limit) = params.get("limit")
-            && let Ok(mut n) = limit.parse()
+            && let Ok(old_limit) = limit.parse()
         {
-            let plimit = PrimeLimit::new(n);
+            let old_dimension = PrimeLimit::new(old_limit).pitches.len();
+            let mut n = old_limit;
             loop {
                 n += 1;
-                if PrimeLimit::new(n).pitches.len() != plimit.pitches.len() {
+                if PrimeLimit::new(n).pitches.len() != old_dimension {
                     // Distinct prime limit
                     let link = web
                         .new_or_emptied_element(&more_more, "a")
@@ -362,6 +363,40 @@ fn other_searches(
                     .or(Err("Can't set higher limit search URL"))?;
                     break;
                 }
+            }
+            n = old_limit;
+            if old_dimension > 2 && !params.contains_key("uvs") {
+                let link = web
+                    .document
+                    .create_element("a")
+                    .or(Err("Can't make link"))?;
+                loop {
+                    n -= 1;
+                    let new_dimension = PrimeLimit::new(n).pitches.len();
+                    if new_dimension == old_dimension - 2 {
+                        // Gone past the next smallest limit
+                        break;
+                    }
+                    if new_dimension != old_dimension {
+                        // Distinct prime limit
+                        link.set_text_content(Some(&format!("{}-limit", n)));
+                        let mut new_params: HashMap<&str, String> = params
+                            .iter()
+                            .map(|(k, v)| (k.as_str(), v.clone()))
+                            .collect();
+                        new_params.insert("limit", format!("{}", n));
+                        link.set_attribute(
+                            "href",
+                            &web.hash_from_params(&new_params),
+                        )
+                        .or(Err("Can't set lower limit search URL"))?;
+                    }
+                }
+                more_more.append_with_str_1(" ")
+                    .or(Err("Can't add space"))?;
+                more_more
+                    .append_child(&link)
+                    .or(Err("Can't add higher-limit link"))?;
             }
         }
     }
