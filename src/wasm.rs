@@ -358,7 +358,7 @@ fn other_searches(
                     .iter()
                     .map(|(k, v)| (k.as_str(), v.clone()))
                     .collect();
-                new_params.insert("limit", format!("{}", new_limit));
+                new_params.insert("limit", new_limit.to_string());
                 link.set_attribute(
                     "href",
                     &web.hash_from_params(&new_params),
@@ -386,7 +386,7 @@ fn other_searches(
                         .iter()
                         .map(|(k, v)| (k.as_str(), v.clone()))
                         .collect();
-                    new_params.insert("limit", format!("{}", n));
+                    new_params.insert("limit", n.to_string());
                     link.set_attribute(
                         "href",
                         &web.hash_from_params(&new_params),
