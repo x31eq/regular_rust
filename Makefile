@@ -5,7 +5,7 @@ target/release/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo
 target/debug/regular-cli: src/main.rs src/lib.rs src/cangwu.rs src/te.rs Cargo.toml
 	cargo build
 
-pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs Cargo.toml
+pkg/regular_bg.wasm: src/wasm.rs src/lib.rs src/cangwu.rs src/te.rs src/temperament_class.rs src/uv.rs src/ratio.rs  src/web_context.rs Cargo.toml
 	cargo build --release --target wasm32-unknown-unknown
 	RUSTFLAGS="-Cstrip=none" wasm-bindgen target/wasm32-unknown-unknown/release/regular.wasm --out-dir pkg --target web
 
