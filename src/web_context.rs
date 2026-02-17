@@ -107,7 +107,7 @@ impl WebContext {
         link: &Element,
         params: &HashMap<&str, String>,
     ) -> Exceptionable {
-        link.set_attribute("href", &self.hash_from_params(&params))
+        link.set_attribute("href", &self.hash_from_params(params))
     }
 
     pub fn hash_from_params(&self, params: &HashMap<&str, String>) -> String {
