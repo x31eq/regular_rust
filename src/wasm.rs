@@ -908,7 +908,7 @@ fn list_unison_vectors(
     let n_results = if (dimension - rank) == 1 {
         1
     } else {
-        (dimension - rank) * 2
+        (dimension - rank) * 4
     };
     for uv in rt.unison_vectors(n_results) {
         let item = web.document.create_element("li")?;
