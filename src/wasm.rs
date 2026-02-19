@@ -25,7 +25,7 @@ use super::{
 #[wasm_bindgen]
 pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
     // The search will fail if this is missing, but the URL
     // should make it clear why
@@ -45,7 +45,7 @@ pub fn general_form_submit(evt: Event) {
 #[wasm_bindgen]
 pub fn uv_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "uv".to_string())]);
     // This is optional for the UV search
     if let Some(limit) = web.input_value("uv-limit") {
@@ -69,7 +69,7 @@ pub fn uv_form_submit(evt: Event) {
 #[wasm_bindgen]
 pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "rt".to_string())]);
     if let Some(limit) = web.input_value("net-limit") {
         params.insert("limit", limit.trim().to_string());
@@ -190,11 +190,11 @@ pub fn hash_change(_evt: Event) {
 /// Plain <noscript> tags don't show up when scripting is disabled.
 /// If this is called, it must be working, so hide the message.
 fn clear_noscript() {
-    WebContext::new().emptied_element("noscript");
+    WebContext::init().emptied_element("noscript");
 }
 
 fn process_hash() {
-    let web = WebContext::new();
+    let web = WebContext::init();
     let params = web.get_url_params();
     if let Err(e) = {
         match params.get("page").map(String::as_str) {

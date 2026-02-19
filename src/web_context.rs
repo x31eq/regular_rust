@@ -13,7 +13,7 @@ pub struct WebContext {
 }
 
 impl WebContext {
-    pub fn new() -> Self {
+    pub fn init() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         WebContext { document }
