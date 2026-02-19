@@ -31,6 +31,8 @@ impl WebContext {
 
     pub fn emptied_element(&self, id: &str) -> Option<Element> {
         let e = self.document.get_element_by_id(id)?;
+        // If this has download links, clean them up to avoid memory leaks
+        revoke_blobs_in_subtree(&e);
         e.set_inner_html("");
         Some(e)
     }
@@ -159,7 +161,7 @@ impl WebContext {
 
 /// Cleanup for contents of download links that use browser memory.
 /// Generic function that doesn't actually use WebContext.
-pub fn revoke_blobs_in_subtree(root: &Element) -> Exceptionable {
+fn revoke_blobs_in_subtree(root: &Element) -> Exceptionable {
     let nodes = root.query_selector_all("[data-blob-url]")?;
     for i in 0..nodes.length() {
         if let Some(node) = nodes.item(i) {
