@@ -812,6 +812,12 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
+    if let Some(field) = web.emptied_element("rt-scala-files") {
+        let new_link = web.make_download_link("test file", "test.scl",
+            "This is a test of a feature that one day will be a Scala file")?;
+        field.append_child(&new_link)?;
+    }
+
     if show_accordion(web, &rt).is_err()
         && let Some(accordion) = web.element("rt-accordion")
     {
