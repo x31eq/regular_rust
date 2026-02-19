@@ -42,7 +42,6 @@ version = "0.3.69"
 features = [
   'console',
   'Blob',
-  'BlobPropertyBag',
   'Document',
   'Element',
   'Event',
