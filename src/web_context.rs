@@ -150,3 +150,18 @@ impl WebContext {
         console::error_1(&message.into());
     }
 }
+
+/// Cleanup for contents of download links that use browser memory.
+/// Generic function that doesn't actually use WebContext.
+pub fn revoke_blobs_in_subtree(root: &Element) -> Exceptionable {
+    let nodes = root.query_selector_all("[data-blob-url]")?;
+    for i in 0..nodes.length() {
+        if let Some(node) = nodes.item(i) {
+            let element: Element = node.dyn_into()?;
+            if let Some(url) = element.get_attribute("data-blob-url") {
+                let _ = Url::revoke_object_url(&url);
+            }
+        }
+    }
+    Ok(())
+}

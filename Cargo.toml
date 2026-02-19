@@ -51,6 +51,7 @@ features = [
   'HtmlTextAreaElement',
   'Location',
   'Node',
+  'NodeList',
   'Url',
   'Window',
 ]
