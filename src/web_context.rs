@@ -32,7 +32,9 @@ impl WebContext {
     pub fn emptied_element(&self, id: &str) -> Option<Element> {
         let e = self.document.get_element_by_id(id)?;
         // If this has download links, clean them up to avoid memory leaks
-        revoke_blobs_in_subtree(&e);
+        if revoke_blobs_in_subtree(&e).is_err() {
+            self.log_error("Couldn't clean up downloadable files");
+        }
         e.set_inner_html("");
         Some(e)
     }
