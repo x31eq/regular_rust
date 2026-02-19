@@ -813,8 +813,11 @@ fn show_rt(
     }
 
     if let Some(field) = web.emptied_element("rt-scala-files") {
-        let new_link = web.make_download_link("test file", "test.scl",
-            "This is a test of a feature that one day will be a Scala file")?;
+        let new_link = web.make_download_link(
+            "test file",
+            "test.scl",
+            "This is a test of a feature that one day will be a Scala file",
+        )?;
         field.append_child(&new_link)?;
     }
 
