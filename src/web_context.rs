@@ -31,10 +31,6 @@ impl WebContext {
         let element = self.element(id)?;
         if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
             return Some(text_area.value());
-        } else if let Some(text_area) =
-            element.dyn_ref::<HtmlTextAreaElement>()
-        {
-            return Some(text_area.value());
         }
         let input_element = element.dyn_ref::<HtmlInputElement>()?;
         Some(input_element.value())
