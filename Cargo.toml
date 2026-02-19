@@ -41,14 +41,18 @@ version = "0.3.69"
 
 features = [
   'console',
+  'Blob',
+  'BlobPropertyBag',
   'Document',
   'Element',
   'Event',
   'EventTarget',
+  'HtmlAnchorElement',
   'HtmlElement',
   'HtmlInputElement',
   'HtmlTextAreaElement',
   'Location',
   'Node',
+  'Url',
   'Window',
 ]
