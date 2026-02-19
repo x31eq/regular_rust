@@ -1,5 +1,3 @@
-use super::te::TETemperament;
-use super::temperament_class::TemperamentClass;
 use super::tuned_temperament::TunedTemperament;
 use super::web_context::{Exceptionable, WebContext};
 use super::{ETMap, Exponent, join, map};
@@ -7,11 +5,11 @@ use wasm_bindgen::prelude::JsValue;
 use web_sys::Element;
 
 /// An accordion is an instrument with buttons
-pub fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
+pub fn show_accordion(web: &WebContext, rt: &impl TunedTemperament) -> Exceptionable {
     let Some(accordion) = web.emptied_element("rt-accordion") else {
         return Ok(());
     };
-    let rank = rt.melody.len();
+    let rank = rt.mapping().len();
     if rank != 2 {
         return Ok(());
     }
@@ -19,7 +17,7 @@ pub fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
     let mut diatonic_steps = 0;
     let mut pitch_stack = vec![tonic.clone()];
     let mut grid = Vec::new();
-    let octaves: ETMap = map(|m| m[0], &rt.melody);
+    let octaves: ETMap = map(|m| m[0], &rt.mapping());
     let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
     let chromatic_dimension = 1 - diatonic_dimension;
     for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
@@ -83,7 +81,7 @@ pub fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
 
 fn accordion_button(
     web: &WebContext,
-    rt: &TETemperament,
+    rt: &impl TunedTemperament,
     pitch: &[Exponent],
 ) -> Result<Element, JsValue> {
     let button = web.document.create_element("button")?;
