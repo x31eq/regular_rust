@@ -85,4 +85,4 @@ https://github.com/webassembly/binaryen
 
 To get documentation including the Wasm code:
 
-make doc
+./doc
