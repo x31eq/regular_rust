@@ -1,8 +1,10 @@
-use js_sys::decode_uri;
+use js_sys::{Array, Uint8Array, decode_uri};
 use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::JsValue;
-use web_sys::{Element, HtmlInputElement, HtmlTextAreaElement, console};
+use web_sys::{
+    Blob, Element, HtmlInputElement, HtmlTextAreaElement, Url, console,
+};
 
 pub type Exceptionable = Result<(), JsValue>;
 
@@ -119,6 +121,29 @@ impl WebContext {
             .join("&");
         result.insert(0, '#');
         result
+    }
+
+    /// Make a link to trigger a file download
+    pub fn make_download_link(
+        &self,
+        label: &str,
+        filename: &str,
+        contents: &str,
+    ) -> Result<Element, JsValue> {
+        let bytes = Uint8Array::from(contents.as_bytes());
+        let parts = Array::new();
+        parts.push(&bytes.buffer());
+
+        let blob = Blob::new_with_u8_array_sequence(&parts)?;
+        let url = Url::create_object_url_with_blob(&blob)?;
+
+        let link = self.document.create_element("a")?;
+        link.set_attribute("href", &url)?;
+        link.set_attribute("download", filename)?;
+        link.set_attribute("data-blob-url", &url)?;
+        link.set_text_content(Some(label));
+
+        Ok(link)
     }
 
     pub fn log_error(&self, message: &str) {
