@@ -190,10 +190,7 @@ pub fn hash_change(_evt: Event) {
 /// Plain <noscript> tags don't show up when scripting is disabled.
 /// If this is called, it must be working, so hide the message.
 fn clear_noscript() {
-    let web = WebContext::new();
-    if let Some(message) = web.element("noscript") {
-        message.set_inner_html("");
-    }
+    WebContext::new().emptied_element("noscript");
 }
 
 fn process_hash() {
@@ -285,9 +282,8 @@ fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let list = web
-        .element("temperament-list")
+        .emptied_element("temperament-list")
         .ok_or("Couldn't find list for results")?;
-    list.set_inner_html("");
     web.set_body_class("show-list");
     show_equal_temperaments(
         web,
@@ -334,61 +330,58 @@ fn other_searches(
         web.set_target(&link, &new_params)
             .or(Err("Failed to set more accurate search link"))?;
     }
-    if let Some(more_more) = web.element("more-more") {
-        more_more.set_inner_html("");
-        if let Some(limit) = params.get("limit")
-            && let Ok(old_limit) = limit.parse()
+    if let Some(more_more) = web.emptied_element("more-more")
+        && let Some(limit) = params.get("limit")
+        && let Ok(old_limit) = limit.parse()
+    {
+        let old_plimit = PrimeLimit::new(old_limit);
+        let old_dimension = old_plimit.pitches.len();
+        // Add a lower-limit link
+        if old_dimension > 2
+            && !params.contains_key("uvs")
+            && let Some(new_limit) = old_plimit.headings.iter().rev().nth(1)
         {
-            let old_plimit = PrimeLimit::new(old_limit);
-            let old_dimension = old_plimit.pitches.len();
-            // Add a lower-limit link
-            if old_dimension > 2
-                && !params.contains_key("uvs")
-                && let Some(new_limit) =
-                    old_plimit.headings.iter().rev().nth(1)
-            {
+            let link = web
+                .document
+                .create_element("a")
+                .or(Err("Can't make link"))?;
+            link.set_text_content(Some(&format!("{}-limit", new_limit)));
+            let mut new_params: HashMap<&str, String> = params
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.clone()))
+                .collect();
+            new_params.insert("limit", new_limit.to_string());
+            web.set_target(&link, &new_params)
+                .or(Err("Can't set lower limit search URL"))?;
+            more_more
+                .append_child(&link)
+                .or(Err("Can't add lower-limit link"))?;
+            more_more
+                .append_with_str_1(" ")
+                .or(Err("Can't add space"))?;
+        }
+        // Add a higher-limit link
+        let mut n = old_limit;
+        loop {
+            n += 1;
+            if PrimeLimit::new(n).pitches.len() != old_dimension {
+                // Distinct prime limit
                 let link = web
                     .document
                     .create_element("a")
                     .or(Err("Can't make link"))?;
-                link.set_text_content(Some(&format!("{}-limit", new_limit)));
+                link.set_text_content(Some(&format!("{}-limit", n)));
                 let mut new_params: HashMap<&str, String> = params
                     .iter()
                     .map(|(k, v)| (k.as_str(), v.clone()))
                     .collect();
-                new_params.insert("limit", new_limit.to_string());
+                new_params.insert("limit", n.to_string());
                 web.set_target(&link, &new_params)
-                    .or(Err("Can't set lower limit search URL"))?;
+                    .or(Err("Can't set higher limit search URL"))?;
                 more_more
                     .append_child(&link)
-                    .or(Err("Can't add lower-limit link"))?;
-                more_more
-                    .append_with_str_1(" ")
-                    .or(Err("Can't add space"))?;
-            }
-            // Add a higher-limit link
-            let mut n = old_limit;
-            loop {
-                n += 1;
-                if PrimeLimit::new(n).pitches.len() != old_dimension {
-                    // Distinct prime limit
-                    let link = web
-                        .document
-                        .create_element("a")
-                        .or(Err("Can't make link"))?;
-                    link.set_text_content(Some(&format!("{}-limit", n)));
-                    let mut new_params: HashMap<&str, String> = params
-                        .iter()
-                        .map(|(k, v)| (k.as_str(), v.clone()))
-                        .collect();
-                    new_params.insert("limit", n.to_string());
-                    web.set_target(&link, &new_params)
-                        .or(Err("Can't set higher limit search URL"))?;
-                    more_more
-                        .append_child(&link)
-                        .or(Err("Can't add higher-limit link"))?;
-                    break;
-                }
+                    .or(Err("Can't add higher-limit link"))?;
+                break;
             }
         }
     }
@@ -421,9 +414,8 @@ fn unison_vector_search(
         if highest_rank == 1 { 1 } else { n_results },
     );
     let list = web
-        .element("temperament-list")
+        .emptied_element("temperament-list")
         .ok_or("Couldn't find list for results")?;
-    list.set_inner_html("");
     web.set_body_class("show-list");
     show_equal_temperaments(web, &list, &limit, mappings.iter())
         .or(Err("Failed to display equal temperaments"))?;
@@ -702,7 +694,7 @@ fn show_et(
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
-    if let Some(field) = web.element("et-unison-vectors") {
+    if let Some(field) = web.emptied_element("et-unison-vectors") {
         list_unison_vectors(web, limit, &rt, &field)?;
     }
 
@@ -812,7 +804,7 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
-    if let Some(field) = web.element("rt-unison-vectors") {
+    if let Some(field) = web.emptied_element("rt-unison-vectors") {
         list_unison_vectors(web, limit, &rt, &field)?;
     }
 
@@ -901,7 +893,6 @@ fn list_unison_vectors(
     rt: &TETemperament,
     field: &Element,
 ) -> Exceptionable {
-    field.set_inner_html("");
     let rank = rt.rank();
     let dimension = limit.pitches.len();
     let list = web.document.create_element("ul")?;
@@ -950,11 +941,9 @@ fn et_name(limit: &PrimeLimit, et: &ETMap) -> String {
 
 /// An accordion is an instrument with buttons
 fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
-    let accordion = match web.element("rt-accordion") {
-        Some(result) => result,
-        None => return Ok(()),
+    let Some(accordion) = web.emptied_element("rt-accordion") else {
+        return Ok(());
     };
-    accordion.set_inner_html("");
     let rank = rt.melody.len();
     if rank != 2 {
         return Ok(());

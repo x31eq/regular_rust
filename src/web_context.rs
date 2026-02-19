@@ -29,6 +29,12 @@ impl WebContext {
         self.document.get_element_by_id(id)
     }
 
+    pub fn emptied_element(&self, id: &str) -> Option<Element> {
+        let e = self.document.get_element_by_id(id)?;
+        e.set_inner_html("");
+        Some(e)
+    }
+
     pub fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
         if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
