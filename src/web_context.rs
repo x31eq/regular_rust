@@ -30,13 +30,13 @@ impl WebContext {
     }
 
     pub fn emptied_element(&self, id: &str) -> Option<Element> {
-        let e = self.document.get_element_by_id(id)?;
+        let element = self.document.get_element_by_id(id)?;
         // If this has download links, clean them up to avoid memory leaks
-        if revoke_blobs_in_subtree(&e).is_err() {
+        if revoke_blobs_in_subtree(&element).is_err() {
             self.log_error("Couldn't clean up downloadable files");
         }
-        e.set_inner_html("");
-        Some(e)
+        element.set_inner_html("");
+        Some(element)
     }
 
     pub fn input_value(&self, id: &str) -> Option<String> {
