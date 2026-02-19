@@ -517,5 +517,8 @@ pub mod wasm;
 #[cfg(target_arch = "wasm32")]
 pub mod web_context;
 
+#[cfg(target_arch = "wasm32")]
+pub mod accordion;
+
 #[cfg(test)]
 mod tests;
