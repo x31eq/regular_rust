@@ -858,7 +858,7 @@ fn show_rt(
                 &unstretched_rt,
                 &steps,
                 &temperament_name,
-                "POTE",
+                "Unstretched",
             )?;
         }
     }
