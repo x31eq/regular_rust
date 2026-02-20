@@ -814,12 +814,31 @@ fn show_rt(
     }
 
     if let Some(field) = web.emptied_element("rt-scala-files") {
-        let new_link = web.make_download_link(
-            "test file",
-            "test.scl",
-            "This is a test of a feature that one day will be a Scala file",
-        )?;
-        field.append_child(&new_link)?;
+        let steps: Vec<Exponent> =
+            rt.mapping().iter().map(|row| row[0]).collect();
+        let temperament_name =
+            rt_name(limit, &rt).replace(' ', "").replace('&', "_");
+        let headers = web.document.create_element("tr")?;
+        headers.set_inner_html(&format!(
+            "<td></td><td colspan={}>Steps per octave</td></tr>",
+            steps.len(),
+        ));
+        field.append_child(&headers)?;
+        let line = web.document.create_element("tr")?;
+        let entry = web.document.create_element("td")?;
+        entry.set_text_content(Some("TE"));
+        line.append_child(&entry)?;
+        for n_notes in steps {
+            let entry = web.document.create_element("td")?;
+            let new_link = web.make_download_link(
+                &n_notes.to_string(),
+                &format!("{}_{}.scl", &temperament_name, n_notes),
+                &rt.scala_file(n_notes, &temperament_name),
+            )?;
+            entry.append_child(&new_link)?;
+            line.append_child(&entry)?;
+        }
+        field.append_child(&line)?;
     }
 
     if show_accordion(web, &rt).is_err()
