@@ -815,8 +815,7 @@ fn show_rt(
 
     let potential_top_rt = TOPTemperament::new(&limit.pitches, &mapping);
     if let Some(field) = web.emptied_element("rt-scala-files") {
-        let steps: Vec<Exponent> =
-            rt.mapping().iter().map(|row| row[0]).collect();
+        let steps: ETMap = rt.mapping().iter().map(|row| row[0]).collect();
         let temperament_name =
             rt_name(limit, &rt).replace(' ', "").replace('&', "_");
         let headers = web.document.create_element("tr")?;
@@ -825,37 +824,16 @@ fn show_rt(
             steps.len(),
         ));
         field.append_child(&headers)?;
-        let line = web.document.create_element("tr")?;
-        let entry = web.document.create_element("td")?;
-        entry.set_text_content(Some("TE"));
-        line.append_child(&entry)?;
-        for &n_notes in &steps {
-            let entry = web.document.create_element("td")?;
-            let new_link = web.make_download_link(
-                &n_notes.to_string(),
-                &format!("{}_{}.scl", &temperament_name, n_notes),
-                &rt.scala_file(n_notes, &temperament_name),
-            )?;
-            entry.append_child(&new_link)?;
-            line.append_child(&entry)?;
-        }
-        field.append_child(&line)?;
+        show_scala_files(web, &field, &rt, &steps, &temperament_name, "TE")?;
         if let Ok(ref top_rt) = potential_top_rt {
-            let line = web.document.create_element("tr")?;
-            let entry = web.document.create_element("td")?;
-            entry.set_text_content(Some("TOP"));
-            line.append_child(&entry)?;
-            for n_notes in steps {
-                let entry = web.document.create_element("td")?;
-                let new_link = web.make_download_link(
-                    &n_notes.to_string(),
-                    &format!("{}_{}.scl", &temperament_name, n_notes),
-                    &top_rt.scala_file(n_notes, &temperament_name),
-                )?;
-                entry.append_child(&new_link)?;
-                line.append_child(&entry)?;
-            }
-            field.append_child(&line)?;
+            show_scala_files(
+                web,
+                &field,
+                top_rt,
+                &steps,
+                &temperament_name,
+                "TOP",
+            )?;
         }
     }
 
@@ -965,6 +943,32 @@ fn list_unison_vectors(
         list.append_child(&item)?;
     }
     field.append_child(&list)?;
+    Ok(())
+}
+
+fn show_scala_files(
+    web: &WebContext,
+    table: &Element,
+    rt: &impl TunedTemperament,
+    steps: &ETMap,
+    temperament_name: &str,
+    tuning_name: &str,
+) -> Exceptionable {
+    let line = web.document.create_element("tr")?;
+    let entry = web.document.create_element("td")?;
+    entry.set_text_content(Some(tuning_name));
+    line.append_child(&entry)?;
+    for &n_notes in steps {
+        let entry = web.document.create_element("td")?;
+        let new_link = web.make_download_link(
+            &n_notes.to_string(),
+            &format!("{}_{}.scl", &temperament_name, n_notes),
+            &rt.scala_file(n_notes, &temperament_name),
+        )?;
+        entry.append_child(&new_link)?;
+        line.append_child(&entry)?;
+    }
+    table.append_child(&line)?;
     Ok(())
 }
 
