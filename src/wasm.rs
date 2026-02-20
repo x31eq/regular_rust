@@ -813,6 +813,7 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
     }
 
+    let potential_top_rt = TOPTemperament::new(&limit.pitches, &mapping);
     if let Some(field) = web.emptied_element("rt-scala-files") {
         let steps: Vec<Exponent> =
             rt.mapping().iter().map(|row| row[0]).collect();
@@ -828,7 +829,7 @@ fn show_rt(
         let entry = web.document.create_element("td")?;
         entry.set_text_content(Some("TE"));
         line.append_child(&entry)?;
-        for n_notes in steps {
+        for &n_notes in &steps {
             let entry = web.document.create_element("td")?;
             let new_link = web.make_download_link(
                 &n_notes.to_string(),
@@ -839,6 +840,23 @@ fn show_rt(
             line.append_child(&entry)?;
         }
         field.append_child(&line)?;
+        if let Ok(ref top_rt) = potential_top_rt {
+            let line = web.document.create_element("tr")?;
+            let entry = web.document.create_element("td")?;
+            entry.set_text_content(Some("TOP"));
+            line.append_child(&entry)?;
+            for n_notes in steps {
+                let entry = web.document.create_element("td")?;
+                let new_link = web.make_download_link(
+                    &n_notes.to_string(),
+                    &format!("{}_{}.scl", &temperament_name, n_notes),
+                    &top_rt.scala_file(n_notes, &temperament_name),
+                )?;
+                entry.append_child(&new_link)?;
+                line.append_child(&entry)?;
+            }
+            field.append_child(&line)?;
+        }
     }
 
     if show_accordion(web, &rt).is_err()
@@ -865,7 +883,7 @@ fn show_rt(
     }
 
     // Now do it all again with TOP
-    if let Ok(rt) = TOPTemperament::new(&limit.pitches, &mapping) {
+    if let Ok(ref rt) = potential_top_rt {
         if let Some(table) = web.element("rt-top-steps") {
             write_float_row(web, &table, &rt.tuning, 4)?;
         }
