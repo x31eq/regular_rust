@@ -4,7 +4,7 @@ use na::DMatrix;
 use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
 use super::temperament_class::TemperamentClass;
 use super::tuned_temperament::TunedTemperament;
-use super::{Cents, ETMap, Exponent, Mapping, Tuning};
+use super::{Cents, ETMap, Mapping, Tuning};
 
 pub struct TETemperament<'a> {
     plimit: &'a [Cents],
@@ -103,15 +103,6 @@ impl<'a> TETemperament<'a> {
     pub fn unison_vectors(&self, n_results: usize) -> Mapping {
         let tc = CangwuTemperament::new(self.plimit, &self.melody);
         tc.unison_vectors(self.error(), n_results)
-    }
-
-    /// This might not actually be a periodicity block
-    /// because there's no check on n_pitches
-    pub fn fokker_block_pitches(&self, n_pitches: Exponent) -> Tuning {
-        self.fokker_block_steps(n_pitches)
-            .iter()
-            .map(|interval| self.pitch_from_steps(interval))
-            .collect()
     }
 }
 

@@ -1,6 +1,6 @@
 extern crate nalgebra as na;
 use super::temperament_class::TemperamentClass;
-use super::{Cents, ETSlice, Tuning, map};
+use super::{Cents, ETSlice, Exponent, Tuning, map};
 use na::{DMatrix, DVector};
 
 pub trait TunedTemperament: TemperamentClass {
@@ -62,5 +62,14 @@ pub trait TunedTemperament: TemperamentClass {
 
     fn pitch_from_primes(&self, interval: &ETSlice) -> Cents {
         self.pitch_from_steps(&self.generators_from_primes(interval))
+    }
+
+    /// This might not actually be a periodicity block
+    /// because there's no check on n_pitches
+    fn fokker_block_pitches(&self, n_pitches: Exponent) -> Tuning {
+        self.fokker_block_steps(n_pitches)
+            .iter()
+            .map(|interval| self.pitch_from_steps(interval))
+            .collect()
     }
 }
