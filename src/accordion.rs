@@ -20,7 +20,7 @@ pub fn show_accordion(
     let mut diatonic_steps = 0;
     let mut pitch_stack = vec![tonic.clone()];
     let mut grid = Vec::new();
-    let octaves: ETMap = map(|m| m[0], &rt.mapping());
+    let octaves: ETMap = map(|m| m[0], rt.mapping());
     let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
     let chromatic_dimension = 1 - diatonic_dimension;
     for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
