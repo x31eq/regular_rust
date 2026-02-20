@@ -4,6 +4,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::{JsValue, wasm_bindgen};
 use web_sys::{Element, Event, HtmlInputElement};
 
+use super::accordion::show_accordion;
 use super::cangwu::{
     CangwuTemperament, ambiguous_et, get_equal_temperaments,
     higher_rank_search,
@@ -18,14 +19,14 @@ use super::tuned_temperament::TunedTemperament;
 use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
 use super::web_context::{Exceptionable, WebContext};
 use super::{
-    Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, join,
-    map, normalize_positive, warted_et_name,
+    Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, map,
+    normalize_positive, warted_et_name,
 };
 
 #[wasm_bindgen]
 pub fn general_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "pregular".to_string())]);
     // The search will fail if this is missing, but the URL
     // should make it clear why
@@ -45,7 +46,7 @@ pub fn general_form_submit(evt: Event) {
 #[wasm_bindgen]
 pub fn uv_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "uv".to_string())]);
     // This is optional for the UV search
     if let Some(limit) = web.input_value("uv-limit") {
@@ -69,7 +70,7 @@ pub fn uv_form_submit(evt: Event) {
 #[wasm_bindgen]
 pub fn net_form_submit(evt: Event) {
     evt.prevent_default();
-    let web = WebContext::new();
+    let web = WebContext::init();
     let mut params = HashMap::from([("page", "rt".to_string())]);
     if let Some(limit) = web.input_value("net-limit") {
         params.insert("limit", limit.trim().to_string());
@@ -190,14 +191,11 @@ pub fn hash_change(_evt: Event) {
 /// Plain <noscript> tags don't show up when scripting is disabled.
 /// If this is called, it must be working, so hide the message.
 fn clear_noscript() {
-    let web = WebContext::new();
-    if let Some(message) = web.element("noscript") {
-        message.set_inner_html("");
-    }
+    WebContext::init().emptied_element("noscript");
 }
 
 fn process_hash() {
-    let web = WebContext::new();
+    let web = WebContext::init();
     let params = web.get_url_params();
     if let Err(e) = {
         match params.get("page").map(String::as_str) {
@@ -285,9 +283,8 @@ fn regular_temperament_search(
     let mappings =
         get_equal_temperaments(&limit.pitches, ek, n_results + safety);
     let list = web
-        .element("temperament-list")
+        .emptied_element("temperament-list")
         .ok_or("Couldn't find list for results")?;
-    list.set_inner_html("");
     web.set_body_class("show-list");
     show_equal_temperaments(
         web,
@@ -334,61 +331,58 @@ fn other_searches(
         web.set_target(&link, &new_params)
             .or(Err("Failed to set more accurate search link"))?;
     }
-    if let Some(more_more) = web.element("more-more") {
-        more_more.set_inner_html("");
-        if let Some(limit) = params.get("limit")
-            && let Ok(old_limit) = limit.parse()
+    if let Some(more_more) = web.emptied_element("more-more")
+        && let Some(limit) = params.get("limit")
+        && let Ok(old_limit) = limit.parse()
+    {
+        let old_plimit = PrimeLimit::new(old_limit);
+        let old_dimension = old_plimit.pitches.len();
+        // Add a lower-limit link
+        if old_dimension > 2
+            && !params.contains_key("uvs")
+            && let Some(new_limit) = old_plimit.headings.iter().rev().nth(1)
         {
-            let old_plimit = PrimeLimit::new(old_limit);
-            let old_dimension = old_plimit.pitches.len();
-            // Add a lower-limit link
-            if old_dimension > 2
-                && !params.contains_key("uvs")
-                && let Some(new_limit) =
-                    old_plimit.headings.iter().rev().nth(1)
-            {
+            let link = web
+                .document
+                .create_element("a")
+                .or(Err("Can't make link"))?;
+            link.set_text_content(Some(&format!("{}-limit", new_limit)));
+            let mut new_params: HashMap<&str, String> = params
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.clone()))
+                .collect();
+            new_params.insert("limit", new_limit.to_string());
+            web.set_target(&link, &new_params)
+                .or(Err("Can't set lower limit search URL"))?;
+            more_more
+                .append_child(&link)
+                .or(Err("Can't add lower-limit link"))?;
+            more_more
+                .append_with_str_1(" ")
+                .or(Err("Can't add space"))?;
+        }
+        // Add a higher-limit link
+        let mut n = old_limit;
+        loop {
+            n += 1;
+            if PrimeLimit::new(n).pitches.len() != old_dimension {
+                // Distinct prime limit
                 let link = web
                     .document
                     .create_element("a")
                     .or(Err("Can't make link"))?;
-                link.set_text_content(Some(&format!("{}-limit", new_limit)));
+                link.set_text_content(Some(&format!("{}-limit", n)));
                 let mut new_params: HashMap<&str, String> = params
                     .iter()
                     .map(|(k, v)| (k.as_str(), v.clone()))
                     .collect();
-                new_params.insert("limit", new_limit.to_string());
+                new_params.insert("limit", n.to_string());
                 web.set_target(&link, &new_params)
-                    .or(Err("Can't set lower limit search URL"))?;
+                    .or(Err("Can't set higher limit search URL"))?;
                 more_more
                     .append_child(&link)
-                    .or(Err("Can't add lower-limit link"))?;
-                more_more
-                    .append_with_str_1(" ")
-                    .or(Err("Can't add space"))?;
-            }
-            // Add a higher-limit link
-            let mut n = old_limit;
-            loop {
-                n += 1;
-                if PrimeLimit::new(n).pitches.len() != old_dimension {
-                    // Distinct prime limit
-                    let link = web
-                        .document
-                        .create_element("a")
-                        .or(Err("Can't make link"))?;
-                    link.set_text_content(Some(&format!("{}-limit", n)));
-                    let mut new_params: HashMap<&str, String> = params
-                        .iter()
-                        .map(|(k, v)| (k.as_str(), v.clone()))
-                        .collect();
-                    new_params.insert("limit", n.to_string());
-                    web.set_target(&link, &new_params)
-                        .or(Err("Can't set higher limit search URL"))?;
-                    more_more
-                        .append_child(&link)
-                        .or(Err("Can't add higher-limit link"))?;
-                    break;
-                }
+                    .or(Err("Can't add higher-limit link"))?;
+                break;
             }
         }
     }
@@ -421,9 +415,8 @@ fn unison_vector_search(
         if highest_rank == 1 { 1 } else { n_results },
     );
     let list = web
-        .element("temperament-list")
+        .emptied_element("temperament-list")
         .ok_or("Couldn't find list for results")?;
-    list.set_inner_html("");
     web.set_body_class("show-list");
     show_equal_temperaments(web, &list, &limit, mappings.iter())
         .or(Err("Failed to display equal temperaments"))?;
@@ -702,7 +695,7 @@ fn show_et(
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
-    if let Some(field) = web.element("et-unison-vectors") {
+    if let Some(field) = web.emptied_element("et-unison-vectors") {
         list_unison_vectors(web, limit, &rt, &field)?;
     }
 
@@ -812,12 +805,62 @@ fn show_rt(
         field.set_text_content(Some(&format!("{:.6}", rt.error())));
     }
 
-    if let Some(field) = web.element("rt-unison-vectors") {
+    if let Some(field) = web.emptied_element("rt-unison-vectors") {
         list_unison_vectors(web, limit, &rt, &field)?;
     }
 
     if let Some(field) = web.element("error") {
         field.set_text_content(Some(&format!("{:.6}", rt.adjusted_error())));
+    }
+
+    let potential_top_rt = TOPTemperament::new(&limit.pitches, &mapping);
+    if let Some(field) = web.emptied_element("rt-scala-files") {
+        let steps: ETMap = rt.mapping().iter().map(|row| row[0]).collect();
+        let temperament_name =
+            rt_name(limit, &rt).replace(' ', "").replace('&', "_");
+        let headers = web.document.create_element("tr")?;
+        headers.set_inner_html(&format!(
+            "<td></td><td colspan={}>Steps per octave</td></tr>",
+            steps.len(),
+        ));
+        field.append_child(&headers)?;
+        show_scala_files(web, &field, &rt, &steps, &temperament_name, "TE")?;
+        let pote_rt = TETemperament {
+            plimit: rt.plimit(),
+            melody: rt.melody.clone(),
+            tuning: rt.unstretched_tuning(),
+        };
+        show_scala_files(
+            web,
+            &field,
+            &pote_rt,
+            &steps,
+            &temperament_name,
+            "POTE",
+        )?;
+        if let Ok(ref top_rt) = potential_top_rt {
+            show_scala_files(
+                web,
+                &field,
+                top_rt,
+                &steps,
+                &temperament_name,
+                "TOP",
+            )?;
+            let unstretched_rt = TETemperament {
+                plimit: top_rt.plimit(),
+                melody: top_rt.melody.clone(),
+                tuning: top_rt.unstretched_tuning(),
+            };
+            show_scala_files(
+                web,
+                &field,
+                &unstretched_rt,
+                &steps,
+                &temperament_name,
+                "POTE",
+            )?;
+        }
     }
 
     if show_accordion(web, &rt).is_err()
@@ -844,7 +887,7 @@ fn show_rt(
     }
 
     // Now do it all again with TOP
-    if let Ok(rt) = TOPTemperament::new(&limit.pitches, &mapping) {
+    if let Ok(ref rt) = potential_top_rt {
         if let Some(table) = web.element("rt-top-steps") {
             write_float_row(web, &table, &rt.tuning, 4)?;
         }
@@ -901,7 +944,6 @@ fn list_unison_vectors(
     rt: &TETemperament,
     field: &Element,
 ) -> Exceptionable {
-    field.set_inner_html("");
     let rank = rt.rank();
     let dimension = limit.pitches.len();
     let list = web.document.create_element("ul")?;
@@ -930,6 +972,32 @@ fn list_unison_vectors(
     Ok(())
 }
 
+fn show_scala_files(
+    web: &WebContext,
+    table: &Element,
+    rt: &impl TunedTemperament,
+    steps: &ETMap,
+    temperament_name: &str,
+    tuning_name: &str,
+) -> Exceptionable {
+    let line = web.document.create_element("tr")?;
+    let entry = web.document.create_element("td")?;
+    entry.set_text_content(Some(tuning_name));
+    line.append_child(&entry)?;
+    for &n_notes in steps {
+        let entry = web.document.create_element("td")?;
+        let new_link = web.make_download_link(
+            &n_notes.to_string(),
+            &format!("{}_{}.scl", &temperament_name, n_notes),
+            &rt.scala_file(n_notes, temperament_name),
+        )?;
+        entry.append_child(&new_link)?;
+        line.append_child(&entry)?;
+    }
+    table.append_child(&line)?;
+    Ok(())
+}
+
 fn rt_name(limit: &PrimeLimit, rt: &TETemperament) -> String {
     if let Some(name) = rt.name(limit) {
         name.to_string()
@@ -946,96 +1014,4 @@ fn et_name(limit: &PrimeLimit, et: &ETMap) -> String {
     } else {
         et[0].to_string()
     }
-}
-
-/// An accordion is an instrument with buttons
-fn show_accordion(web: &WebContext, rt: &TETemperament) -> Exceptionable {
-    let accordion = match web.element("rt-accordion") {
-        Some(result) => result,
-        None => return Ok(()),
-    };
-    accordion.set_inner_html("");
-    let rank = rt.melody.len();
-    if rank != 2 {
-        return Ok(());
-    }
-    let tonic: ETMap = (0..rank).map(|_| 0).collect();
-    let mut diatonic_steps = 0;
-    let mut pitch_stack = vec![tonic.clone()];
-    let mut grid = Vec::new();
-    let octaves: ETMap = map(|m| m[0], &rt.melody);
-    let diatonic_dimension = if octaves[0] < octaves[1] { 0 } else { 1 };
-    let chromatic_dimension = 1 - diatonic_dimension;
-    for pitch in rt.fokker_block_steps(octaves.iter().sum()) {
-        if pitch[diatonic_dimension] == diatonic_steps {
-            pitch_stack.push(pitch);
-        } else {
-            diatonic_steps = pitch[diatonic_dimension];
-            grid.push(pitch_stack.clone());
-            pitch_stack = vec![pitch];
-        }
-    }
-    if diatonic_steps > 100 {
-        // Don't show an overly complex accordion
-        return Ok(());
-    }
-    grid.push(pitch_stack);
-
-    let drift = (octaves[chromatic_dimension] as f64)
-        / (octaves[diatonic_dimension] as f64);
-    let margin_for_pitch = |pitch: &ETMap| {
-        drift * (pitch[diatonic_dimension] as f64)
-            - pitch[chromatic_dimension] as f64
-    };
-    let mut min_margin = 1e99;
-    for pitch_stack in grid.iter() {
-        if let Some(pitch) = pitch_stack.iter().last() {
-            let margin = margin_for_pitch(pitch);
-            if margin < min_margin {
-                min_margin = margin;
-            }
-        }
-    }
-
-    // give up on styling and use a table
-    let table = web.document.create_element("table")?;
-    let row = web.document.create_element("tr")?;
-    for mut pitch_stack in grid {
-        // The Fokker block calculation might return duplicate pitches
-        // but they should at least be in the right order
-        pitch_stack.dedup();
-        let column = web.document.create_element("td")?;
-        // Buttons are added top-down
-        for (i, pitch) in pitch_stack.iter().rev().enumerate() {
-            let button = accordion_button(web, rt, pitch)?;
-            if i == 0 {
-                let button_height = 3.0;
-                let margin = margin_for_pitch(pitch) - min_margin;
-                button.set_attribute(
-                    "style",
-                    &format!("margin-top: {:.1}em", margin * button_height),
-                )?;
-            }
-            column.append_child(&button)?;
-        }
-        row.append_child(&column)?;
-    }
-    table.append_child(&row)?;
-    accordion.append_child(&table)?;
-    Ok(())
-}
-
-fn accordion_button(
-    web: &WebContext,
-    rt: &TETemperament,
-    pitch: &[Exponent],
-) -> Result<Element, JsValue> {
-    let button = web.document.create_element("button")?;
-    button.set_attribute("data-steps", &join("_", pitch))?;
-    button.set_text_content(Some(&join(", ", pitch)));
-    let pitch = rt.pitch_from_steps(pitch);
-    // Tonic is middle C for now
-    let freq = 264.0 * 2.0_f64.powf(pitch / 12e2);
-    button.set_attribute("data-freq", &format!("{:.6}", freq))?;
-    Ok(button)
 }

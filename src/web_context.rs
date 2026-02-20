@@ -1,8 +1,10 @@
-use js_sys::decode_uri;
+use js_sys::{Array, Uint8Array, decode_uri};
 use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::JsValue;
-use web_sys::{Element, HtmlInputElement, HtmlTextAreaElement, console};
+use web_sys::{
+    Blob, Element, HtmlInputElement, HtmlTextAreaElement, Url, console,
+};
 
 pub type Exceptionable = Result<(), JsValue>;
 
@@ -11,7 +13,7 @@ pub struct WebContext {
 }
 
 impl WebContext {
-    pub fn new() -> Self {
+    pub fn init() -> Self {
         let window = web_sys::window().expect("no window");
         let document = window.document().expect("no document");
         WebContext { document }
@@ -27,13 +29,19 @@ impl WebContext {
         self.document.get_element_by_id(id)
     }
 
+    pub fn emptied_element(&self, id: &str) -> Option<Element> {
+        let element = self.document.get_element_by_id(id)?;
+        // If this has download links, clean them up to avoid memory leaks
+        if revoke_blobs_in_subtree(&element).is_err() {
+            self.log_error("Couldn't clean up downloadable files");
+        }
+        element.set_inner_html("");
+        Some(element)
+    }
+
     pub fn input_value(&self, id: &str) -> Option<String> {
         let element = self.element(id)?;
         if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>() {
-            return Some(text_area.value());
-        } else if let Some(text_area) =
-            element.dyn_ref::<HtmlTextAreaElement>()
-        {
             return Some(text_area.value());
         }
         let input_element = element.dyn_ref::<HtmlInputElement>()?;
@@ -125,7 +133,45 @@ impl WebContext {
         result
     }
 
+    /// Make a link to trigger a file download
+    pub fn make_download_link(
+        &self,
+        label: &str,
+        filename: &str,
+        contents: &str,
+    ) -> Result<Element, JsValue> {
+        let bytes = Uint8Array::from(contents.as_bytes());
+        let parts = Array::new();
+        parts.push(&bytes.buffer());
+
+        let blob = Blob::new_with_u8_array_sequence(&parts)?;
+        let url = Url::create_object_url_with_blob(&blob)?;
+
+        let link = self.document.create_element("a")?;
+        link.set_attribute("href", &url)?;
+        link.set_attribute("download", filename)?;
+        link.set_attribute("data-blob-url", &url)?;
+        link.set_text_content(Some(label));
+
+        Ok(link)
+    }
+
     pub fn log_error(&self, message: &str) {
         console::error_1(&message.into());
     }
+}
+
+/// Cleanup for contents of download links that use browser memory.
+/// Generic function that doesn't actually use WebContext.
+fn revoke_blobs_in_subtree(root: &Element) -> Exceptionable {
+    let nodes = root.query_selector_all("[data-blob-url]")?;
+    for i in 0..nodes.length() {
+        if let Some(node) = nodes.item(i) {
+            let element: Element = node.dyn_into()?;
+            if let Some(url) = element.get_attribute("data-blob-url") {
+                let _ = Url::revoke_object_url(&url);
+            }
+        }
+    }
+    Ok(())
 }
