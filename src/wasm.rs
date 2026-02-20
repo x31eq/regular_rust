@@ -825,6 +825,19 @@ fn show_rt(
         ));
         field.append_child(&headers)?;
         show_scala_files(web, &field, &rt, &steps, &temperament_name, "TE")?;
+        let pote_rt = TETemperament {
+            plimit: rt.plimit(),
+            melody: rt.melody.clone(),
+            tuning: rt.unstretched_tuning(),
+        };
+        show_scala_files(
+            web,
+            &field,
+            &pote_rt,
+            &steps,
+            &temperament_name,
+            "POTE",
+        )?;
         if let Ok(ref top_rt) = potential_top_rt {
             show_scala_files(
                 web,
@@ -833,6 +846,19 @@ fn show_rt(
                 &steps,
                 &temperament_name,
                 "TOP",
+            )?;
+            let unstretched_rt = TETemperament {
+                plimit: top_rt.plimit(),
+                melody: top_rt.melody.clone(),
+                tuning: top_rt.unstretched_tuning(),
+            };
+            show_scala_files(
+                web,
+                &field,
+                &unstretched_rt,
+                &steps,
+                &temperament_name,
+                "POTE",
             )?;
         }
     }

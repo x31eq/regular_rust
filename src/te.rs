@@ -7,7 +7,7 @@ use super::tuned_temperament::TunedTemperament;
 use super::{Cents, ETMap, Mapping, Tuning};
 
 pub struct TETemperament<'a> {
-    plimit: &'a [Cents],
+    pub plimit: &'a [Cents],
     pub melody: Mapping,
     pub tuning: Tuning,
 }
