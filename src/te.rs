@@ -331,7 +331,7 @@ fn tuned_block() {
 fn scala_file() {
     let limit11 = super::PrimeLimit::new(11);
     let content = make_marvel(&limit11).scala_file(22, "Magic");
-    let expected = r#"! regular.scl
+    let expected = r#"! Magic_22.scl
 !
 22 note scale for some Magic temperament.
 ! fokker block

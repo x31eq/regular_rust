@@ -81,7 +81,7 @@ pub trait TunedTemperament: TemperamentClass {
             .collect::<Vec<_>>()
             .join("\r\n");
         format!(
-            "! regular.scl\r\n\
+            "! {name}_{n_notes}.scl\r\n\
              !\r\n\
              {n_notes} note scale for some {name} temperament.\r\n\
              ! fokker block\r\n\
