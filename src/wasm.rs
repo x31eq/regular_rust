@@ -989,7 +989,7 @@ fn show_scala_files(
         let new_link = web.make_download_link(
             &n_notes.to_string(),
             &format!("{}_{}.scl", &temperament_name, n_notes),
-            &rt.scala_file(n_notes, &temperament_name),
+            &rt.scala_file(n_notes, temperament_name),
         )?;
         entry.append_child(&new_link)?;
         line.append_child(&entry)?;
