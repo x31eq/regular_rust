@@ -5,7 +5,10 @@ use wasm_bindgen::prelude::JsValue;
 use web_sys::Element;
 
 /// An accordion is an instrument with buttons
-pub fn show_accordion(web: &WebContext, rt: &impl TunedTemperament) -> Exceptionable {
+pub fn show_accordion(
+    web: &WebContext,
+    rt: &impl TunedTemperament,
+) -> Exceptionable {
     let Some(accordion) = web.emptied_element("rt-accordion") else {
         return Ok(());
     };
