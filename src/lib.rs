@@ -152,7 +152,7 @@ impl FromStr for PrimeLimit {
 /// The letters the start of the alphabet for prime limits
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
-    assert_ne!(et, vec![]);
+    debug_assert_ne!(et, vec![]);
     let warts = plimit.warts();
     let mut name = et[0].to_string();
     if plimit.headings[0] != "2" {
@@ -253,7 +253,7 @@ fn prime_warts() -> HashMap<String, char> {
     let mut result = HashMap::new();
     let mut next_wart = 'a';
     for p in primes_below(48).into_iter() {
-        assert_ne!(next_wart, 'p');
+        debug_assert_ne!(next_wart, 'p');
         result.insert(p.to_string(), next_wart);
         next_wart = next_char(next_wart);
     }
@@ -263,7 +263,7 @@ fn prime_warts() -> HashMap<String, char> {
 /// Next character in the sequence used for warts
 fn next_char(current: char) -> char {
     // The last harmonic wart is o, so p should never be requested
-    assert_ne!(current, 'p');
+    debug_assert_ne!(current, 'p');
     if current == 'z' {
         // The Python wrapped around to 'a' again,  but that can be
         // ambiguous and this code has to handle more primes, so
@@ -358,7 +358,7 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
         if let Some((row, &n)) =
             top_col.iter().enumerate().find(|&(ref _i, &n)| n != 0)
         {
-            assert!(n > 0);
+            debug_assert!(n > 0);
             for scol in col_iter {
                 let s = scol[row];
                 if s == 0 {
@@ -367,8 +367,8 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
                 for (x, y) in scol.iter_mut().zip(top_col.iter()) {
                     *x -= div_floor(s, n) * y;
                 }
-                assert!(scol[row] >= 0);
-                assert!(scol[row] < n);
+                debug_assert!(scol[row] >= 0);
+                debug_assert!(scol[row] < n);
             }
         }
     }
@@ -397,7 +397,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
     if row == nrows {
         return working;
     }
-    assert!(row < nrows);
+    debug_assert!(row < nrows);
 
     let mut reduced = Vec::new();
     loop {
@@ -423,7 +423,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
         let pivot = workings.next().expect("No pivot for echelon reduction");
         let pivot_element = pivot[row];
         // pivot_element must be non-zero or it would be in reduced
-        assert!(pivot_element != 0);
+        debug_assert!(pivot_element != 0);
         for col in workings {
             let n = col[row] / pivot_element;
             for (i, &x) in pivot.iter().enumerate() {

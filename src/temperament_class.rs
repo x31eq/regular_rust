@@ -111,7 +111,7 @@ fn fokker_block(n_pitches: Exponent, octaves: ETMap) -> Mapping {
     );
     (0..n_pitches)
         .map(|pitch| {
-            assert!(pitch >= 0);
+            debug_assert!(pitch >= 0);
             map(|scale| scale[pitch as usize], &scales)
         })
         .collect()
@@ -123,9 +123,9 @@ fn maximally_even(d: Exponent, n: Exponent, rotation: Exponent) -> ETMap {
         return Vec::new();
     }
     // Nothing can be negative because of the way / and % work
-    assert!(d > 0);
-    assert!(n >= 0);
-    assert!(rotation >= 0);
+    debug_assert!(d > 0);
+    debug_assert!(n >= 0);
+    debug_assert!(rotation >= 0);
     let mut raw_scale = (rotation..=d + rotation).map(|i| (i * n) / d);
     let tonic = raw_scale
         .next()

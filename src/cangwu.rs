@@ -36,7 +36,7 @@ fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
     let weighting_vec = map(|x| 1200.0 / x, plimit);
     let mut weighting =
         DMatrix::from_vec(dimension, 1, weighting_vec.clone());
-    assert!(rank > 0);
+    debug_assert!(rank > 0);
     for _ in 1..rank {
         weighting.extend(weighting_vec.clone());
     }
@@ -94,7 +94,7 @@ impl<'a> CangwuTemperament<'a> {
         let offset = scaling * m.row_mean();
         let offset_vec: Vec<_> = offset.iter().cloned().collect();
         let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
-        assert!(dimension > 0);
+        debug_assert!(dimension > 0);
         for _ in 1..dimension {
             translation.extend(offset_vec.clone());
         }
@@ -284,7 +284,7 @@ pub fn equal_temperament_badness(
     ek: Cents,
     mapping: &[Exponent],
 ) -> Cents {
-    assert_eq!(plimit.len(), mapping.len());
+    debug_assert_eq!(plimit.len(), mapping.len());
     // Put the primes in terms of octaves
     let plimit = map(|p| p / 12e2, plimit);
     // Get a dimensionless ek
@@ -411,7 +411,7 @@ impl<'a> MoreMappings<'a> {
     ///
     /// tot2: running total of w squared
     fn search(&mut self, i: usize, tot: f64, tot2: f64) {
-        assert!(self.mapping.len() == self.plimit.len());
+        debug_assert!(self.mapping.len() == self.plimit.len());
         let weighted_size =
             f64::from(self.mapping[i - 1]) / self.plimit[i - 1];
         let tot = tot + weighted_size;
