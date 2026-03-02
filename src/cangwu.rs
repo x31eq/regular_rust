@@ -803,6 +803,43 @@ fn marvel_ets() {
 }
 
 #[test]
+fn porcupine_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_porcupine(&limit11);
+
+    // Excessive accuracy gives stable results
+    let ets = octaves(&rt.get_belonging_ets(0.1, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![15, 22, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(4.0, 3));
+    assert_eq!(ets, vec![15, 7, 22]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![22, 15, 7, 37, 44, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![22, 15, 7, 37, 44, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![15, 22, 7, 37, 8, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(4.0, 6));
+    assert_eq!(ets, vec![15, 7, 22, 8, 37, 29]);
+}
+
+#[test]
 fn jove_ets() {
     let limit11 = super::PrimeLimit::new(11);
     let rt = make_jove(&limit11);
