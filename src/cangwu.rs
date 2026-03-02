@@ -782,8 +782,60 @@ fn porcupine_from_key() {
 fn marvel_ets() {
     let limit11 = super::PrimeLimit::new(11);
     let rt = make_marvel(&limit11);
+
     let ets = octaves(&rt.get_belonging_ets(1.0, 3));
     assert_eq!(ets, vec![31, 22, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![31, 22, 19]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![22, 9, 10]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![31, 22, 41, 72, 19, 53]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![31, 22, 19, 9, 10, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![22, 9, 10, 19, 31, 12]);
+}
+
+#[test]
+fn jove_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_jove(&limit11);
+
+    let ets = octaves(&rt.get_belonging_ets(0.1, 3));
+    assert_eq!(ets, vec![72, 31, 130]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 3));
+    assert_eq!(ets, vec![72, 31, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![31, 41, 27]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![31, 14, 27]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![14, 10, 31]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.1, 6));
+    assert_eq!(ets, vec![72, 31, 130, 41, 58, 99]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 6));
+    assert_eq!(ets, vec![72, 31, 41, 58, 130, 99]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![31, 41, 27, 72, 58, 14]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![31, 14, 27, 10, 41, 17]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![14, 10, 31, 4, 17, 27]);
 }
 
 #[cfg(test)]
