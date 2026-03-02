@@ -269,11 +269,12 @@ pub fn filtered_equal_temperaments(
     // Stop weird things happening for non-standard units
     let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
-    let mut results = PriorityQueue::new(n_results);
     // Start this conservatively assuming 90% of the results will be
     // filtered out
     let mut bmax = preliminary_badness(&plimit, ek, n_results * 10);
-    while results.len() < n_results {
+    loop {
+        // Make a new queue every time to avoid duplicates
+        let mut results = PriorityQueue::new(n_results);
         let mut n_notes = 1;
         let mut cap = bmax;
         while (f64::from(n_notes)) < cap / ek {
@@ -287,12 +288,14 @@ pub fn filtered_equal_temperaments(
             n_notes += 1;
             cap = cap.min(results.cap);
         }
-        // Filtered results can be harder to find,
-        // so the initial bmax guess might have been wrong
-        bmax *= 1.1;
+        if results.len() < n_results {
+            // Filtered results can be harder to find,
+            // so the initial bmax guess might have been wrong
+            bmax *= 1.1;
+        } else {
+            return results.extract().collect();
+        }
     }
-
-    results.extract().collect()
 }
 
 pub fn equal_temperament_badness(
@@ -889,7 +892,7 @@ fn na_naa_ets() {
     assert_eq!(ets, vec![12, 46, 58, 34]);
 
     let ets = octaves(&rt.get_belonging_ets(2.0, 5));
-    assert_eq!(ets, vec![12, 46, 58, 34, 104]);
+    assert_eq!(ets, vec![12, 46, 58, 34, 24]);
 }
 
 #[cfg(test)]
