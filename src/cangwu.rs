@@ -146,6 +146,21 @@ impl<'a> CangwuTemperament<'a> {
             .map(|uv| normalize_positive(self.plimit, uv))
             .collect()
     }
+
+    /// Get the best equal temperament mappings that belong to
+    /// the temperament class
+    ///
+    /// ek: The Cangwu parameter in cents/octave
+    ///
+    /// n_results: How many to return
+    pub fn get_belonging_ets(&self, ek: Cents, n_results: usize) -> Mapping {
+        filtered_equal_temperaments(
+            self.plimit,
+            |mapping| self.et_belongs(mapping),
+            ek,
+            n_results,
+        )
+    }
 }
 
 impl TemperamentClass for CangwuTemperament<'_> {
@@ -254,11 +269,12 @@ pub fn filtered_equal_temperaments(
     // Stop weird things happening for non-standard units
     let plimit = map(|p| 12e2 * (p / plimit[0]), plimit);
 
-    let mut results = PriorityQueue::new(n_results);
     // Start this conservatively assuming 90% of the results will be
     // filtered out
     let mut bmax = preliminary_badness(&plimit, ek, n_results * 10);
-    while results.len() < n_results {
+    loop {
+        // Make a new queue every time to avoid duplicates
+        let mut results = PriorityQueue::new(n_results);
         let mut n_notes = 1;
         let mut cap = bmax;
         while (f64::from(n_notes)) < cap / ek {
@@ -272,12 +288,15 @@ pub fn filtered_equal_temperaments(
             n_notes += 1;
             cap = cap.min(results.cap);
         }
+        if results.len() >= n_results {
+            // The PriorityQueue ensures the capacity is never exceeded
+            debug_assert!(results.len() == n_results);
+            return results.extract().collect();
+        }
         // Filtered results can be harder to find,
         // so the initial bmax guess might have been wrong
         bmax *= 1.1;
     }
-
-    results.extract().collect()
 }
 
 pub fn equal_temperament_badness(
@@ -761,6 +780,123 @@ fn porcupine_from_key() {
         Some(_) => (),
         None => assert!(false),
     }
+}
+
+#[test]
+fn marvel_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_marvel(&limit11);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![31, 22, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![31, 22, 19]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![22, 9, 10]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![31, 22, 41, 72, 19, 53]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![31, 22, 19, 9, 10, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![22, 9, 10, 19, 31, 12]);
+}
+
+#[test]
+fn porcupine_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_porcupine(&limit11);
+
+    // Excessive accuracy gives stable results
+    let ets = octaves(&rt.get_belonging_ets(0.1, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![22, 15, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![15, 22, 7]);
+
+    let ets = octaves(&rt.get_belonging_ets(4.0, 3));
+    assert_eq!(ets, vec![15, 7, 22]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![22, 15, 7, 37, 44, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![22, 15, 7, 37, 44, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![15, 22, 7, 37, 8, 29]);
+
+    let ets = octaves(&rt.get_belonging_ets(4.0, 6));
+    assert_eq!(ets, vec![15, 7, 22, 8, 37, 29]);
+}
+
+#[test]
+fn jove_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_jove(&limit11);
+
+    let ets = octaves(&rt.get_belonging_ets(0.1, 3));
+    assert_eq!(ets, vec![72, 31, 130]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 3));
+    assert_eq!(ets, vec![72, 31, 41]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![31, 41, 27]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 3));
+    assert_eq!(ets, vec![31, 14, 27]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 3));
+    assert_eq!(ets, vec![14, 10, 31]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.1, 6));
+    assert_eq!(ets, vec![72, 31, 130, 41, 58, 99]);
+
+    let ets = octaves(&rt.get_belonging_ets(0.3, 6));
+    assert_eq!(ets, vec![72, 31, 41, 58, 130, 99]);
+
+    let ets = octaves(&rt.get_belonging_ets(1.0, 6));
+    assert_eq!(ets, vec![31, 41, 27, 72, 58, 14]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![31, 14, 27, 10, 41, 17]);
+
+    let ets = octaves(&rt.get_belonging_ets(3.0, 6));
+    assert_eq!(ets, vec![14, 10, 31, 4, 17, 27]);
+}
+
+#[test]
+fn na_naa_ets() {
+    // Regression test with Na"Naa' ETs
+    let limit17 = super::PrimeLimit::new(17);
+    let mapping = vec![
+        vec![12, 19, 28, 34, 42, 45, 49],
+        vec![46, 73, 107, 129, 159, 170, 188],
+    ];
+    let rt = CangwuTemperament::new(&limit17.pitches, &mapping);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 4));
+    assert_eq!(ets, vec![12, 46, 58, 34]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 5));
+    assert_eq!(ets, vec![12, 46, 58, 34, 24]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![12, 46, 58, 34, 24, 70]);
 }
 
 #[cfg(test)]

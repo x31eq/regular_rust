@@ -164,6 +164,38 @@ fn uv_action(
     Ok(())
 }
 
+fn lowrank_action(
+    web: &WebContext,
+    params: &HashMap<String, String>,
+) -> Result<(), String> {
+    let (ets, limit, key) =
+        parse_rt_params(params).ok_or("Missing parameter")?;
+    web.set_input_value("prime-limit", &limit);
+    let limit = limit
+        .parse::<PrimeLimit>()
+        .or(Err("Unable to parse limit"))?;
+    let rt = match key {
+        Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
+        None => CangwuTemperament::from_name(&limit, &ets),
+    }
+    .ok_or("Couldn't generate the regular temperament!")?;
+    let ekm = if let Some(multiplier) = params.get("error") {
+        multiplier
+            .parse()
+            .or(Err("Unable to parse target error multiplier"))?
+    } else {
+        // Default (page 2) from the old interface
+        2.0
+    };
+    let nresults =
+        params.get("nresults").cloned().unwrap_or("10".to_string());
+    let nresults =
+        nresults.parse().or(Err("Failed to parse n of results"))?;
+    subset_search(web, rt, &limit, ekm, nresults)?;
+    other_searches(web, params, ekm)?;
+    Ok(())
+}
+
 /// Only needed for backwards compatibility for the short time when
 /// there was a different page for the net search
 fn net_action(
@@ -203,6 +235,7 @@ fn process_hash() {
             Some("pregular") => pregular_action(&web, &params),
             Some("uv") => uv_action(&web, &params),
             Some("net") => net_action(&web, &params),
+            Some("lowrank") => lowrank_action(&web, &params),
             _ => Ok(()),
         }
     } {
@@ -334,6 +367,7 @@ fn other_searches(
     if let Some(more_more) = web.emptied_element("more-more")
         && let Some(limit) = params.get("limit")
         && let Ok(old_limit) = limit.parse()
+        && params.get("page") != Some(&"lowrank".to_string())
     {
         let old_plimit = PrimeLimit::new(old_limit);
         let old_dimension = old_plimit.pitches.len();
@@ -435,6 +469,46 @@ fn unison_vector_search(
         );
         if !rts.is_empty() {
             show_regular_temperaments(web, &list, &limit, rts.iter(), rank)
+                .or(Err("Failed to display regular temperaments"))?
+        }
+    }
+    list.scroll_into_view();
+    Ok(())
+}
+
+fn subset_search(
+    web: &WebContext,
+    rt: CangwuTemperament,
+    limit: &PrimeLimit,
+    ek_multiplier: Cents,
+    n_results: usize,
+) -> Result<(), String> {
+    let te_rt = TETemperament::new(&limit.pitches, &rt.melody);
+    let ek = te_rt.error() * ek_multiplier;
+    let rank = rt.melody.len();
+    let mappings =
+        rt.get_belonging_ets(ek, if rank == 1 { 1 } else { n_results });
+    let list = web
+        .emptied_element("temperament-list")
+        .ok_or("Couldn't find list for results")?;
+    web.set_body_class("show-list");
+    show_equal_temperaments(web, &list, limit, mappings.iter())
+        .or(Err("Failed to display equal temperaments"))?;
+
+    if rank == 1 {
+        return Ok(());
+    }
+    let mut rts = map(|mapping| vec![mapping.clone()], &mappings);
+    for r in 2..(rank + 1) {
+        rts = higher_rank_search(
+            &limit.pitches,
+            &mappings,
+            &rts,
+            ek,
+            if r == rank { 1 } else { n_results },
+        );
+        if !rts.is_empty() {
+            show_regular_temperaments(web, &list, limit, rts.iter(), r)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
@@ -818,6 +892,7 @@ fn show_rt(
         let steps: ETMap = rt.mapping().iter().map(|row| row[0]).collect();
         let temperament_name =
             rt_name(limit, &rt).replace(' ', "").replace('&', "_");
+
         let headers = web.document.create_element("tr")?;
         headers.set_inner_html(&format!(
             "<td></td><td colspan={}>Steps per octave</td></tr>",
@@ -861,6 +936,18 @@ fn show_rt(
                 "Unstretched",
             )?;
         }
+    }
+
+    let ets = map(|et| et_name(limit, et), &rt.melody);
+    let params = HashMap::from([
+        ("ets", ets.join("_")),
+        ("limit", limit.label.clone()),
+    ]);
+    if let Some(link) = web.element("rt-subnet") {
+        let mut new_params = params.clone();
+        new_params.insert("page", "lowrank".to_string());
+        web.set_target(&link, &new_params)
+            .or(Err("Failed to set subnet search link"))?;
     }
 
     if show_accordion(web, &rt).is_err()
