@@ -288,13 +288,14 @@ pub fn filtered_equal_temperaments(
             n_notes += 1;
             cap = cap.min(results.cap);
         }
-        if results.len() < n_results {
-            // Filtered results can be harder to find,
-            // so the initial bmax guess might have been wrong
-            bmax *= 1.1;
-        } else {
+        if results.len() >= n_results {
+            // The PriorityQueue ensures the capacity is never exceeded
+            debug_assert!(results.len() == n_results);
             return results.extract().collect();
         }
+        // Filtered results can be harder to find,
+        // so the initial bmax guess might have been wrong
+        bmax *= 1.1;
     }
 }
 
