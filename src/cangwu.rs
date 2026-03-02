@@ -884,8 +884,12 @@ fn na_naa_ets() {
         vec![46, 73, 107, 129, 159, 170, 188],
     ];
     let rt = CangwuTemperament::new(&limit17.pitches, &mapping);
+
     let ets = octaves(&rt.get_belonging_ets(2.0, 4));
     assert_eq!(ets, vec![12, 46, 58, 34]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 5));
+    assert_eq!(ets, vec![12, 46, 58, 34, 104]);
 }
 
 #[cfg(test)]
