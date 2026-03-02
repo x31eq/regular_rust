@@ -890,6 +890,7 @@ fn show_rt(
         let steps: ETMap = rt.mapping().iter().map(|row| row[0]).collect();
         let temperament_name =
             rt_name(limit, &rt).replace(' ', "").replace('&', "_");
+
         let headers = web.document.create_element("tr")?;
         headers.set_inner_html(&format!(
             "<td></td><td colspan={}>Steps per octave</td></tr>",
@@ -933,6 +934,18 @@ fn show_rt(
                 "Unstretched",
             )?;
         }
+    }
+
+    let ets = map(|et| et_name(limit, et), &rt.melody);
+    let params = HashMap::from([
+        ("ets", ets.join("_")),
+        ("limit", limit.label.clone()),
+    ]);
+    if let Some(link) = web.element("rt-subnet") {
+        let mut new_params = params.clone();
+        new_params.insert("page", "lowrank".to_string());
+        web.set_target(&link, &new_params)
+            .or(Err("Failed to set subnet search link"))?;
     }
 
     if show_accordion(web, &rt).is_err()
