@@ -893,6 +893,9 @@ fn na_naa_ets() {
 
     let ets = octaves(&rt.get_belonging_ets(2.0, 5));
     assert_eq!(ets, vec![12, 46, 58, 34, 24]);
+
+    let ets = octaves(&rt.get_belonging_ets(2.0, 6));
+    assert_eq!(ets, vec![12, 46, 58, 34, 24, 70]);
 }
 
 #[cfg(test)]
