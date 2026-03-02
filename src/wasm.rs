@@ -490,7 +490,7 @@ fn subset_search(
         .emptied_element("temperament-list")
         .ok_or("Couldn't find list for results")?;
     web.set_body_class("show-list");
-    show_equal_temperaments(web, &list, &limit, mappings.iter())
+    show_equal_temperaments(web, &list, limit, mappings.iter())
         .or(Err("Failed to display equal temperaments"))?;
 
     if rank == 1 {
@@ -506,7 +506,7 @@ fn subset_search(
             if r == rank { 1 } else { n_results },
         );
         if !rts.is_empty() {
-            show_regular_temperaments(web, &list, &limit, rts.iter(), r)
+            show_regular_temperaments(web, &list, limit, rts.iter(), r)
                 .or(Err("Failed to display regular temperaments"))?
         }
     }
