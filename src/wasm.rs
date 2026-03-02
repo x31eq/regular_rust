@@ -366,6 +366,7 @@ fn other_searches(
     if let Some(more_more) = web.emptied_element("more-more")
         && let Some(limit) = params.get("limit")
         && let Ok(old_limit) = limit.parse()
+        && params.get("page") != Some(&"lowrank".to_string())
     {
         let old_plimit = PrimeLimit::new(old_limit);
         let old_dimension = old_plimit.pitches.len();
