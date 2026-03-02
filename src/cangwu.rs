@@ -875,6 +875,19 @@ fn jove_ets() {
     assert_eq!(ets, vec![14, 10, 31, 4, 17, 27]);
 }
 
+#[test]
+fn na_naa_ets() {
+    // Regression test with Na"Naa' ETs
+    let limit17 = super::PrimeLimit::new(17);
+    let mapping = vec![
+        vec![12, 19, 28, 34, 42, 45, 49],
+        vec![46, 73, 107, 129, 159, 170, 188],
+    ];
+    let rt = CangwuTemperament::new(&limit17.pitches, &mapping);
+    let ets = octaves(&rt.get_belonging_ets(2.0, 4));
+    assert_eq!(ets, vec![12, 46, 58, 34]);
+}
+
 #[cfg(test)]
 fn octaves(mappings: &Vec<super::ETMap>) -> super::ETMap {
     mappings.iter().map(|m| m[0]).collect()
