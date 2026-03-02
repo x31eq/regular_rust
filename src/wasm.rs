@@ -187,7 +187,8 @@ fn lowrank_action(
         // Default (page 2) from the old interface
         2.0
     };
-    let nresults = params.get("nresults").cloned().unwrap_or("6".to_string());
+    let nresults =
+        params.get("nresults").cloned().unwrap_or("10".to_string());
     let nresults =
         nresults.parse().or(Err("Failed to parse n of results"))?;
     subset_search(web, rt, &limit, ekm, nresults)?;
