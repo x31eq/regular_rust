@@ -146,6 +146,21 @@ impl<'a> CangwuTemperament<'a> {
             .map(|uv| normalize_positive(self.plimit, uv))
             .collect()
     }
+
+    /// Get the best equal temperament mappings that belong to
+    /// the temperament class
+    ///
+    /// ek: The Cangwu parameter in cents/octave
+    ///
+    /// n_results: How many to return
+    pub fn get_belonging_ets(&self, ek: Cents, n_results: usize) -> Mapping {
+        filtered_equal_temperaments(
+            self.plimit,
+            |mapping| self.et_belongs(mapping),
+            ek,
+            n_results,
+        )
+    }
 }
 
 impl TemperamentClass for CangwuTemperament<'_> {
@@ -761,6 +776,14 @@ fn porcupine_from_key() {
         Some(_) => (),
         None => assert!(false),
     }
+}
+
+#[test]
+fn marvel_ets() {
+    let limit11 = super::PrimeLimit::new(11);
+    let rt = make_marvel(&limit11);
+    let ets = octaves(&rt.get_belonging_ets(1.0, 3));
+    assert_eq!(ets, vec![31, 22, 41]);
 }
 
 #[cfg(test)]
