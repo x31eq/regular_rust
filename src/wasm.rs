@@ -1033,6 +1033,13 @@ fn list_unison_vectors(
 ) -> Exceptionable {
     let rank = rt.rank();
     let dimension = limit.pitches.len();
+    if dimension > 11 {
+        let paragraph = web.document.create_element("p")?;
+        paragraph.set_text_content("Disabled for performance reasons");
+        field.append_child(&paragraph)?;
+        return Ok(());
+    }
+
     let list = web.document.create_element("ul")?;
     let n_results = if (dimension - rank) == 1 { 1 } else { 10 };
     for uv in rt.unison_vectors(n_results) {
