@@ -277,6 +277,14 @@ fn simple_transpose() {
 }
 
 #[test]
+fn vector_transpose() {
+    let original = vec![vec![1, 2, 3, 4]];
+    let expected = vec![vec![1], vec![2], vec![3], vec![4]];
+    assert_eq!(transpose(&original), expected);
+    assert_eq!(transpose(&expected), original);
+}
+
+#[test]
 fn empty_transpose() {
     assert_eq!(transpose(&Mapping::new()), Mapping::new())
 }
