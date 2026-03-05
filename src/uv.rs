@@ -110,7 +110,9 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
         .into_iter()
         .filter_map(|v| {
             debug_assert_eq!(n_rows + n_cols, v.len());
-            if v[..n_rows].iter().all(|&x| x == 0) {
+            if v[..n_rows].iter().all(|&x| x == 0)
+                && !v.iter().all(|&x| x == 0)
+            {
                 Some(v[n_rows..].to_vec())
             } else {
                 None
@@ -307,8 +309,26 @@ fn meantone5_kernel() {
 }
 
 #[test]
+fn meantone5_redundant_kernel() {
+    let mapping = vec![vec![12, 19, 28], vec![19, 30, 44], vec![31, 49, 72]];
+    assert_eq!(kernel_basis(&mapping), vec![vec![4, -4, 1]]);
+}
+
+#[test]
 fn meantone7_kernel() {
     let mapping = vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]];
+    // This is implementation-specific
+    let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
+    assert_eq!(kernel_basis(&mapping), expected);
+}
+
+#[test]
+fn meantone7_redundant_kernel() {
+    let mapping = vec![
+        vec![12, 19, 28, 34],
+        vec![19, 30, 44, 53],
+        vec![31, 49, 72, 87],
+    ];
     // This is implementation-specific
     let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
     assert_eq!(kernel_basis(&mapping), expected);
