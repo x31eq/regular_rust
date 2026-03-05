@@ -2,7 +2,10 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form};
+use super::{
+    Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
+    hermite_normal_form,
+};
 
 /// Return the commatic unison vector for a mapping with
 /// only one dimension short
@@ -119,6 +122,48 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
             }
         })
         .collect()
+}
+
+/// Remove torsion from a basis
+fn saturate(vectors: &[ETMap]) -> Mapping {
+    // c.f. http://www.wstein.org/papers/hnf/
+    // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
+    if vectors.is_empty() {
+        return vec![];
+    }
+    debug_assert!(vectors.iter().all(|row| row.len() == vectors[0].len()));
+    debug_assert_ne!(vectors[0], vec![]);
+    let hermite = hermite_normal_form(&vectors);
+    let double_hermite = hermite_normal_form(&transpose(&hermite));
+    let n_vecs = vectors.len();
+    if n_vecs == 1 {
+        let gcd = double_hermite[0][0];
+        return vec![vectors[0].iter().map(|x| x / gcd).collect()];
+    }
+    let double_hermite = DMatrix::from_iterator(
+        n_vecs,
+        n_vecs,
+        double_hermite
+            .iter()
+            .take(n_vecs)
+            .flat_map(|m| m.iter())
+            .map(|&x| x as f64),
+    );
+    if let Some(transformation) = double_hermite.try_inverse() {
+        let hermite_matrix = DMatrix::from_iterator(
+            hermite[0].len(),
+            hermite.len(),
+            hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
+        );
+        let result = transformation.transpose() * hermite_matrix;
+        result
+            .row_iter()
+            .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
+            .collect()
+    } else {
+        // That shouldn't happen.  Best do nothing
+        vectors.to_vec()
+    }
 }
 
 fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
