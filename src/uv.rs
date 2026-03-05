@@ -305,7 +305,13 @@ fn inherent_errors() {
 #[test]
 fn meantone5_kernel() {
     let mapping = vec![vec![12, 19, 28], vec![19, 30, 44]];
-    assert_eq!(kernel_basis(&mapping), vec![vec![4, -4, 1]]);
+    let expected = vec![vec![4, -4, 1]];
+    let kernel = kernel_basis(&mapping);
+    assert_eq!(kernel, expected);
+    let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(reduced,
+        super::hermite_normal_form(
+            &kernel_basis(&kernel)));
 }
 
 #[test]
