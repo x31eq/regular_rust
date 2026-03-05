@@ -350,6 +350,18 @@ fn magic11_kernel() {
 }
 
 #[test]
+fn marvel11_kernel() {
+    let mapping = vec![
+        vec![19, 30, 44, 53, 66],
+        vec![22, 35, 51, 62, 76],
+        vec![31, 49, 72, 87, 107],
+    ];
+    let kernel = kernel_basis(&mapping);
+    let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
+}
+
+#[test]
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
