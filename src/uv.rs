@@ -87,9 +87,9 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         .sum()
 }
 
-fn transpose<T: Clone>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
+fn transpose<T: Clone>(v: &Vec<Vec<T>>) -> Vec<Vec<T>> {
     if v.len() == 0 {
-        v
+        vec![]
     } else {
         debug_assert!(v.iter().all(|row| row.len() == v[0].len()));
         (0..v[0].len())
@@ -272,17 +272,18 @@ fn inherent_errors() {
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
-    assert_eq!(transpose(original), expected);
+    assert_eq!(transpose(&original), expected);
+    assert_eq!(transpose(&expected), original);
 }
 
 #[test]
 fn empty_transpose() {
-    assert_eq!(transpose(Mapping::new()), Mapping::new())
+    assert_eq!(transpose(&Mapping::new()), Mapping::new())
 }
 
 #[test]
 #[cfg(debug_assertions)]
 #[should_panic]
 fn uneven_transpose() {
-    transpose(vec![vec![1, 2, 3], vec![4, 5]]);
+    transpose(&vec![vec![1, 2, 3], vec![4, 5]]);
 }
