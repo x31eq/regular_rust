@@ -362,6 +362,17 @@ fn marvel11_kernel() {
 }
 
 #[test]
+fn mystery17_kernel() {
+    let mapping = vec![
+        vec![29, 46, 67, 81, 100, 107, 119],
+        vec![58, 92, 135, 163, 201, 215, 237],
+    ];
+    let kernel = kernel_basis(&mapping);
+    let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
+}
+
+#[test]
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
