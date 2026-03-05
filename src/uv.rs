@@ -89,7 +89,7 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
 
 fn transpose<T: Clone>(v: &Vec<Vec<T>>) -> Vec<Vec<T>> {
     if v.len() == 0 {
-        vec![]
+        vec![vec![]]
     } else {
         debug_assert!(v.iter().all(|row| row.len() == v[0].len()));
         (0..v[0].len())
@@ -286,7 +286,10 @@ fn vector_transpose() {
 
 #[test]
 fn empty_transpose() {
-    assert_eq!(transpose(&Mapping::new()), Mapping::new())
+    let empty:Mapping = vec![];
+    let empty_empty:Mapping = vec![vec![]];
+    assert_eq!(transpose(&empty), empty_empty);
+    assert_eq!(transpose(&empty_empty), empty);
 }
 
 #[test]
