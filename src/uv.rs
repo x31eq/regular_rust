@@ -309,9 +309,7 @@ fn meantone5_kernel() {
     let kernel = kernel_basis(&mapping);
     assert_eq!(kernel, expected);
     let reduced = super::hermite_normal_form(&mapping);
-    assert_eq!(reduced,
-        super::hermite_normal_form(
-            &kernel_basis(&kernel)));
+    assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
 }
 
 #[test]
@@ -328,9 +326,7 @@ fn meantone7_kernel() {
     let kernel = kernel_basis(&mapping);
     assert_eq!(kernel, expected);
     let reduced = super::hermite_normal_form(&mapping);
-    assert_eq!(reduced,
-        super::hermite_normal_form(
-            &kernel_basis(&kernel)));
+    assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
 }
 
 #[test]
@@ -343,6 +339,14 @@ fn meantone7_redundant_kernel() {
     // This is implementation-specific
     let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
     assert_eq!(kernel_basis(&mapping), expected);
+}
+
+#[test]
+fn magic11_kernel() {
+    let mapping = vec![vec![19, 30, 44, 53, 66], vec![22, 35, 51, 62, 76]];
+    let kernel = kernel_basis(&mapping);
+    let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
 }
 
 #[test]
