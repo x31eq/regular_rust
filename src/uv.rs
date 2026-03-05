@@ -87,13 +87,13 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         .sum()
 }
 
-fn transpose<T: Clone>(v: &Vec<Vec<T>>) -> Vec<Vec<T>> {
-    if v.len() == 0 {
+fn transpose<T: Clone>(m: &Vec<Vec<T>>) -> Vec<Vec<T>> {
+    if m.len() == 0 {
         vec![vec![]]
     } else {
-        debug_assert!(v.iter().all(|row| row.len() == v[0].len()));
-        (0..v[0].len())
-            .map(|i| v.iter().map(|row| row[i].clone()).collect())
+        debug_assert!(m.iter().all(|row| row.len() == m[0].len()));
+        (0..m[0].len())
+            .map(|i| m.iter().map(|row| row[i].clone()).collect())
             .collect()
     }
 }
