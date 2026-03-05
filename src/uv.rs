@@ -307,6 +307,14 @@ fn meantone5_kernel() {
 }
 
 #[test]
+fn meantone7_kernel() {
+    let mapping = vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]];
+    // This is implementation-specific
+    let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
+    assert_eq!(kernel_basis(&mapping), expected);
+}
+
+#[test]
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
