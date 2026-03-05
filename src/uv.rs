@@ -87,6 +87,12 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         .sum()
 }
 
+fn transpose<T: Clone>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
+    (0..v[0].len())
+        .map(|i| v.iter().map(|row| row[i].clone()).collect())
+        .collect()
+}
+
 #[test]
 fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
@@ -255,4 +261,11 @@ fn inherent_errors() {
     let ek = inherent_error(&limit, &comma) / 12e2;
     assert!(0.000400 < ek);
     assert!(ek < 0.000401);
+}
+
+#[test]
+fn simple_transpose() {
+    let original = vec![vec![1, 2 ,3 ,4], vec![5, 6, 7, 8]];
+    let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
+    assert_eq!(transpose(original), expected);
 }
