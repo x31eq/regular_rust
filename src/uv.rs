@@ -87,8 +87,8 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         .sum()
 }
 
-fn transpose<T: Clone>(m: &Vec<Vec<T>>) -> Vec<Vec<T>> {
-    if m.len() == 0 {
+fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
+    if m.is_empty() {
         vec![vec![]]
     } else {
         debug_assert!(m.iter().all(|row| row.len() == m[0].len()));
