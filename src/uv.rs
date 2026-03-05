@@ -319,7 +319,12 @@ fn meantone7_kernel() {
     let mapping = vec![vec![12, 19, 28, 34], vec![19, 30, 44, 53]];
     // This is implementation-specific
     let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
-    assert_eq!(kernel_basis(&mapping), expected);
+    let kernel = kernel_basis(&mapping);
+    assert_eq!(kernel, expected);
+    let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(reduced,
+        super::hermite_normal_form(
+            &kernel_basis(&kernel)));
 }
 
 #[test]
