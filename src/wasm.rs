@@ -1035,7 +1035,7 @@ fn list_unison_vectors(
     let dimension = limit.pitches.len();
     if dimension > 11 {
         let paragraph = web.document.create_element("p")?;
-        paragraph.set_text_content("Disabled for performance reasons");
+        paragraph.set_text_content(Some("Disabled for performance reasons"));
         field.append_child(&paragraph)?;
         return Ok(());
     }
