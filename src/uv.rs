@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
-use super::{Cents, ETMap, ETSlice, Exponent, Mapping};
+use super::{Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form};
 
 /// Return the commatic unison vector for a mapping with
 /// only one dimension short
@@ -85,6 +85,38 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         // multiply as i64 to avoid overflows
         .map(|(&m, &n)| (m as i64) * (n as i64))
         .sum()
+}
+
+/// Get unison vectors from a mapping, or vice versa.
+/// Results aren't simple and might introduce torsion.
+fn kernel_basis(vectors: &[ETMap]) -> Mapping {
+    // The algorithm originally came from
+    // http://en.wikipedia.org/wiki/Null_space#Basis
+    // but they kept taking it away because it isn't efficient.
+    // But it is easy to implement.
+
+    if vectors.is_empty() {
+        return vec![];
+    }
+    let n_rows = vectors.len();
+    let mut prepared = transpose(vectors);
+    let n_cols = prepared.len();
+    for (i, v) in prepared.iter_mut().enumerate() {
+        for j in 0..n_cols {
+            v.push(if i == j { 1 } else { 0 });
+        }
+    }
+    echelon_form(&prepared)
+        .into_iter()
+        .filter_map(|v| {
+            debug_assert_eq!(n_rows + n_cols, v.len());
+            if v[..n_rows].iter().all(|&x| x == 0) {
+                Some(v[n_rows..].to_vec())
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
@@ -269,6 +301,12 @@ fn inherent_errors() {
 }
 
 #[test]
+fn meantone5_kernel() {
+    let mapping = vec![vec![12, 19, 28], vec![19, 30, 44]];
+    assert_eq!(kernel_basis(&mapping), vec![vec![4, -4, 1]]);
+}
+
+#[test]
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
@@ -286,8 +324,8 @@ fn vector_transpose() {
 
 #[test]
 fn empty_transpose() {
-    let empty:Mapping = vec![];
-    let empty_empty:Mapping = vec![vec![]];
+    let empty: Mapping = vec![];
+    let empty_empty: Mapping = vec![vec![]];
     assert_eq!(transpose(&empty), empty_empty);
     assert_eq!(transpose(&empty_empty), empty);
 }
