@@ -133,9 +133,11 @@ fn saturate(vectors: &[ETMap]) -> Mapping {
     }
     debug_assert!(vectors.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_ne!(vectors[0], vec![]);
-    let hermite = hermite_normal_form(&vectors);
-    let double_hermite = hermite_normal_form(&transpose(&hermite));
     let n_vecs = vectors.len();
+    let hermite = hermite_normal_form(&vectors);
+    debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
+    debug_assert_eq!(hermite.len(), n_vecs);
+    let double_hermite = hermite_normal_form(&transpose(&hermite));
     if n_vecs == 1 {
         let gcd = double_hermite[0][0];
         return vec![vectors[0].iter().map(|x| x / gcd).collect()];
@@ -149,14 +151,16 @@ fn saturate(vectors: &[ETMap]) -> Mapping {
             .flat_map(|m| m.iter())
             .map(|&x| x as f64),
     );
+    debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
     if let Some(transformation) = double_hermite.try_inverse() {
         let hermite_matrix = DMatrix::from_iterator(
             hermite[0].len(),
             hermite.len(),
             hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
         );
-        let result = transformation.transpose() * hermite_matrix;
+        let result = hermite_matrix * transformation;
         result
+            .transpose()
             .row_iter()
             .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
             .collect()
