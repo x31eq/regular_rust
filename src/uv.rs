@@ -1,11 +1,10 @@
 extern crate nalgebra as na;
-use lllreduce::{Basetype, gram_schmidt_with_coeffs, lll_reduce};
 use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
     Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
-    hermite_normal_form, normalize_positive,
+    hermite_normal_form,
 };
 
 /// Return the commatic unison vector for a mapping with
@@ -32,7 +31,6 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     None
 }
 
-/// Get equal temperaments that temper out some unison vectors
 pub fn get_ets_tempering_out(
     plimit: &[Cents],
     ek: Cents,
@@ -83,33 +81,6 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         // multiply as i64 to avoid overflows
         .map(|(&m, &n)| (m as i64) * (n as i64))
         .sum()
-}
-
-/// Tenney-weighted LLL reduction of intervals
-pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
-    let weighted: Vec<_> = vectors
-        .iter()
-        .map(|m| {
-            m.iter()
-                .zip(plimit)
-                .map(|(&x, &p)| x as Basetype * p as Basetype)
-                .collect()
-        })
-        .collect();
-
-    let mut mxtuple = gram_schmidt_with_coeffs(weighted);
-    lll_reduce(&mut mxtuple);
-
-    mxtuple.2
-        .iter()
-        .map(|m| {
-            m.iter()
-                .zip(plimit)
-                .map(|(&x, &p)| (x / p as Basetype).round() as Exponent)
-                .collect()
-        })
-        .map(|m| normalize_positive(plimit, m))
-        .collect()
 }
 
 pub fn saturated_kernel_basis(vectors: &[ETMap]) -> Mapping {
@@ -227,7 +198,8 @@ fn meantone5() {
     assert!(!tempers_out(&mapping, &[4, -1, -1]));
     assert!(!tempers_out(&mapping, &[-3, -1, 1]));
     let uv = only_unison_vector(&mapping).expect("no UV");
-    let uv = normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
+    let uv =
+        super::normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
     assert_eq!(expected, uv);
 }
 
@@ -356,14 +328,6 @@ fn porcupine11_ets() {
     assert!(tempers_out(&ets, &comma1));
     assert!(tempers_out(&ets, &comma2));
     assert!(tempers_out(&ets, &comma3));
-}
-
-#[test]
-fn tlll_limit11() {
-    let limit = super::PrimeLimit::new(11).pitches;
-    let commas = vec![vec![2, -2, 2, 0, -1], vec![-5, 2, 2, -1, 0]];
-    assert_eq!(commas, tlll(&limit, &commas));
-    assert_eq!(commas, tlll(&limit, &hermite_normal_form(&commas)));
 }
 
 #[test]
