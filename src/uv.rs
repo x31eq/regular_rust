@@ -124,7 +124,8 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
         .collect()
 }
 
-/// Remove torsion from a basis
+/// Remove torsion from a basis.
+/// Returns None when the vectors are not of full rank.
 fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     // c.f. http://www.wstein.org/papers/hnf/
     // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
@@ -440,6 +441,13 @@ fn saturate_vector() {
 }
 
 #[test]
+fn saturate_negative() {
+    let mapping = vec![vec![-2, -4, -6, -8]];
+    let expected = vec![vec![-1, -2, -3, -4]];
+    assert_eq!(saturate(&mapping), Some(expected));
+}
+
+#[test]
 fn saturate_vector10() {
     let mapping = vec![vec![20, 40, 60, 80]];
     let expected = vec![vec![1, 2, 3, 4]];
@@ -461,6 +469,12 @@ fn saturate_empty() {
 #[test]
 fn saturate_zero() {
     assert_eq!(saturate(&vec![vec![0]]), None);
+}
+
+#[test]
+fn saturate_redundant() {
+    let mapping = vec![vec![1, 2, 3, 4], vec![2, 4, 6, 8]];
+    assert_eq!(saturate(&mapping, None));
 }
 
 #[test]
