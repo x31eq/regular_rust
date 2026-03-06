@@ -91,7 +91,7 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
 }
 
 pub fn saturated_kernel_basis(vectors: &[ETMap]) -> Mapping {
-    saturate(&kernel_basis(&vectors))
+    saturate(&kernel_basis(vectors))
         .expect("calculated basis not of full rank")
 }
 
@@ -141,7 +141,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert_ne!(vectors[0], vec![]);
 
     let n_vecs = vectors.len();
-    let hermite = hermite_normal_form(&vectors);
+    let hermite = hermite_normal_form(vectors);
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
 
