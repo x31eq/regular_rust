@@ -125,22 +125,31 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
 }
 
 /// Remove torsion from a basis
-fn saturate(vectors: &[ETMap]) -> Mapping {
+fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     // c.f. http://www.wstein.org/papers/hnf/
     // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
     if vectors.is_empty() {
-        return vec![];
+        return Some(vec![]);
     }
     debug_assert!(vectors.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_ne!(vectors[0], vec![]);
+
     let n_vecs = vectors.len();
     let hermite = hermite_normal_form(&vectors);
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
+
     let double_hermite = hermite_normal_form(&transpose(&hermite));
+    debug_assert!(
+        double_hermite
+            .iter()
+            .skip(n_vecs)
+            .all(|row| row.iter().all(|&x| x == 0))
+    );
     if n_vecs == 1 {
         let gcd = double_hermite[0][0];
-        return vec![vectors[0].iter().map(|x| x / gcd).collect()];
+        let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
+        return Some(result);
     }
     let double_hermite = DMatrix::from_iterator(
         n_vecs,
@@ -152,22 +161,21 @@ fn saturate(vectors: &[ETMap]) -> Mapping {
             .map(|&x| x as f64),
     );
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
-    if let Some(transformation) = double_hermite.try_inverse() {
-        let hermite_matrix = DMatrix::from_iterator(
-            hermite[0].len(),
-            hermite.len(),
-            hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
-        );
-        let result = hermite_matrix * transformation;
+
+    let transformation = double_hermite.try_inverse()?;
+    let hermite_matrix = DMatrix::from_iterator(
+        hermite[0].len(),
+        hermite.len(),
+        hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
+    );
+    let result = hermite_matrix * transformation;
+    Some(
         result
             .transpose()
             .row_iter()
             .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
-            .collect()
-    } else {
-        // That shouldn't happen.  Best do nothing
-        vectors.to_vec()
-    }
+            .collect(),
+    )
 }
 
 fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
@@ -425,21 +433,21 @@ fn mystery17_kernel() {
 fn saturate_vector() {
     let mapping = vec![vec![2, 4, 6, 8]];
     let expected = vec![vec![1, 2, 3, 4]];
-    assert_eq!(saturate(&mapping), expected);
+    assert_eq!(saturate(&mapping), Some(expected));
 }
 
 #[test]
 fn saturate_vector10() {
     let mapping = vec![vec![20, 40, 60, 80]];
     let expected = vec![vec![1, 2, 3, 4]];
-    assert_eq!(saturate(&mapping), expected);
+    assert_eq!(saturate(&mapping), Some(expected));
 }
 
 #[test]
 fn saturate_matrix() {
     let mapping = vec![vec![2, 4, 6], vec![3, 4, 5]];
     let expected = vec![vec![1, 0, -1], vec![0, 1, 2]];
-    assert_eq!(saturate(&mapping), expected);
+    assert_eq!(saturate(&mapping), Some(expected));
 }
 
 #[test]
