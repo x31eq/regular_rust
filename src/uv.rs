@@ -1,5 +1,5 @@
 extern crate nalgebra as na;
-use na::DMatrix;
+use na::{DMatrix, dmatrix};
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
@@ -166,7 +166,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
 
     let transformation = double_hermite.try_inverse()?;
     let hermite_matrix = float_matrix_from_mapping(hermite);
-    let result = hermite_matrix.transpose() * transformation;
+    let result = transformation.transpose() * hermite_matrix;
     Some(mapping_from_float_matrix(result))
 }
 
@@ -182,17 +182,19 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
 }
 
 fn float_matrix_from_mapping(m: Mapping) -> DMatrix<f64> {
-    DMatrix::from_iterator(
-        if m.is_empty() { 0 } else { m[0].len() },
+    if m.is_empty() {
+        return dmatrix![];
+    }
+    debug_assert!(m.iter().all(|row| row.len() == m[0].len()));
+    DMatrix::from_row_iterator(
         m.len(),
+        m[0].len(),
         m.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
     )
-    .transpose()
 }
 
 fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
-    m.transpose()
-        .row_iter()
+    m.row_iter()
         .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
         .collect()
 }
@@ -555,8 +557,10 @@ fn matrix_from_mapping() {
 #[test]
 fn mapping_from_matrix() {
     assert_eq!(
-        nalgebra::dmatrix![1.0, 2.0, 3.0; 4.0, 5.0, 6.0],
-        float_matrix_from_mapping(vec![vec![1, 2, 3], vec![4, 5, 6]]),
+        mapping_from_float_matrix(
+            nalgebra::dmatrix![1.0, 2.0, 3.0; 4.0, 5.0, 6.0]
+        ),
+        vec![vec![1, 2, 3], vec![4, 5, 6]],
     )
 }
 
@@ -571,8 +575,8 @@ fn matrix_from_vector() {
 #[test]
 fn vector_from_matrix() {
     assert_eq!(
-        nalgebra::dmatrix![1.0, 2.0, 3.0],
-        float_matrix_from_mapping(vec![vec![1, 2, 3]]),
+        mapping_from_float_matrix(nalgebra::dmatrix![1.0, 2.0, 3.0]),
+        vec![vec![1, 2, 3]],
     )
 }
 
