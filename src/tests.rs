@@ -362,6 +362,11 @@ fn hermite_reduction() {
         vec![0, 0, 2, 1, 0],
     ];
     assert_eq!(hermite_normal_form(&jove_neg_hermite), jove_hermite);
+    let redundant =
+        vec![vec![1, 2, 3, 4], vec![1, 2, 3, 4], vec![4, 5, 6, 7]];
+    let redundant_normal = hermite_normal_form(&redundant);
+    assert_eq!(redundant_normal.len(), 3);
+    assert_eq!(redundant_normal[2], vec![0, 0, 0, 0]);
 }
 
 #[test]
