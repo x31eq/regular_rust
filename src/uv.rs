@@ -171,13 +171,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
         hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
     );
     let result = hermite_matrix * transformation;
-    Some(
-        result
-            .transpose()
-            .row_iter()
-            .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
-            .collect(),
-    )
+    Some(mapping_from_float_matrix(result))
 }
 
 fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
@@ -198,6 +192,13 @@ fn float_matrix_from_mapping(m: &[ETMap]) -> DMatrix<f64> {
         m.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
     )
     .transpose()
+}
+
+fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
+    m.transpose()
+        .row_iter()
+        .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
+        .collect()
 }
 
 #[test]
@@ -556,6 +557,14 @@ fn matrix_from_mapping() {
 }
 
 #[test]
+fn mapping_from_matrix() {
+    assert_eq!(
+        nalgebra::dmatrix![1.0, 2.0, 3.0; 4.0, 5.0, 6.0],
+        float_matrix_from_mapping(&vec![vec![1, 2, 3], vec![4, 5, 6]]),
+    )
+}
+
+#[test]
 fn matrix_from_vector() {
     assert_eq!(
         float_matrix_from_mapping(&vec![vec![1, 2, 3]]),
@@ -564,6 +573,20 @@ fn matrix_from_vector() {
 }
 
 #[test]
+fn vector_from_matrix() {
+    assert_eq!(
+        nalgebra::dmatrix![1.0, 2.0, 3.0],
+        float_matrix_from_mapping(&vec![vec![1, 2, 3]]),
+    )
+}
+
+#[test]
 fn matrix_from_empty() {
-    assert_eq!(float_matrix_from_mapping(&vec![]), nalgebra::dmatrix![],)
+    assert_eq!(float_matrix_from_mapping(&vec![]), nalgebra::dmatrix![])
+}
+
+#[test]
+fn mapping_from_empty() {
+    let empty: Mapping = vec![];
+    assert_eq!(mapping_from_float_matrix(nalgebra::dmatrix![]), empty)
 }
