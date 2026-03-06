@@ -139,7 +139,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
 
-    let double_hermite = hermite_normal_form(&transpose(&hermite));
+    let mut double_hermite = hermite_normal_form(&transpose(&hermite));
     debug_assert!(
         double_hermite
             .iter()
@@ -151,12 +151,12 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
         let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
         return Some(result);
     }
+    double_hermite.drain(n_vecs..);
     let double_hermite = DMatrix::from_iterator(
         n_vecs,
         n_vecs,
         double_hermite
             .iter()
-            .take(n_vecs)
             .flat_map(|m| m.iter())
             .map(|&x| x as f64),
     );
