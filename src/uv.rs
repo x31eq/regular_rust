@@ -148,6 +148,9 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     );
     if n_vecs == 1 {
         let gcd = double_hermite[0][0];
+        if gcd == 0 {
+            return None;
+        }
         let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
         return Some(result);
     }
@@ -448,6 +451,16 @@ fn saturate_matrix() {
     let mapping = vec![vec![2, 4, 6], vec![3, 4, 5]];
     let expected = vec![vec![1, 0, -1], vec![0, 1, 2]];
     assert_eq!(saturate(&mapping), Some(expected));
+}
+
+#[test]
+fn saturate_empty() {
+    assert_eq!(saturate(&vec![]), Some(vec![]));
+}
+
+#[test]
+fn saturate_zero() {
+    assert_eq!(saturate(&vec![vec![0]]), None);
 }
 
 #[test]
