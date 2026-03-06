@@ -161,7 +161,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
         return Some(result);
     }
     double_hermite.drain(n_vecs..);
-    let double_hermite = float_matrix_from_mapping(&double_hermite);
+    let double_hermite = float_matrix_from_mapping(double_hermite);
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
 
     let transformation = double_hermite.try_inverse()?;
@@ -185,7 +185,7 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
     }
 }
 
-fn float_matrix_from_mapping(m: &[ETMap]) -> DMatrix<f64> {
+fn float_matrix_from_mapping(m: Mapping) -> DMatrix<f64> {
     DMatrix::from_iterator(
         if m.is_empty() { 0 } else { m[0].len() },
         m.len(),
@@ -551,7 +551,7 @@ fn uneven_transpose() {
 #[test]
 fn matrix_from_mapping() {
     assert_eq!(
-        float_matrix_from_mapping(&vec![vec![1, 2, 3], vec![4, 5, 6]]),
+        float_matrix_from_mapping(vec![vec![1, 2, 3], vec![4, 5, 6]]),
         nalgebra::dmatrix![1.0, 2.0, 3.0; 4.0, 5.0, 6.0],
     )
 }
@@ -560,14 +560,14 @@ fn matrix_from_mapping() {
 fn mapping_from_matrix() {
     assert_eq!(
         nalgebra::dmatrix![1.0, 2.0, 3.0; 4.0, 5.0, 6.0],
-        float_matrix_from_mapping(&vec![vec![1, 2, 3], vec![4, 5, 6]]),
+        float_matrix_from_mapping(vec![vec![1, 2, 3], vec![4, 5, 6]]),
     )
 }
 
 #[test]
 fn matrix_from_vector() {
     assert_eq!(
-        float_matrix_from_mapping(&vec![vec![1, 2, 3]]),
+        float_matrix_from_mapping(vec![vec![1, 2, 3]]),
         nalgebra::dmatrix![1.0, 2.0, 3.0],
     )
 }
@@ -576,13 +576,13 @@ fn matrix_from_vector() {
 fn vector_from_matrix() {
     assert_eq!(
         nalgebra::dmatrix![1.0, 2.0, 3.0],
-        float_matrix_from_mapping(&vec![vec![1, 2, 3]]),
+        float_matrix_from_mapping(vec![vec![1, 2, 3]]),
     )
 }
 
 #[test]
 fn matrix_from_empty() {
-    assert_eq!(float_matrix_from_mapping(&vec![]), nalgebra::dmatrix![])
+    assert_eq!(float_matrix_from_mapping(vec![]), nalgebra::dmatrix![])
 }
 
 #[test]
