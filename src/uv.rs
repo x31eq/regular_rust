@@ -165,12 +165,8 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
 
     let transformation = double_hermite.try_inverse()?;
-    let hermite_matrix = DMatrix::from_iterator(
-        hermite[0].len(),
-        hermite.len(),
-        hermite.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
-    );
-    let result = hermite_matrix * transformation;
+    let hermite_matrix = float_matrix_from_mapping(hermite);
+    let result = hermite_matrix.transpose() * transformation;
     Some(mapping_from_float_matrix(result))
 }
 
