@@ -190,6 +190,11 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+/// Rounding function the book I copied from specifies
+fn round_lll(x: f64) -> f64 {
+    (x + 0.5).next_down().floor()
+}
+
 #[test]
 fn meantone5() {
     let mapping = vec![vec![12, 19, 28], vec![7, 11, 16]];
@@ -580,4 +585,19 @@ fn matrix_from_empty() {
 fn mapping_from_empty() {
     let empty: Mapping = vec![];
     assert_eq!(mapping_from_float_matrix(nalgebra::dmatrix![]), empty)
+}
+
+#[test]
+fn round_lll_checks() {
+    assert_eq!(round_lll(0.4), 0.0);
+    assert_eq!(round_lll(0.5), 0.0);
+    assert_eq!(round_lll(0.500001), 1.0);
+    assert_eq!(round_lll(0.6), 1.0);
+    assert_eq!(round_lll(1.5), 1.0);
+    assert_eq!(round_lll(17.499999999), 17.0);
+    assert_eq!(round_lll(17.5), 17.0);
+    assert_eq!(round_lll(17.500001), 18.0);
+    assert_eq!(round_lll(-0.4999999), 0.0);
+    assert_eq!(round_lll(-0.5), -1.0);
+    assert_eq!(round_lll(-0.5000001), -1.0);
 }
