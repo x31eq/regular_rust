@@ -18,20 +18,14 @@ pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     if rank + 1 != dimension {
         return None;
     }
-    let fiter = mapping.iter().flat_map(|m| m.iter()).map(|&x| x as f64);
-    let fmap = DMatrix::from_iterator(dimension, rank, fiter);
-    let mut sq = fmap.insert_column(0, 0.0);
+    let fmap = float_matrix_from_mapping(mapping.clone());
+    let mut sq = fmap.transpose().insert_column(0, 0.0);
     for i in 0..dimension {
         sq[(i, 0)] = 1.0;
         if let Some(inverse) = sq.clone().try_inverse() {
             let adjoint = inverse * sq.clone().determinant();
-            return Some(
-                adjoint
-                    .row(0)
-                    .iter()
-                    .map(|&x| x.round() as Exponent)
-                    .collect(),
-            );
+            let result = mapping_from_float_matrix(adjoint);
+            return result.into_iter().next();
         }
         sq[(i, 0)] = 0.0;
     }
