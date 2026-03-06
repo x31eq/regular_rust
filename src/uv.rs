@@ -1,5 +1,5 @@
 extern crate nalgebra as na;
-use na::{DMatrix, dmatrix};
+use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
@@ -182,13 +182,11 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
 }
 
 fn float_matrix_from_mapping(m: Mapping) -> DMatrix<f64> {
-    if m.is_empty() {
-        return dmatrix![];
-    }
-    debug_assert!(m.iter().all(|row| row.len() == m[0].len()));
+    let n_cols = if m.is_empty() { 0 } else { m[0].len() };
+    debug_assert!(m.iter().all(|row| row.len() == n_cols));
     DMatrix::from_row_iterator(
         m.len(),
-        m[0].len(),
+        n_cols,
         m.iter().flat_map(|m| m.iter()).map(|&x| x as f64),
     )
 }
