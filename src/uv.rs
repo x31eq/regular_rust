@@ -431,6 +431,12 @@ fn saturate_vector10() {
     assert_eq!(saturate(&mapping), expected);
 }
 
+#[test]
+fn saturate_matrix() {
+    let mapping = vec![vec![2, 4, 6], vec![3, 4, 5]];
+    let expected = vec![vec![1, 0, -1], vec![0, 1, 2]];
+    assert_eq!(saturate(&mapping), expected);
+}
 
 #[test]
 fn simple_transpose() {
