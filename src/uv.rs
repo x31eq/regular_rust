@@ -418,6 +418,21 @@ fn mystery17_kernel() {
 }
 
 #[test]
+fn saturate_vector() {
+    let mapping = vec![vec![2, 4, 6, 8]];
+    let expected = vec![vec![1, 2, 3, 4]];
+    assert_eq!(saturate(&mapping), expected);
+}
+
+#[test]
+fn saturate_vector10() {
+    let mapping = vec![vec![20, 40, 60, 80]];
+    let expected = vec![vec![1, 2, 3, 4]];
+    assert_eq!(saturate(&mapping), expected);
+}
+
+
+#[test]
 fn simple_transpose() {
     let original = vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]];
     let expected = vec![vec![1, 5], vec![2, 6], vec![3, 7], vec![4, 8]];
