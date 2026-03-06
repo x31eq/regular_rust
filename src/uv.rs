@@ -90,6 +90,11 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         .sum()
 }
 
+pub fn saturated_kernel_basis(vectors: &[ETMap]) -> Mapping {
+    saturate(&kernel_basis(&vectors))
+        .expect("calculated basis not of full rank")
+}
+
 /// Get unison vectors from a mapping, or vice versa.
 /// Results aren't simple and might introduce torsion.
 fn kernel_basis(vectors: &[ETMap]) -> Mapping {
@@ -369,6 +374,8 @@ fn meantone5_kernel() {
     let expected = vec![vec![4, -4, 1]];
     let kernel = kernel_basis(&mapping);
     assert_eq!(kernel, expected);
+    assert_eq!(Some(expected), saturate(&kernel));
+    assert_eq!(kernel, saturated_kernel_basis(&mapping));
     let reduced = super::hermite_normal_form(&mapping);
     assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
 }
@@ -377,6 +384,10 @@ fn meantone5_kernel() {
 fn meantone5_redundant_kernel() {
     let mapping = vec![vec![12, 19, 28], vec![19, 30, 44], vec![31, 49, 72]];
     assert_eq!(kernel_basis(&mapping), vec![vec![4, -4, 1]]);
+    // The redundant mapping can't be saturated
+    assert_eq!(saturate(&mapping), None);
+    // But the basis is fine
+    assert_eq!(saturated_kernel_basis(&mapping), vec![vec![4, -4, 1]]);
 }
 
 #[test]
@@ -386,6 +397,7 @@ fn meantone7_kernel() {
     let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
     let kernel = kernel_basis(&mapping);
     assert_eq!(kernel, expected);
+    assert_eq!(kernel, saturated_kernel_basis(&mapping));
     let reduced = super::hermite_normal_form(&mapping);
     assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
 }
@@ -400,6 +412,7 @@ fn meantone7_redundant_kernel() {
     // This is implementation-specific
     let expected = vec![vec![1, 2, -3, 1], vec![0, 12, -13, 4]];
     assert_eq!(kernel_basis(&mapping), expected);
+    assert_eq!(saturated_kernel_basis(&mapping), expected);
 }
 
 #[test]
@@ -407,7 +420,15 @@ fn magic11_kernel() {
     let mapping = vec![vec![19, 30, 44, 53, 66], vec![22, 35, 51, 62, 76]];
     let kernel = kernel_basis(&mapping);
     let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(
+        super::hermite_normal_form(&kernel),
+        super::hermite_normal_form(&saturated_kernel_basis(&mapping)),
+    );
     assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
+    assert_eq!(
+        reduced,
+        super::hermite_normal_form(&saturated_kernel_basis(&kernel)),
+    );
 }
 
 #[test]
@@ -419,7 +440,15 @@ fn marvel11_kernel() {
     ];
     let kernel = kernel_basis(&mapping);
     let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(
+        super::hermite_normal_form(&kernel),
+        super::hermite_normal_form(&saturated_kernel_basis(&mapping)),
+    );
     assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
+    assert_eq!(
+        reduced,
+        super::hermite_normal_form(&saturated_kernel_basis(&kernel)),
+    );
 }
 
 #[test]
@@ -430,7 +459,15 @@ fn mystery17_kernel() {
     ];
     let kernel = kernel_basis(&mapping);
     let reduced = super::hermite_normal_form(&mapping);
+    assert_eq!(
+        super::hermite_normal_form(&kernel),
+        super::hermite_normal_form(&saturated_kernel_basis(&mapping)),
+    );
     assert_eq!(reduced, super::hermite_normal_form(&kernel_basis(&kernel)));
+    assert_eq!(
+        reduced,
+        super::hermite_normal_form(&saturated_kernel_basis(&kernel)),
+    );
 }
 
 #[test]
@@ -474,7 +511,7 @@ fn saturate_zero() {
 #[test]
 fn saturate_redundant() {
     let mapping = vec![vec![1, 2, 3, 4], vec![2, 4, 6, 8]];
-    assert_eq!(saturate(&mapping, None));
+    assert_eq!(saturate(&mapping), None);
 }
 
 #[test]
