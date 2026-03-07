@@ -3,7 +3,7 @@ use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, echelon_form,
+    Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
     hermite_normal_form,
 };
 
@@ -190,6 +190,11 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+/// Tenney-weighted LLL
+pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
+    LLLReducer::new(plimit).reduce(vectors)
+}
+
 /// The book sets this it 2.  Lower numbers mean closer convergence.
 /// I think it works from 2 to 4 but I'm not sure.
 /// c.f. https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf)
@@ -203,7 +208,7 @@ struct LLLReducer {
 }
 
 impl LLLReducer {
-    pub fn new(plimit: &Tuning) -> Self {
+    pub fn new(plimit: &[Cents]) -> Self {
         LLLReducer {
             weights: plimit.iter().map(|x| x * x).collect(),
         }
@@ -703,11 +708,21 @@ fn mapping_from_empty() {
 }
 
 #[test]
+fn tlll_limit11() {
+    // Compared to Python implementation
+    let plimit = super::PrimeLimit::new(11).pitches;
+    let vectors = vec![vec![1, 2, 3, 4, 5], vec![3, 4, 2, 2, 3]];
+    let result = tlll(&plimit, &vectors);
+    assert_eq!(result, vec![vec![2, 2, -1, -2, -2], vec![5, 6, 1, 0, 1]]);
+}
+
+#[test]
 fn lll_limit11() {
-    // Compared to Python implemetation
-    let reducer = LLLReducer::new(&super::PrimeLimit::new(11).pitches);
-    let result =
-        reducer.reduce(&vec![vec![1, 2, 3, 4, 5], vec![3, 4, 2, 2, 3]]);
+    // Compared to Python implementation
+    let plimit = super::PrimeLimit::new(11).pitches;
+    let vectors = vec![vec![1, 2, 3, 4, 5], vec![3, 4, 2, 2, 3]];
+    let reducer = LLLReducer::new(&plimit);
+    let result = reducer.reduce(&vectors);
     assert_eq!(result, vec![vec![2, 2, -1, -2, -2], vec![5, 6, 1, 0, 1]]);
 }
 
