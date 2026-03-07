@@ -3,7 +3,7 @@ use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
+    Cents, ETMap, ETSlice, Exponent, Mapping, Tuning, echelon_form,
     hermite_normal_form,
 };
 
@@ -188,6 +188,27 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
     m.row_iter()
         .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
         .collect()
+}
+
+struct LLLReducer {
+    weights: Vec<f64>,
+}
+
+impl LLLReducer {
+    pub fn new(plimit: &Tuning) -> Self {
+        LLLReducer {
+            weights: plimit.iter().map(|x| x * x).collect(),
+        }
+    }
+
+    pub fn product(&self, u: &[Exponent], v: &[Exponent]) -> f64 {
+        self.weights
+            .iter()
+            .zip(u.iter())
+            .zip(v.iter())
+            .map(|((&x, &m), &n)| x * (m as f64) * (n as f64))
+            .sum()
+    }
 }
 
 /// Rounding function the book I copied from specifies
@@ -585,6 +606,18 @@ fn matrix_from_empty() {
 fn mapping_from_empty() {
     let empty: Mapping = vec![];
     assert_eq!(mapping_from_float_matrix(nalgebra::dmatrix![]), empty)
+}
+
+#[test]
+fn lll_unewighted_product() {
+    let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
+    let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
+    super::assert_between!(0.999999, prod, 1.000001);
+    assert_eq!(0.0, reducer.product(&vec![1, 0, 0], &vec![0, 1, 1]));
+    let prod = reducer.product(&vec![2, 0, 0], &vec![1, 0, 0]);
+    super::assert_between!(1.999999, prod, 2.000001);
+    let prod = reducer.product(&vec![3, 3, 3], &vec![2, 2, 2]);
+    super::assert_between!(17.999999, prod, 18.000001);
 }
 
 #[test]
