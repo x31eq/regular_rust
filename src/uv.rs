@@ -190,6 +190,8 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+const LLL_TERMINATION_CONSTRAINT: f64 = 2.0;
+
 struct LLLReducer {
     weights: Vec<f64>,
 }
@@ -199,6 +201,45 @@ impl LLLReducer {
         LLLReducer {
             weights: plimit.iter().map(|x| x * x).collect(),
         }
+    }
+
+    fn reduction(&self, vectors: &[ETMap]) -> Mapping {
+        let n = vectors.len();
+        if n == 0 {
+            return vec![];
+        }
+        debug_assert!(
+            vectors.iter().all(|row| row.len() == vectors[0].len()),
+        );
+        let mut g: Vec<Vec<f64>> = vectors
+            .iter()
+            .map(|row| row.iter().map(|&x| x as f64).collect())
+            .collect();
+        let (mut gs, mut m) = self.gram_schmidt_orthogonalization(&g);
+        let mut i = 1;
+        while i < n {
+            for j in (0..i).rev() {
+                g[i] = g[i]
+                    .iter()
+                    .zip(&g[j])
+                    .map(|(&x, &y)| x - round_lll(m[i][j]) * y)
+                    .collect();
+                (gs, m) = self.gram_schmidt_orthogonalization(&g);
+            }
+            if i > 0
+                && self.prod(&gs[i - 1], &gs[i - 1])
+                    > LLL_TERMINATION_CONSTRAINT * self.prod(&gs[i], &gs[i])
+            {
+                (g[i - 1], g[i]) = (g[i].clone(), g[i - 1].clone());
+                (gs, m) = self.gram_schmidt_orthogonalization(&g);
+                i -= 1;
+            } else {
+                i += 1;
+            }
+        }
+        g.iter()
+            .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
+            .collect()
     }
 
     fn gram_schmidt_orthogonalization(
