@@ -201,12 +201,53 @@ impl LLLReducer {
         }
     }
 
+    fn gram_schmidt_orthogonalization(
+        &self,
+        basis: &[Vec<f64>],
+    ) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
+        let mut m = vec![];
+        let mut gramian: Vec<Vec<f64>> = vec![];
+        let mut idrow_orig = vec![1.0];
+        let idrow = &mut idrow_orig;
+        for _ in 0..basis.len() {
+            idrow.push(0.0);
+        }
+        for frow in basis {
+            idrow.pop();
+            let row: Vec<f64> = gramian
+                .iter()
+                .map(|g| self.prod(frow, g) / self.prod(g, g))
+                .chain(idrow.clone())
+                .collect();
+            let mut new_row = frow.clone();
+            for (mcell, grow) in row.iter().zip(gramian.iter()) {
+                new_row = frow
+                    .iter()
+                    .zip(grow.iter())
+                    .map(|(&x, &g)| x - mcell * g)
+                    .collect();
+            }
+            gramian.push(new_row);
+            m.push(row);
+        }
+        (gramian, m)
+    }
+
     fn product(&self, u: &[Exponent], v: &[Exponent]) -> f64 {
         self.weights
             .iter()
             .zip(u.iter())
             .zip(v.iter())
             .map(|((&x, &m), &n)| x * (m as f64) * (n as f64))
+            .sum()
+    }
+
+    fn prod(&self, u: &[f64], v: &[f64]) -> f64 {
+        self.weights
+            .iter()
+            .zip(u.iter())
+            .zip(v.iter())
+            .map(|((&x, &m), &n)| x * m * n)
             .sum()
     }
 }
@@ -621,6 +662,21 @@ fn lll_unewighted_product() {
 }
 
 #[test]
+fn lll_unewighted_prod() {
+    let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
+    let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
+    super::assert_between!(0.999999, prod, 1.000001);
+    assert_eq!(
+        0.0,
+        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
+    );
+    let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
+    super::assert_between!(1.999999, prod, 2.000001);
+    let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
+    super::assert_between!(17.999999, prod, 18.000001);
+}
+
+#[test]
 fn lll_weighted_product() {
     let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
     let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
@@ -629,6 +685,21 @@ fn lll_weighted_product() {
     let prod = reducer.product(&vec![2, 0, 0], &vec![1, 0, 0]);
     super::assert_between!(7.999999, prod, 8.000001);
     let prod = reducer.product(&vec![3, 3, 3], &vec![2, 2, 2]);
+    super::assert_between!(173.999999, prod, 174.000001);
+}
+
+#[test]
+fn lll_weighted_prod() {
+    let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
+    let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
+    super::assert_between!(3.999999, prod, 4.000001);
+    assert_eq!(
+        0.0,
+        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
+    );
+    let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
+    super::assert_between!(7.999999, prod, 8.000001);
+    let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
     super::assert_between!(173.999999, prod, 174.000001);
 }
 
