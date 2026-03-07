@@ -652,6 +652,29 @@ fn mapping_from_empty() {
 }
 
 #[test]
+fn gram_schmidt_limit11() {
+    // Compared to Python implemetation
+    let reducer = LLLReducer::new(&super::PrimeLimit::new(11).pitches);
+    let (g, m) = reducer.gram_schmidt_orthogonalization(
+        &vec![vec![1.0, 2.0, 3.0, 4.0, 5.0],
+              vec![3.0, 4.0, 2.0, 2.0, 3.0],
+        ]);
+    assert_eq!(g.len(), 2);
+    // First row is unchanged from the input so will be exact
+    assert_eq!(g[0], vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+    assert_between!(2.385371887339598, g[1][0], 2.385371887339600);
+    assert_between!(2.770743774679197, g[1][1], 2.770743774679199);
+    assert_between!( 0.156115662018796, g[1][2],  0.156115662018798);
+    assert_between!(-0.458512450641605, g[1][3], -0.458512450641602);
+    assert_between!(-0.073140563302006, g[1][4], -0.073140563302003);
+    assert_eq!(m.len(), 2);
+    // Exact integers in the Python
+    assert_eq!(m[0], vec![1.0, 0.0]);
+    assert_between!(0.614628112660400, m[1][0], 0.614628112660402);
+    assert_eq!(m[1][1], 1.0);
+}
+
+#[test]
 fn lll_unewighted_product() {
     let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
     let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
