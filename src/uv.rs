@@ -205,6 +205,7 @@ impl LLLReducer {
         &self,
         basis: &[Vec<f64>],
     ) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
+        debug_assert!(basis.iter().all(|row| row.len() == self.weights.len()));
         let mut m = vec![];
         let mut gramian: Vec<Vec<f64>> = vec![];
         let mut idrow_orig = vec![1.0];
@@ -230,6 +231,7 @@ impl LLLReducer {
             gramian.push(new_row);
             m.push(row);
         }
+        debug_assert!(gramian.iter().all(|row| row.len() == self.weights.len()));
         (gramian, m)
     }
 
