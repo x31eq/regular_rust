@@ -621,6 +621,18 @@ fn lll_unewighted_product() {
 }
 
 #[test]
+fn lll_weighted_product() {
+    let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
+    let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
+    super::assert_between!(3.999999, prod, 4.000001);
+    assert_eq!(0.0, reducer.product(&vec![1, 0, 0], &vec![0, 1, 1]));
+    let prod = reducer.product(&vec![2, 0, 0], &vec![1, 0, 0]);
+    super::assert_between!(7.999999, prod, 8.000001);
+    let prod = reducer.product(&vec![3, 3, 3], &vec![2, 2, 2]);
+    super::assert_between!(173.999999, prod, 174.000001);
+}
+
+#[test]
 fn round_lll_checks() {
     assert_eq!(round_lll(0.4), 0.0);
     assert_eq!(round_lll(0.5), 0.0);
