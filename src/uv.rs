@@ -291,15 +291,7 @@ impl LLLReducer {
         (gramian, m)
     }
 
-    fn product(&self, u: &[Exponent], v: &[Exponent]) -> f64 {
-        self.weights
-            .iter()
-            .zip(u.iter())
-            .zip(v.iter())
-            .map(|((&x, &m), &n)| x * (m as f64) * (n as f64))
-            .sum()
-    }
-
+    /// Inner product implementation
     fn prod(&self, u: &[f64], v: &[f64]) -> f64 {
         self.weights
             .iter()
@@ -750,18 +742,6 @@ fn gram_schmidt_limit11() {
 }
 
 #[test]
-fn lll_unewighted_product() {
-    let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
-    let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
-    super::assert_between!(0.999999, prod, 1.000001);
-    assert_eq!(0.0, reducer.product(&vec![1, 0, 0], &vec![0, 1, 1]));
-    let prod = reducer.product(&vec![2, 0, 0], &vec![1, 0, 0]);
-    super::assert_between!(1.999999, prod, 2.000001);
-    let prod = reducer.product(&vec![3, 3, 3], &vec![2, 2, 2]);
-    super::assert_between!(17.999999, prod, 18.000001);
-}
-
-#[test]
 fn lll_unewighted_prod() {
     let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
     let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
@@ -774,18 +754,6 @@ fn lll_unewighted_prod() {
     super::assert_between!(1.999999, prod, 2.000001);
     let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
     super::assert_between!(17.999999, prod, 18.000001);
-}
-
-#[test]
-fn lll_weighted_product() {
-    let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
-    let prod = reducer.product(&vec![1, 0, 0], &vec![1, 0, 0]);
-    super::assert_between!(3.999999, prod, 4.000001);
-    assert_eq!(0.0, reducer.product(&vec![1, 0, 0], &vec![0, 1, 1]));
-    let prod = reducer.product(&vec![2, 0, 0], &vec![1, 0, 0]);
-    super::assert_between!(7.999999, prod, 8.000001);
-    let prod = reducer.product(&vec![3, 3, 3], &vec![2, 2, 2]);
-    super::assert_between!(173.999999, prod, 174.000001);
 }
 
 #[test]
