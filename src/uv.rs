@@ -190,8 +190,14 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+/// The book sets this it 2.  Lower numbers mean closer convergence.
+/// I think it works from 2 to 4 but I'm not sure.
+/// c.f. https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf)
 const LLL_TERMINATION_CONSTRAINT: f64 = 2.0;
 
+/// LLL reduction with a Euclidean inner product
+/// Based on Modern Computer Algebra,
+/// von zur Gathen & Gerhard, p.449
 struct LLLReducer {
     weights: Vec<f64>,
 }
