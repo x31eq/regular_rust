@@ -209,7 +209,7 @@ impl LLLReducer {
         }
     }
 
-    fn reduction(&self, vectors: &[ETMap]) -> Mapping {
+    pub fn reduce(&self, vectors: &[ETMap]) -> Mapping {
         let n = vectors.len();
         if n == 0 {
             return vec![];
@@ -700,6 +700,15 @@ fn matrix_from_empty() {
 fn mapping_from_empty() {
     let empty: Mapping = vec![];
     assert_eq!(mapping_from_float_matrix(nalgebra::dmatrix![]), empty)
+}
+
+#[test]
+fn lll_limit11() {
+    // Compared to Python implemetation
+    let reducer = LLLReducer::new(&super::PrimeLimit::new(11).pitches);
+    let result =
+        reducer.reduce(&vec![vec![1, 2, 3, 4, 5], vec![3, 4, 2, 2, 3]]);
+    assert_eq!(result, vec![vec![2, 2, -1, -2, -2], vec![5, 6, 1, 0, 1]]);
 }
 
 #[test]
