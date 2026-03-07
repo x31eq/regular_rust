@@ -201,7 +201,7 @@ impl LLLReducer {
         }
     }
 
-    pub fn product(&self, u: &[Exponent], v: &[Exponent]) -> f64 {
+    fn product(&self, u: &[Exponent], v: &[Exponent]) -> f64 {
         self.weights
             .iter()
             .zip(u.iter())
