@@ -17,8 +17,7 @@ pub struct CangwuTemperament<'a> {
     pub melody: Mapping,
 }
 
-pub trait TenneyWeighted {
-    fn mapping(&self) -> &Mapping;
+pub trait TenneyWeighted: TemperamentClass {
     fn plimit(&self) -> &[Cents];
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
@@ -170,10 +169,6 @@ impl TemperamentClass for CangwuTemperament<'_> {
 }
 
 impl TenneyWeighted for CangwuTemperament<'_> {
-    fn mapping(&self) -> &Mapping {
-        &self.melody
-    }
-
     fn plimit(&self) -> &[Cents] {
         self.plimit
     }

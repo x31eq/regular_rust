@@ -29,10 +29,6 @@ impl TunedTemperament for TETemperament<'_> {
 }
 
 impl TenneyWeighted for TETemperament<'_> {
-    fn mapping(&self) -> &Mapping {
-        &self.melody
-    }
-
     fn plimit(&self) -> &[Cents] {
         self.plimit
     }
