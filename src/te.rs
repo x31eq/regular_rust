@@ -1,7 +1,9 @@
 extern crate nalgebra as na;
 use na::DMatrix;
 
-use super::cangwu::{CangwuTemperament, TenneyWeighted, rms_of_matrix};
+use super::cangwu::{
+    CangwuMetrics, CangwuTemperament, TenneyWeighted, rms_of_matrix,
+};
 use super::temperament_class::TemperamentClass;
 use super::tuned_temperament::TunedTemperament;
 use super::{Cents, ETMap, Mapping, Tuning};

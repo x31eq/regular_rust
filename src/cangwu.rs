@@ -25,7 +25,9 @@ pub trait TenneyWeighted: TemperamentClass {
         let plimit = self.plimit();
         weight_mapping(melody, plimit)
     }
+}
 
+pub trait CangwuMetrics: TenneyWeighted {
     fn badness(&self, ek: Cents) -> Cents {
         let rank = self.mapping().len();
         let dimension = self.plimit().len();
@@ -89,7 +91,6 @@ pub trait TenneyWeighted: TemperamentClass {
             .map(|uv| normalize_positive(self.plimit(), uv))
             .collect()
     }
-
 }
 
 fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
@@ -175,6 +176,8 @@ impl TenneyWeighted for CangwuTemperament<'_> {
         self.plimit
     }
 }
+
+impl CangwuMetrics for CangwuTemperament<'_> {}
 
 pub fn higher_rank_search(
     plimit: &[Cents],
