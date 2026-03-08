@@ -1041,7 +1041,7 @@ fn list_unison_vectors(
         let n_results = if (dimension - rank) == 1 { 1 } else { 10 };
         rt.unison_vectors(n_results)
     } else {
-        // The full search is to inefficient in these reaches
+        // The full search is too inefficient in these reaches
         unison_vector_basis(&limit.pitches, &rt.melody)
     };
     for uv in uvs {
