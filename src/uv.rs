@@ -482,6 +482,18 @@ fn inherent_errors() {
 }
 
 #[test]
+fn et12_uvs() {
+    let mapping = vec![vec![12, 19, 28, 34]];
+    let plimit = super::PrimeLimit::new(7);
+    let uvs = unison_vector_basis(&plimit.pitches, &mapping);
+    let ratios: Vec<_> = uvs
+        .iter()
+        .map(|uv| super::ratio::get_ratio_or_ket_string(&plimit, uv))
+        .collect();
+    assert_eq!(vec!["50:49", "64:63", "36:35"], ratios);
+}
+
+#[test]
 fn meantone5_kernel() {
     let mapping = vec![vec![12, 19, 28], vec![19, 30, 44]];
     let expected = vec![vec![4, -4, 1]];
