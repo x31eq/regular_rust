@@ -17,8 +17,7 @@ pub struct CangwuTemperament<'a> {
     pub melody: Mapping,
 }
 
-pub trait TenneyWeighted {
-    fn mapping(&self) -> &Mapping;
+pub trait TenneyWeighted: TemperamentClass {
     fn plimit(&self) -> &[Cents];
 
     fn weighted_mapping(&self) -> DMatrix<f64> {
@@ -26,6 +25,71 @@ pub trait TenneyWeighted {
         let plimit = self.plimit();
         weight_mapping(melody, plimit)
     }
+
+    fn badness(&self, ek: Cents) -> Cents {
+        let rank = self.mapping().len();
+        let dimension = self.plimit().len();
+        let ek = ek / 1200.0;
+        let epsilon = ek / (1.0 + square(ek)).sqrt();
+        let scaling = 1.0 - epsilon;
+        let m = self.weighted_mapping();
+        let offset = scaling * m.row_mean();
+        let offset_vec: Vec<_> = offset.iter().cloned().collect();
+        let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
+        debug_assert!(dimension > 0);
+        for _ in 1..dimension {
+            translation.extend(offset_vec.clone());
+        }
+        rms_of_matrix(&(m - translation.transpose())) * 1200.0
+    }
+
+    /// Get equal temperaments of a specific size belonging to the class.
+    /// If more than one match is legal, they might not all be found.
+    fn ets_of_size(&self, size: Exponent) -> Mapping {
+        let pet = prime_mapping(self.plimit(), size);
+        let ek = self.badness(0.0);
+        let mut bmax =
+            CangwuTemperament::new(self.plimit(), &[pet]).badness(ek);
+        for _ in 0..100 {
+            let ets = limited_mappings(size, ek, bmax, self.plimit());
+            if !ets.is_empty() {
+                return ets;
+            }
+            bmax *= 1.1;
+        }
+        // Return an empty result if we couldn't find anything
+        // in a reasonable amount of time
+        vec![]
+    }
+
+    /// Find unison vectors that this temperament class tempers out.
+    /// Might not find as many as you ask for, but will do its best
+    fn unison_vectors(&self, ek: f64, n_results: usize) -> Mapping {
+        let rank = self.mapping().len();
+        let dimension = self.plimit().len();
+        let n_ets = n_results + 10;
+        let seed_ets: Vec<ETMap> = filtered_equal_temperaments(
+            self.plimit(),
+            |et| !self.et_belongs(et),
+            ek,
+            n_ets,
+        );
+        let mut rts = vec![self.mapping().clone()];
+        for _ in (rank + 1)..dimension {
+            rts = higher_rank_search(
+                self.plimit(),
+                &seed_ets,
+                &rts,
+                ek,
+                n_results,
+            );
+        }
+        rts.iter()
+            .filter_map(only_unison_vector)
+            .map(|uv| normalize_positive(self.plimit(), uv))
+            .collect()
+    }
+
 }
 
 fn weight_mapping(mapping: &[ETMap], plimit: &[Cents]) -> DMatrix<f64> {
@@ -84,69 +148,6 @@ impl<'a> CangwuTemperament<'a> {
         }
     }
 
-    pub fn badness(&self, ek: Cents) -> Cents {
-        let rank = self.melody.len();
-        let dimension = self.plimit.len();
-        let ek = ek / 1200.0;
-        let epsilon = ek / (1.0 + square(ek)).sqrt();
-        let scaling = 1.0 - epsilon;
-        let m = self.weighted_mapping();
-        let offset = scaling * m.row_mean();
-        let offset_vec: Vec<_> = offset.iter().cloned().collect();
-        let mut translation = DMatrix::from_vec(rank, 1, offset_vec.clone());
-        debug_assert!(dimension > 0);
-        for _ in 1..dimension {
-            translation.extend(offset_vec.clone());
-        }
-        rms_of_matrix(&(m - translation.transpose())) * 1200.0
-    }
-
-    /// Get equal temperaments of a specific size belonging to the class.
-    /// If more than one match is legal, they might not all be found.
-    pub fn ets_of_size(&self, size: Exponent) -> Mapping {
-        let pet = prime_mapping(self.plimit, size);
-        let ek = self.badness(0.0);
-        let mut bmax = Self::new(self.plimit, &[pet]).badness(ek);
-        for _ in 0..100 {
-            let ets = limited_mappings(size, ek, bmax, self.plimit);
-            if !ets.is_empty() {
-                return ets;
-            }
-            bmax *= 1.1;
-        }
-        // Return an empty result if we couldn't find anything
-        // in a reasonable amount of time
-        vec![]
-    }
-
-    /// Find unison vectors that this temperament class tempers out.
-    /// Might not find as many as you ask for, but will do its best
-    pub fn unison_vectors(&self, ek: f64, n_results: usize) -> Mapping {
-        let rank = self.melody.len();
-        let dimension = self.plimit.len();
-        let n_ets = n_results + 10;
-        let seed_ets: Vec<ETMap> = filtered_equal_temperaments(
-            self.plimit,
-            |et| !self.et_belongs(et),
-            ek,
-            n_ets,
-        );
-        let mut rts = vec![self.melody.clone()];
-        for _ in (rank + 1)..dimension {
-            rts = higher_rank_search(
-                self.plimit,
-                &seed_ets,
-                &rts,
-                ek,
-                n_results,
-            );
-        }
-        rts.iter()
-            .filter_map(only_unison_vector)
-            .map(|uv| normalize_positive(self.plimit, uv))
-            .collect()
-    }
-
     /// Get the best equal temperament mappings that belong to
     /// the temperament class
     ///
@@ -170,10 +171,6 @@ impl TemperamentClass for CangwuTemperament<'_> {
 }
 
 impl TenneyWeighted for CangwuTemperament<'_> {
-    fn mapping(&self) -> &Mapping {
-        &self.melody
-    }
-
     fn plimit(&self) -> &[Cents] {
         self.plimit
     }
