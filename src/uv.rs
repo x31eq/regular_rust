@@ -4,7 +4,7 @@ use na::DMatrix;
 use super::cangwu::filtered_equal_temperaments;
 use super::{
     Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
-    hermite_normal_form,
+    hermite_normal_form, normalize_positive,
 };
 
 /// Return the commatic unison vector for a mapping with
@@ -81,6 +81,14 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
         // multiply as i64 to avoid overflows
         .map(|(&m, &n)| (m as i64) * (n as i64))
         .sum()
+}
+
+/// Get unison vectors from a mapping and TLL-reduce them
+pub fn unison_vector_basis(plimit: &[Cents], mapping: &[ETMap]) -> Mapping {
+    tlll(plimit, &saturated_kernel_basis(mapping))
+        .into_iter()
+        .map(|uv| normalize_positive(plimit, uv))
+        .collect()
 }
 
 pub fn saturated_kernel_basis(vectors: &[ETMap]) -> Mapping {
@@ -315,8 +323,7 @@ fn meantone5() {
     assert!(!tempers_out(&mapping, &[4, -1, -1]));
     assert!(!tempers_out(&mapping, &[-3, -1, 1]));
     let uv = only_unison_vector(&mapping).expect("no UV");
-    let uv =
-        super::normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
+    let uv = normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
     assert_eq!(expected, uv);
 }
 
@@ -331,8 +338,7 @@ fn marvel7() {
     assert!(tempers_out(&mapping, &expected));
     assert!(!tempers_out(&mapping, &[-4, 4, -1, 0]));
     let uv = only_unison_vector(&mapping).expect("no UV");
-    let uv =
-        super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
+    let uv = normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
     assert_eq!(expected, uv);
 }
 
@@ -347,8 +353,7 @@ fn marvel7_reordered() {
     assert!(tempers_out(&mapping, &expected));
     assert!(!tempers_out(&mapping, &[-4, 4, -1, 0]));
     let uv = only_unison_vector(&mapping).expect("no UV");
-    let uv =
-        super::normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
+    let uv = normalize_positive(&super::PrimeLimit::new(7).pitches, uv);
     assert_eq!(expected, uv);
 }
 
@@ -392,8 +397,7 @@ fn uv_1575_1573() {
     let expected = vec![0, 2, 2, 1, -2, -1];
     assert!(tempers_out(&mapping, &expected));
     let uv = only_unison_vector(&mapping).expect("no UV");
-    let uv =
-        super::normalize_positive(&super::PrimeLimit::new(13).pitches, uv);
+    let uv = normalize_positive(&super::PrimeLimit::new(13).pitches, uv);
     assert_eq!(expected, uv);
 }
 
@@ -557,6 +561,33 @@ fn marvel11_kernel() {
     assert_eq!(
         reduced,
         super::hermite_normal_form(&saturated_kernel_basis(&kernel)),
+    );
+}
+
+#[test]
+fn mystery17_uvs() {
+    let mapping = vec![
+        vec![29, 46, 67, 81, 100, 107, 119],
+        vec![58, 92, 135, 163, 201, 215, 237],
+    ];
+    let plimit = super::PrimeLimit::new(17);
+    let uvs = unison_vector_basis(&plimit.pitches, &mapping);
+    let ratios: Vec<_> = uvs
+        .iter()
+        .map(|uv| super::ratio::get_ratio_or_ket_string(&plimit, uv))
+        .collect();
+
+    // TLLL reduction doesn't do a brilliant job,
+    // but note that the simplest ratio is quite simple
+    assert_eq!(
+        vec![
+            "352:351",
+            "2080:2079",
+            "5831:5808",
+            "53508:53125",
+            "[-83, -47, 61, 24, -25, -27, 33⟩",
+        ],
+        ratios,
     );
 }
 
