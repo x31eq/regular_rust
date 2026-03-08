@@ -16,7 +16,10 @@ use super::te::TETemperament;
 use super::temperament_class::TemperamentClass;
 use super::top::TOPTemperament;
 use super::tuned_temperament::TunedTemperament;
-use super::uv::{ek_for_search, get_ets_tempering_out, only_unison_vector};
+use super::uv::{
+    ek_for_search, get_ets_tempering_out, only_unison_vector,
+    unison_vector_basis,
+};
 use super::web_context::{Exceptionable, WebContext};
 use super::{
     Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, map,
@@ -1033,16 +1036,15 @@ fn list_unison_vectors(
 ) -> Exceptionable {
     let rank = rt.rank();
     let dimension = limit.pitches.len();
-    if dimension > 11 {
-        let paragraph = web.document.create_element("p")?;
-        paragraph.set_text_content(Some("Disabled for performance reasons"));
-        field.append_child(&paragraph)?;
-        return Ok(());
-    }
-
     let list = web.document.create_element("ul")?;
-    let n_results = if (dimension - rank) == 1 { 1 } else { 10 };
-    for uv in rt.unison_vectors(n_results) {
+    let uvs = if dimension < 12 {
+        let n_results = if (dimension - rank) == 1 { 1 } else { 10 };
+        rt.unison_vectors(n_results)
+    } else {
+        // The full search is to inefficient in these reaches
+        unison_vector_basis(&limit.pitches, &rt.melody)
+    };
+    for uv in uvs {
         let item = web.document.create_element("li")?;
         let text = get_ratio_or_ket_string(limit, &uv);
         let link = web.document.create_element("a")?;

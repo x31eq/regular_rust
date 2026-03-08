@@ -375,7 +375,8 @@ pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     echelon
 }
 
-fn echelon_form(ets: &[ETMap]) -> Mapping {
+/// Echelon form without the extra reduction to get HNF
+pub fn echelon_form(ets: &[ETMap]) -> Mapping {
     echelon_rec(ets.to_vec(), 0)
 }
 
