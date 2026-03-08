@@ -83,7 +83,14 @@ impl<'a> CangwuTemperament<'a> {
         }
     }
 
+    /// Cangwu badness given the parameter
     pub fn badness(&self, ek: Cents) -> Cents {
+        let metric = self.cangwu_metric(ek);
+        rms_of_matrix(&metric) * 1200.0
+    }
+
+    /// Matrix used to determine the badness
+    fn cangwu_metric(&self, ek:Cents) -> DMatrix<f64> {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
         let ek = ek / 1200.0;
@@ -97,8 +104,9 @@ impl<'a> CangwuTemperament<'a> {
         for _ in 1..dimension {
             translation.extend(offset_vec.clone());
         }
-        rms_of_matrix(&(m - translation.transpose())) * 1200.0
+        m - translation.transpose()
     }
+
 
     /// Get equal temperaments of a specific size belonging to the class.
     /// If more than one match is legal, they might not all be found.
