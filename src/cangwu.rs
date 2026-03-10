@@ -467,6 +467,15 @@ impl<'a> MoreMappings<'a> {
     }
 }
 
+/// ET generator based on a positive definite quadratic form
+struct QuadraticMappings<'a> {
+    metric: &' DMatrix<f64>, // a matrix defining quadratic form
+    cap: f64,                // the highest badness (squared) to keep
+    mapping: ETMap,          // working result
+    results: Mapping,        // final result
+    diagonals: Vec<f64>,     // copy of useful values for the calculation
+}
+
 fn square(x: f64) -> f64 {
     x.powi(2)
 }
