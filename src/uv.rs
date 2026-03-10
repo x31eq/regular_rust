@@ -203,9 +203,9 @@ pub fn rtlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
     if vectors.len() < 2 {
         return vectors.to_vec();
     }
-    let lll = tlll(plimit, vectors);
-    let mut result = vec![lll[0].clone()];
-    result.append(&mut rtlll(plimit, &lll[1..]));
+    let mut lll = tlll(plimit, vectors);
+    let mut result = vec![lll.swap_remove(0)];
+    result.append(&mut rtlll(plimit, &lll));
     result
 }
 
