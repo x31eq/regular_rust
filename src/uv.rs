@@ -85,7 +85,7 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
 
 /// Get unison vectors from a mapping and TLL-reduce them
 pub fn unison_vector_basis(plimit: &[Cents], mapping: &[ETMap]) -> Mapping {
-    tlll(plimit, &saturated_kernel_basis(mapping))
+    rtlll(plimit, &saturated_kernel_basis(mapping))
         .into_iter()
         .map(|uv| normalize_positive(plimit, uv))
         .collect()
@@ -196,6 +196,17 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
     m.row_iter()
         .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
         .collect()
+}
+
+/// Recursive Tenney-weighted LLL
+pub fn rtlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
+    if vectors.len() < 2 {
+        return vectors.to_vec();
+    }
+    let lll = tlll(plimit, vectors);
+    let mut result = vec![lll[0].clone()];
+    result.append(&mut rtlll(plimit, &lll[1..]));
+    result
 }
 
 /// Tenney-weighted LLL
