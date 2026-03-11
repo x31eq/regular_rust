@@ -85,7 +85,7 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
 
 /// Get unison vectors from a mapping and TLL-reduce them
 pub fn unison_vector_basis(plimit: &[Cents], mapping: &[ETMap]) -> Mapping {
-    tlll(plimit, &saturated_kernel_basis(mapping))
+    rtlll(plimit, &saturated_kernel_basis(mapping))
         .into_iter()
         .map(|uv| normalize_positive(plimit, uv))
         .collect()
@@ -198,6 +198,17 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+/// Recursive Tenney-weighted LLL
+pub fn rtlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
+    if vectors.len() < 2 {
+        return vectors.to_vec();
+    }
+    let mut lll = tlll(plimit, vectors);
+    let mut result = vec![lll.swap_remove(0)];
+    result.append(&mut rtlll(plimit, &lll));
+    result
+}
+
 /// Tenney-weighted LLL
 pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
     LLLReducer::new(plimit).reduce(vectors)
@@ -206,7 +217,8 @@ pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
 /// The book sets this it 2.  Lower numbers mean closer convergence.
 /// I think it works from 2 to 4 but I'm not sure.
 /// c.f. https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf)
-const LLL_TERMINATION_CONSTRAINT: f64 = 2.0;
+/// Testing shows it does work lower than 2, however
+const LLL_TERMINATION_CONSTRAINT: f64 = 1.3;
 
 /// LLL reduction with a Euclidean inner product
 /// Based on Modern Computer Algebra,
