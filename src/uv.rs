@@ -183,7 +183,7 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
 }
 
 fn float_matrix_from_mapping(m: &Mapping) -> DMatrix<f64> {
-    let n_cols = if m.is_empty() { 0 } else { m[0].len() };
+    let n_cols = m.first().map_or(0, Vec::len);
     debug_assert!(m.iter().all(|row| row.len() == n_cols));
     DMatrix::from_row_iterator(
         m.len(),
