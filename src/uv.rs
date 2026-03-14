@@ -275,10 +275,6 @@ impl LLLReducer {
         debug_assert!(
             basis.iter().all(|row| row.len() == self.weights.len()),
         );
-        let basis: Vec<Vec<f64>> = basis
-            .iter()
-            .map(|row| row.iter().map(|&x| x as f64).collect())
-            .collect();
         let mut m = vec![];
         let mut gramian: Vec<Vec<f64>> = vec![];
         let mut idrow_orig = vec![1.0];
@@ -286,7 +282,8 @@ impl LLLReducer {
         for _ in 0..basis.len() {
             idrow.push(0.0);
         }
-        for frow in basis {
+        for row in basis {
+            let frow: Vec<f64> = row.iter().map(|&x| x as f64).collect();
             idrow.pop();
             let row: Vec<f64> = gramian
                 .iter()
