@@ -242,10 +242,7 @@ impl LLLReducer {
         debug_assert!(
             vectors.iter().all(|row| row.len() == vectors[0].len()),
         );
-        let mut g: Vec<Vec<f64>> = vectors
-            .iter()
-            .map(|row| row.iter().map(|&x| x as f64).collect())
-            .collect();
+        let mut g = vectors.to_vec();
         let (mut gs, mut m) = self.gram_schmidt_orthogonalization(&g);
         let mut i = 1;
         while i < n {
@@ -268,18 +265,20 @@ impl LLLReducer {
                 i += 1;
             }
         }
-        g.iter()
-            .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
-            .collect()
+        g
     }
 
     fn gram_schmidt_orthogonalization(
         &self,
-        basis: &[Vec<f64>],
+        basis: &[ETMap],
     ) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         debug_assert!(
             basis.iter().all(|row| row.len() == self.weights.len()),
         );
+        let basis: Vec<Vec<f64>> = basis
+            .iter()
+            .map(|row| row.iter().map(|&x| x as f64).collect())
+            .collect();
         let mut m = vec![];
         let mut gramian: Vec<Vec<f64>> = vec![];
         let mut idrow_orig = vec![1.0];
@@ -291,7 +290,7 @@ impl LLLReducer {
             idrow.pop();
             let row: Vec<f64> = gramian
                 .iter()
-                .map(|g| self.prod(frow, g) / self.prod(g, g))
+                .map(|g| self.prod(&frow, g) / self.prod(g, g))
                 .chain(idrow.clone())
                 .collect();
             let mut new_row = frow.clone();
@@ -323,8 +322,8 @@ impl LLLReducer {
 }
 
 /// Rounding function the book I copied from specifies
-fn round_lll(x: f64) -> f64 {
-    (x + 0.5).next_down().floor()
+fn round_lll(x: f64) -> Exponent {
+    (x + 0.5).next_down().floor() as Exponent
 }
 
 #[test]
@@ -597,7 +596,7 @@ fn mystery17_uvs() {
             "2080:2079",
             "5831:5808",
             "53508:53125",
-            "[-83, -47, 61, 24, -25, -27, 33⟩",
+            "18830774421468890345242624:18277964950103308174248225",
         ],
         ratios,
     );
@@ -766,8 +765,8 @@ fn gram_schmidt_limit11() {
     // Compared to Python implemetation
     let reducer = LLLReducer::new(&super::PrimeLimit::new(11).pitches);
     let (g, m) = reducer.gram_schmidt_orthogonalization(&vec![
-        vec![1.0, 2.0, 3.0, 4.0, 5.0],
-        vec![3.0, 4.0, 2.0, 2.0, 3.0],
+        vec![1, 2, 3, 4, 5],
+        vec![3, 4, 2, 2, 3],
     ]);
     assert_eq!(g.len(), 2);
     // First row is unchanged from the input so will be exact
@@ -816,15 +815,15 @@ fn lll_weighted_prod() {
 
 #[test]
 fn round_lll_checks() {
-    assert_eq!(round_lll(0.4), 0.0);
-    assert_eq!(round_lll(0.5), 0.0);
-    assert_eq!(round_lll(0.500001), 1.0);
-    assert_eq!(round_lll(0.6), 1.0);
-    assert_eq!(round_lll(1.5), 1.0);
-    assert_eq!(round_lll(17.499999999), 17.0);
-    assert_eq!(round_lll(17.5), 17.0);
-    assert_eq!(round_lll(17.500001), 18.0);
-    assert_eq!(round_lll(-0.4999999), 0.0);
-    assert_eq!(round_lll(-0.5), -1.0);
-    assert_eq!(round_lll(-0.5000001), -1.0);
+    assert_eq!(round_lll(0.4), 0);
+    assert_eq!(round_lll(0.5), 0);
+    assert_eq!(round_lll(0.500001), 1);
+    assert_eq!(round_lll(0.6), 1);
+    assert_eq!(round_lll(1.5), 1);
+    assert_eq!(round_lll(17.499999999), 17);
+    assert_eq!(round_lll(17.5), 17);
+    assert_eq!(round_lll(17.500001), 18);
+    assert_eq!(round_lll(-0.4999999), 0);
+    assert_eq!(round_lll(-0.5), -1);
+    assert_eq!(round_lll(-0.5000001), -1);
 }
