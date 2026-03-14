@@ -350,6 +350,8 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
+    // Looks like rows and columns are the other way round from normal
+    debug_assert!(ets.iter().all(|col| col.len() == ets[0].len()));
     for col in 1..echelon.len() {
         let mut col_iter = echelon[..=col].iter_mut().rev();
         // Getting top_col from the mutable iterator
@@ -385,6 +387,7 @@ fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
         return working;
     };
     let nrows = first.len();
+    debug_assert!(working.iter().all(|col| col.len() == nrows));
 
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
