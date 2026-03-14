@@ -258,7 +258,7 @@ impl LLLReducer {
                 && self.prod(&gs[i - 1], &gs[i - 1])
                     > LLL_TERMINATION_CONSTRAINT * self.prod(&gs[i], &gs[i])
             {
-                (g[i - 1], g[i]) = (g[i].clone(), g[i - 1].clone());
+                g.swap(i - 1, i);
                 (gs, m) = self.gram_schmidt_orthogonalization(&g);
                 i -= 1;
             } else {
