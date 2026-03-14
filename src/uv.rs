@@ -253,7 +253,7 @@ impl LLLReducer {
                 g[i] = g[i]
                     .iter()
                     .zip(&g[j])
-                    .map(|(&x, &y)| x - round_lll(m[i][j]) * y)
+                    .map(|(&gi, &gj)| gi - round_lll(m[i][j]) * gj)
                     .collect();
                 (gs, m) = self.gram_schmidt_orthogonalization(&g);
             }
