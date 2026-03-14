@@ -381,10 +381,10 @@ pub fn echelon_form(ets: &[ETMap]) -> Mapping {
 }
 
 fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
-    if working.is_empty() {
+    let Some(first) = working.first() else {
         return working;
-    }
-    let nrows = working[0].len();
+    };
+    let nrows = first.len();
 
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
