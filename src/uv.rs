@@ -651,6 +651,8 @@ fn saturate_empty() {
 #[test]
 fn saturate_zero() {
     assert_eq!(saturate(&vec![vec![0]]), None);
+    assert_eq!(saturate(&vec![vec![0, 0, 0, 0]]), None);
+    assert_eq!(saturate(&vec![vec![0, 0, 0], vec![0, 0, 0]]), None);
 }
 
 #[test]
