@@ -158,8 +158,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
         if gcd == 0 {
             return None;
         }
-        let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
-        return Some(result);
+        return Some(vec![vectors[0].iter().map(|x| x / gcd).collect()]);
     }
     double_hermite.drain(n_vecs..);
     let double_hermite = float_matrix_from_mapping(&double_hermite);
