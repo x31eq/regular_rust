@@ -152,17 +152,20 @@ impl FromStr for PrimeLimit {
 /// The letters the start of the alphabet for prime limits
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
-    debug_assert_ne!(et, vec![]);
+    debug_assert!(!et.is_empty());
+    debug_assert_eq!(et.len(), plimit.headings.len());
+    debug_assert_eq!(et.len(), plimit.pitches.len());
+    let octave = et[0];
     let warts = plimit.warts();
-    let mut name = et[0].to_string();
+    let mut name = octave.to_string();
     if plimit.headings[0] != "2" {
         name.insert(0, warts[0]);
     }
-    let prime_et = prime_mapping(&plimit.pitches, et[0]);
+    let prime_et = prime_mapping(&plimit.pitches, octave);
     if prime_et == et {
         return name + "p";
     }
-    let n_notes_scale = et[0] as f64 / plimit.pitches[0];
+    let n_notes_scale = octave as f64 / plimit.pitches[0];
     for (&et_i, (&pet_i, (&pitch, &wart))) in et
         .iter()
         .zip(prime_et.iter().zip(plimit.pitches.iter().zip(warts.iter())))
@@ -350,6 +353,8 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
+    // Looks like rows and columns are the other way round from normal
+    debug_assert!(ets.iter().all(|col| col.len() == ets[0].len()));
     for col in 1..echelon.len() {
         let mut col_iter = echelon[..=col].iter_mut().rev();
         // Getting top_col from the mutable iterator
@@ -381,10 +386,11 @@ pub fn echelon_form(ets: &[ETMap]) -> Mapping {
 }
 
 fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
-    if working.is_empty() {
+    let Some(first) = working.first() else {
         return working;
-    }
-    let nrows = working[0].len();
+    };
+    let nrows = first.len();
+    debug_assert!(working.iter().all(|col| col.len() == nrows));
 
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {

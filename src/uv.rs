@@ -131,7 +131,7 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
 }
 
 /// Remove torsion from a basis.
-/// Returns None when the vectors are not of full rank.
+/// Returns None when the vectors are linearly dependent.
 fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     // c.f. http://www.wstein.org/papers/hnf/
     // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
@@ -146,23 +146,23 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
 
-    let mut double_hermite = hermite_normal_form(&transpose(&hermite));
+    let double_hermite = hermite_normal_form(&transpose(&hermite));
     debug_assert!(
         double_hermite
             .iter()
             .skip(n_vecs)
             .all(|row| row.iter().all(|&x| x == 0))
     );
-    if n_vecs == 1 {
+    if let [vector] = vectors {
+        debug_assert_eq!(n_vecs, 1);
         let gcd = double_hermite[0][0];
         if gcd == 0 {
-            return None;
+            debug_assert!(vector.iter().all(|&x| x == 0));
+            return Some(vectors.to_vec());
         }
-        let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
-        return Some(result);
+        return Some(vec![vector.iter().map(|x| x / gcd).collect()]);
     }
-    double_hermite.drain(n_vecs..);
-    let double_hermite = float_matrix_from_mapping(&double_hermite);
+    let double_hermite = float_matrix_from_mapping(&double_hermite[..n_vecs]);
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
 
     let transformation = double_hermite.try_inverse()?;
@@ -182,8 +182,8 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
     }
 }
 
-fn float_matrix_from_mapping(m: &Mapping) -> DMatrix<f64> {
-    let n_cols = if m.is_empty() { 0 } else { m[0].len() };
+fn float_matrix_from_mapping(m: &[ETMap]) -> DMatrix<f64> {
+    let n_cols = m.first().map_or(0, Vec::len);
     debug_assert!(m.iter().all(|row| row.len() == n_cols));
     DMatrix::from_row_iterator(
         m.len(),
@@ -653,7 +653,14 @@ fn saturate_empty() {
 
 #[test]
 fn saturate_zero() {
-    assert_eq!(saturate(&vec![vec![0]]), None);
+    // A single zero vector going in is valid
+    assert_eq!(saturate(&vec![vec![0]]), Some(vec![vec![0]]));
+    assert_eq!(
+        saturate(&vec![vec![0, 0, 0, 0]]),
+        Some(vec![vec![0, 0, 0, 0]]),
+    );
+    // Two zero vectors count as linearly dependent
+    assert_eq!(saturate(&vec![vec![0, 0, 0], vec![0, 0, 0]]), None);
 }
 
 #[test]
