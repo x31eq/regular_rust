@@ -131,7 +131,7 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
 }
 
 /// Remove torsion from a basis.
-/// Returns None when the vectors are not of full rank.
+/// Returns None when the vectors are linearly dependent.
 fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     // c.f. http://www.wstein.org/papers/hnf/
     // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
@@ -155,7 +155,9 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     );
     if n_vecs == 1 {
         let gcd = double_hermite[0][0];
-        (gcd != 0).then_some(())?;
+        if gcd == 0 {
+            return Some(vectors.to_vec());
+        }
         return Some(vec![vectors[0].iter().map(|x| x / gcd).collect()]);
     }
     double_hermite.drain(n_vecs..);
@@ -650,8 +652,13 @@ fn saturate_empty() {
 
 #[test]
 fn saturate_zero() {
-    assert_eq!(saturate(&vec![vec![0]]), None);
-    assert_eq!(saturate(&vec![vec![0, 0, 0, 0]]), None);
+    // A single zero vector going in is valid
+    assert_eq!(saturate(&vec![vec![0]]), Some(vec![vec![0]]));
+    assert_eq!(
+        saturate(&vec![vec![0, 0, 0, 0]]),
+        Some(vec![vec![0, 0, 0, 0]]),
+    );
+    // Two zero vectors count as linearly dependent
     assert_eq!(saturate(&vec![vec![0, 0, 0], vec![0, 0, 0]]), None);
 }
 
