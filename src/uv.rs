@@ -146,7 +146,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
 
-    let mut double_hermite = hermite_normal_form(&transpose(&hermite));
+    let double_hermite = hermite_normal_form(&transpose(&hermite));
     debug_assert!(
         double_hermite
             .iter()
@@ -162,8 +162,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
         }
         return Some(vec![vector.iter().map(|x| x / gcd).collect()]);
     }
-    double_hermite.drain(n_vecs..);
-    let double_hermite = float_matrix_from_mapping(&double_hermite);
+    let double_hermite = float_matrix_from_mapping(&double_hermite[..n_vecs]);
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
 
     let transformation = double_hermite.try_inverse()?;
@@ -183,7 +182,7 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
     }
 }
 
-fn float_matrix_from_mapping(m: &Mapping) -> DMatrix<f64> {
+fn float_matrix_from_mapping(m: &[ETMap]) -> DMatrix<f64> {
     let n_cols = m.first().map_or(0, Vec::len);
     debug_assert!(m.iter().all(|row| row.len() == n_cols));
     DMatrix::from_row_iterator(
