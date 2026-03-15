@@ -155,9 +155,7 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     );
     if n_vecs == 1 {
         let gcd = double_hermite[0][0];
-        if gcd == 0 {
-            return None;
-        }
+        (gcd != 0).then_some(())?;
         return Some(vec![vectors[0].iter().map(|x| x / gcd).collect()]);
     }
     double_hermite.drain(n_vecs..);
