@@ -223,7 +223,7 @@ pub fn hash_change(_evt: Event) {
     process_hash();
 }
 
-/// Plain <noscript> tags don't show up when scripting is disabled.
+/// Plain &lt;noscript&gt; tags don't show up when scripting is disabled.
 /// If this is called, it must be working, so hide the message.
 fn clear_noscript() {
     WebContext::init().emptied_element("noscript");
