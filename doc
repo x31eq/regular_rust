@@ -1,1 +1,2 @@
-cargo doc --target wasm32-unknown-unknown --document-private-items
+#!/usr/bin/bash
+cargo doc --target wasm32-unknown-unknown --document-private-items "$@"
