@@ -216,7 +216,7 @@ pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
 
 /// The book sets this it 2.  Lower numbers mean closer convergence.
 /// I think it works from 2 to 4 but I'm not sure.
-/// c.f. https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf)
+/// c.f. <https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf>)
 /// Testing shows it does work lower than 2, however
 const LLL_TERMINATION_CONSTRAINT: f64 = 1.3;
 
