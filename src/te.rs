@@ -42,11 +42,7 @@ impl<'a> TETemperament<'a> {
     /// Upgrade vectors into a struct of nalgebra objects
     pub fn new(plimit: &'a [Cents], melody: &[ETMap]) -> Self {
         let melody = melody.to_vec();
-        let mut rt = TETemperament {
-            plimit,
-            melody,
-            tuning: vec![0.0],
-        };
+        let mut rt = TETemperament { plimit, melody, tuning: vec![0.0] };
         let wmap = rt.weighted_mapping();
         let pinv = wmap.pseudo_inverse(0.0).expect("no pseudoinverse");
         let tuning = pinv.column_sum() * 12e2;

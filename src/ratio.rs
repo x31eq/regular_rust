@@ -252,10 +252,7 @@ fn test_5_limit_ratios() {
 #[test]
 fn test_13_limit_ratios() {
     let limit = PrimeLimit::new(13);
-    assert_eq!(
-        factorize_ratio(&limit, (1, 1)),
-        Some(vec![0, 0, 0, 0, 0, 0]),
-    );
+    assert_eq!(factorize_ratio(&limit, (1, 1)), Some(vec![0, 0, 0, 0, 0, 0]),);
     assert_eq!(
         factorize_ratio(&limit, (144, 143)),
         Some(vec![4, 2, 0, 0, -1, -1]),

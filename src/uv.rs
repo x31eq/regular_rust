@@ -54,9 +54,7 @@ fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
 /// This is a rough guess that has to be precise for
 /// backwards compatibility reasons
 pub fn ek_for_search(limit: &[Cents], uvs: &[ETMap]) -> Cents {
-    uvs.iter()
-        .map(|uv| inherent_error(limit, uv))
-        .fold(0.0, Cents::max)
+    uvs.iter().map(|uv| inherent_error(limit, uv)).fold(0.0, Cents::max)
 }
 
 fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
@@ -64,10 +62,7 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
         // senseless question, return something to avoid panics
         return 0.0;
     }
-    let q = limit
-        .iter()
-        .zip(uv.iter())
-        .map(|(&x, &y)| x / 12e2 * y as Cents);
+    let q = limit.iter().zip(uv.iter()).map(|(&x, &y)| x / 12e2 * y as Cents);
     let len = limit.len() as Cents;
     let mean = q.clone().sum::<Cents>() / len;
     let rms = (q.map(|x| x * x).sum::<Cents>() / len).sqrt();
@@ -229,9 +224,7 @@ struct LLLReducer {
 
 impl LLLReducer {
     pub fn new(plimit: &[Cents]) -> Self {
-        LLLReducer {
-            weights: plimit.iter().map(|x| x * x).collect(),
-        }
+        LLLReducer { weights: plimit.iter().map(|x| x * x).collect() }
     }
 
     pub fn reduce(&self, vectors: &[ETMap]) -> Mapping {
@@ -792,10 +785,7 @@ fn lll_unewighted_prod() {
     let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
     let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(0.999999, prod, 1.000001);
-    assert_eq!(
-        0.0,
-        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
-    );
+    assert_eq!(0.0, reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]));
     let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(1.999999, prod, 2.000001);
     let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
@@ -807,10 +797,7 @@ fn lll_weighted_prod() {
     let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
     let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(3.999999, prod, 4.000001);
-    assert_eq!(
-        0.0,
-        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
-    );
+    assert_eq!(0.0, reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]));
     let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(7.999999, prod, 8.000001);
     let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);

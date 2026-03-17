@@ -77,11 +77,7 @@ impl<'a> CangwuTemperament<'a> {
                 }
             }
         }
-        if result.rank() == tclass.rank() {
-            Some(result)
-        } else {
-            None
-        }
+        if result.rank() == tclass.rank() { Some(result) } else { None }
     }
 
     pub fn badness(&self, ek: Cents) -> Cents {
@@ -310,11 +306,8 @@ pub fn equal_temperament_badness(
     // Get a dimensionless ek
     let ek = ek / 12e2;
     let epsilon = ek / (1.0 + square(ek)).sqrt();
-    let weighted_mapping: Vec<_> = mapping
-        .iter()
-        .zip(plimit)
-        .map(|(&m, p)| f64::from(m) / p)
-        .collect();
+    let weighted_mapping: Vec<_> =
+        mapping.iter().zip(plimit).map(|(&m, p)| f64::from(m) / p).collect();
     let mean = |items: &Vec<_>| {
         let mut sum = 0.0;
         for item in items.iter() {
@@ -415,14 +408,7 @@ impl<'a> MoreMappings<'a> {
         let lambda = 1.0 - epsilon2;
         let mapping = vec![n_notes; plimit.len()];
         let results = Vec::new();
-        MoreMappings {
-            cap,
-            epsilon2,
-            plimit,
-            lambda,
-            mapping,
-            results,
-        }
+        MoreMappings { cap, epsilon2, plimit, lambda, mapping, results }
     }
 
     /// i: the element to choose next

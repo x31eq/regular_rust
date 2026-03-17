@@ -53,11 +53,7 @@ impl PrimeLimit {
         let pitches = map(|p| cents(f64::from(*p)), &prime_numbers);
         let label = join(".", &prime_numbers);
         let headings = map(Harmonic::to_string, &prime_numbers);
-        PrimeLimit {
-            label,
-            pitches,
-            headings,
-        }
+        PrimeLimit { label, pitches, headings }
     }
 
     /// Harmonic numbers or ratios specified as strings
@@ -80,21 +76,13 @@ impl PrimeLimit {
         let label = join(".", labels);
         // Take ownership of the labels so that they can be stored
         let headings = labels.iter().map(|&s| s.to_string()).collect();
-        Some(PrimeLimit {
-            label,
-            pitches,
-            headings,
-        })
+        Some(PrimeLimit { label, pitches, headings })
     }
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
         let headings = map(Cents::to_string, &pitches);
-        PrimeLimit {
-            label: "inharmonic".to_string(),
-            pitches,
-            headings,
-        }
+        PrimeLimit { label: "inharmonic".to_string(), pitches, headings }
     }
 
     pub fn interval_size(&self, interval: &ETSlice) -> Cents {
@@ -192,9 +180,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
     let warts = plimit.warts();
     let octave_size = if warts.contains(&name.chars().next()?) {
         let octave_wart = name.remove(0);
-        *plimit
-            .pitches
-            .get(warts.iter().position(|&c| c == octave_wart)?)?
+        *plimit.pitches.get(warts.iter().position(|&c| c == octave_wart)?)?
     } else {
         match name.parse::<usize>() {
             // A plain integer is the number of steps
@@ -232,11 +218,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
                         (!nearest_sharp, (count + 1) / 2)
                     };
                     nearest as Exponent
-                        + if approx_sharp {
-                            correction
-                        } else {
-                            -correction
-                        }
+                        + if approx_sharp { correction } else { -correction }
                 } else {
                     nearest as Exponent
                 }
@@ -297,11 +279,8 @@ impl fmt::Display for ParseLimitError {
 }
 
 pub fn normalize_positive(limit: &[Cents], rsvec: ETMap) -> ETMap {
-    let pitch_width: Cents = limit
-        .iter()
-        .zip(rsvec.iter())
-        .map(|(&x, &y)| x * (y as Cents))
-        .sum();
+    let pitch_width: Cents =
+        limit.iter().zip(rsvec.iter()).map(|(&x, &y)| x * (y as Cents)).sum();
     if pitch_width < 0.0 {
         rsvec.iter().map(|x| -x).collect()
     } else {
@@ -486,8 +465,7 @@ impl<T> PriorityQueue<T> {
 
     fn sort(&mut self) {
         self.items.sort_unstable_by(|(bad1, _), (bad2, _)| {
-            bad1.partial_cmp(bad2)
-                .expect("Bad comparison: NaN or something")
+            bad1.partial_cmp(bad2).expect("Bad comparison: NaN or something")
         });
     }
 

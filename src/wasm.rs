@@ -174,9 +174,8 @@ fn lowrank_action(
     let (ets, limit, key) =
         parse_rt_params(params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
-    let limit = limit
-        .parse::<PrimeLimit>()
-        .or(Err("Unable to parse limit"))?;
+    let limit =
+        limit.parse::<PrimeLimit>().or(Err("Unable to parse limit"))?;
     let rt = match key {
         Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
         None => CangwuTemperament::from_name(&limit, &ets),
@@ -266,9 +265,8 @@ fn rt_action(
     let (ets, limit, key) =
         parse_rt_params(params).ok_or("Missing parameter")?;
     web.set_input_value("prime-limit", &limit);
-    let limit = limit
-        .parse::<PrimeLimit>()
-        .or(Err("Unable to parse limit"))?;
+    let limit =
+        limit.parse::<PrimeLimit>().or(Err("Unable to parse limit"))?;
     let rt = match key {
         Some(key) => rt_from_ets_and_key(&limit, &ets, &key),
         None => CangwuTemperament::from_name(&limit, &ets),
@@ -353,10 +351,8 @@ fn other_searches(
     params: &HashMap<String, String>,
     error: Cents,
 ) -> Result<(), String> {
-    let mut new_params: HashMap<&str, String> = params
-        .iter()
-        .map(|(k, v)| (k.as_str(), v.clone()))
-        .collect();
+    let mut new_params: HashMap<&str, String> =
+        params.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
     if let Some(link) = web.element("simpler-search") {
         new_params.insert("error", format!("{:.3}", error * 1.1));
         web.set_target(&link, &new_params)
@@ -384,19 +380,15 @@ fn other_searches(
                 .create_element("a")
                 .or(Err("Can't make link"))?;
             link.set_text_content(Some(&format!("{}-limit", new_limit)));
-            let mut new_params: HashMap<&str, String> = params
-                .iter()
-                .map(|(k, v)| (k.as_str(), v.clone()))
-                .collect();
+            let mut new_params: HashMap<&str, String> =
+                params.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
             new_params.insert("limit", new_limit.to_string());
             web.set_target(&link, &new_params)
                 .or(Err("Can't set lower limit search URL"))?;
             more_more
                 .append_child(&link)
                 .or(Err("Can't add lower-limit link"))?;
-            more_more
-                .append_with_str_1(" ")
-                .or(Err("Can't add space"))?;
+            more_more.append_with_str_1(" ").or(Err("Can't add space"))?;
         }
         // Add a higher-limit link
         let mut n = old_limit;
@@ -636,14 +628,9 @@ fn show_regular_temperaments<'a>(
     let table = web.document.create_element("table")?;
     table.set_inner_html("");
     let row = web.document.create_element("tr")?;
-    for column_heading in &[
-        "Name",
-        "ETs",
-        "complexity",
-        "error",
-        "TE error",
-        "TOP error",
-    ] {
+    for column_heading in
+        &["Name", "ETs", "complexity", "error", "TE error", "TOP error"]
+    {
         let cell = web.document.create_element("th")?;
         cell.set_text_content(Some(column_heading));
         row.append_child(&cell)?;

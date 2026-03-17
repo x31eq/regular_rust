@@ -350,11 +350,8 @@ fn hermite_reduction() {
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    let jove_hermite = vec![
-        vec![1, 1, 1, 2, 2],
-        vec![0, 2, 1, 1, 5],
-        vec![0, 0, 2, 1, 0],
-    ];
+    let jove_hermite =
+        vec![vec![1, 1, 1, 2, 2], vec![0, 2, 1, 1, 5], vec![0, 0, 2, 1, 0]];
     assert_eq!(hermite_normal_form(&jove), jove_hermite);
     let jove_neg_hermite = vec![
         vec![1, -1, 0, 1, -3],

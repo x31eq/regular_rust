@@ -146,9 +146,7 @@ impl TemperamentClass for StubTemperamentClass {
 #[cfg(test)]
 fn make_meantone() -> StubTemperamentClass {
     let meantone_vector = vec![vec![19, 30, 44], vec![31, 49, 72]];
-    StubTemperamentClass {
-        melody: meantone_vector,
-    }
+    StubTemperamentClass { melody: meantone_vector }
 }
 
 #[cfg(test)]
@@ -158,9 +156,7 @@ fn make_marvel() -> StubTemperamentClass {
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    StubTemperamentClass {
-        melody: marvel_vector,
-    }
+    StubTemperamentClass { melody: marvel_vector }
 }
 
 #[cfg(test)]
@@ -170,9 +166,7 @@ fn make_jove() -> StubTemperamentClass {
         vec![31, 49, 72, 87, 107],
         vec![41, 65, 95, 115, 142],
     ];
-    StubTemperamentClass {
-        melody: jove_vector,
-    }
+    StubTemperamentClass { melody: jove_vector }
 }
 
 #[rustfmt::skip]
