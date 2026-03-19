@@ -476,6 +476,40 @@ struct QuadraticMappings<'a> {
     diagonals: Vec<f64>,     // copy of useful values for the calculation
 }
 
+impl<'a> QuadraticMappings<'a> {
+    fn new(n_notes: Exponent, cap: f64, metric: DMatrix<f64>) -> Self {
+        let rank = metric.nrows();
+        let mapping = vec![n_notes; rank];
+        let mut diagonals = Vec::with_capacity(rank);
+        for row in metric.row
+            diagonals.push(row.iter().map(|x| x * x).sum());
+        }
+        let results = Vec::new();
+        QuadraticMappings { metric, cap, mapping, results, diagonals }
+    }
+    /// i: the element to choose next
+    ///
+    /// tot: running total of quadratic form
+    ///
+    /// btot: another parameter to keep track of
+    fn search(&mut self, i: usize, tot: f64, btot: f64) {
+        if i == self.metric.nrows() {
+            // Recursion stops here.
+            // The current value is good, so add it.
+            self.results.push(self.mapping.clone());
+            return;
+        }
+        // The allowable values follow a quadratic inequality
+        let a = diagonals[i];
+        let b = 2.0 * btot; // FIXME is this right?
+        let c = tot - cap;
+        let discriminant = b*b - 4*a*c;
+        if discriminant < 0 {
+            // nothing will work
+            return;
+        }
+    }
+
 fn square(x: f64) -> f64 {
     x.powi(2)
 }
