@@ -420,6 +420,8 @@ impl<'a> MoreMappings<'a> {
     /// tot2: running total of w squared
     fn search(&mut self, i: usize, tot: f64, tot2: f64) {
         debug_assert!(self.mapping.len() == self.plimit.len());
+        debug_assert!(i > 0);
+        debug_assert!(i <= self.mapping.len());
         let weighted_size =
             f64::from(self.mapping[i - 1]) / self.plimit[i - 1];
         let tot = tot + weighted_size;
@@ -462,11 +464,11 @@ struct QuadraticMappings<'a> {
 }
 
 impl<'a> QuadraticMappings<'a> {
-    fn new(n_notes: Exponent, cap: f64, metric: DMatrix<f64>) -> Self {
+    fn new(n_notes: Exponent, cap: f64, metric: &'a DMatrix<f64>) -> Self {
         let rank = metric.nrows();
         let mapping = vec![n_notes; rank];
         let mut diagonals = Vec::with_capacity(rank);
-        for row in metric.row {
+        for row in metric.row_iter() {
             diagonals.push(row.iter().map(|x| x * x).sum());
         }
         let results = Vec::new();
@@ -476,22 +478,42 @@ impl<'a> QuadraticMappings<'a> {
     ///
     /// tot: running total of quadratic form
     ///
-    /// btot: another parameter to keep track of
-    fn search(&mut self, i: usize, tot: f64, btot: f64) {
+    /// mg: another intermediate part of the calculation
+    fn search(&mut self, i: usize, tot: f64, mg: &[f64]) {
+        debug_assert_eq!(mg.len(), self.metric.ncols());
+        debug_assert!(i > 0);
+        debug_assert!(i <= self.mapping.len());
         if i == self.metric.nrows() {
             // Recursion stops here.
             // The current value is good, so add it.
             self.results.push(self.mapping.clone());
             return;
         }
+
+        // Update the state with the last element added
+        let x = self.mapping[i - 1] as f64;
+        let mg: Vec<_> = mg
+            .into_iter()
+            .zip(self.metric.row(i - 1))
+            .map(|(m, &g)| m + x * g)
+            .collect();
+        let tot =
+            tot + self.diagonals[i - 1] * square(x) + 2.0 * x * mg[i - 1];
+
         // The allowable values follow a quadratic inequality
-        let a = diagonals[i];
-        let b = 2.0 * btot; // FIXME is this right?
-        let c = tot - cap;
-        let discriminant = b * b - 4 * a * c;
-        if discriminant < 0 {
+        let a = self.diagonals[i];
+        let b = 2.0 * mg[i];
+        let c = tot - self.cap;
+        let discriminant = b * b - 4.0 * a * c;
+        if discriminant < 0.0 {
             // nothing will work
             return;
+        }
+        let xmin = (square(b) - discriminant.sqrt()) / 2.0 / a;
+        let xmax = (square(b) + discriminant.sqrt()) / 2.0 / a;
+        for guess in intrange(xmin, xmax) {
+            self.mapping[i] = guess;
+            self.search(i + 1, tot, &mg);
         }
     }
 }
