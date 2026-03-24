@@ -97,7 +97,5 @@ fn read_cents() -> Result<PrimeLimit, String> {
 /// Print debug to stdout or return true if stdout is closed
 fn print_return_closed<T: std::fmt::Debug>(obj: &T) -> bool {
     // This is like println! but without the panic
-    stdout()
-        .write_all(&format!("{:?}\n", obj).into_bytes())
-        .is_err()
+    stdout().write_all(&format!("{:?}\n", obj).into_bytes()).is_err()
 }

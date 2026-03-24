@@ -54,9 +54,7 @@ fn tempers_out(mapping: &[ETMap], interval: &ETSlice) -> bool {
 /// This is a rough guess that has to be precise for
 /// backwards compatibility reasons
 pub fn ek_for_search(limit: &[Cents], uvs: &[ETMap]) -> Cents {
-    uvs.iter()
-        .map(|uv| inherent_error(limit, uv))
-        .fold(0.0, Cents::max)
+    uvs.iter().map(|uv| inherent_error(limit, uv)).fold(0.0, Cents::max)
 }
 
 fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
@@ -64,10 +62,7 @@ fn inherent_error(limit: &[Cents], uv: &ETSlice) -> Cents {
         // senseless question, return something to avoid panics
         return 0.0;
     }
-    let q = limit
-        .iter()
-        .zip(uv.iter())
-        .map(|(&x, &y)| x / 12e2 * y as Cents);
+    let q = limit.iter().zip(uv.iter()).map(|(&x, &y)| x / 12e2 * y as Cents);
     let len = limit.len() as Cents;
     let mean = q.clone().sum::<Cents>() / len;
     let rms = (q.map(|x| x * x).sum::<Cents>() / len).sqrt();
@@ -85,7 +80,7 @@ fn dotprod(a: &[Exponent], b: &[Exponent]) -> i64 {
 
 /// Get unison vectors from a mapping and TLL-reduce them
 pub fn unison_vector_basis(plimit: &[Cents], mapping: &[ETMap]) -> Mapping {
-    tlll(plimit, &saturated_kernel_basis(mapping))
+    rtlll(plimit, &saturated_kernel_basis(mapping))
         .into_iter()
         .map(|uv| normalize_positive(plimit, uv))
         .collect()
@@ -131,7 +126,7 @@ fn kernel_basis(vectors: &[ETMap]) -> Mapping {
 }
 
 /// Remove torsion from a basis.
-/// Returns None when the vectors are not of full rank.
+/// Returns None when the vectors are linearly dependent.
 fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     // c.f. http://www.wstein.org/papers/hnf/
     // pernet-stein-fast_computation_of_hnf_of_random_integer_matrices.pdf
@@ -146,23 +141,23 @@ fn saturate(vectors: &[ETMap]) -> Option<Mapping> {
     debug_assert!(hermite.iter().all(|row| row.len() == vectors[0].len()));
     debug_assert_eq!(hermite.len(), n_vecs);
 
-    let mut double_hermite = hermite_normal_form(&transpose(&hermite));
+    let double_hermite = hermite_normal_form(&transpose(&hermite));
     debug_assert!(
         double_hermite
             .iter()
             .skip(n_vecs)
             .all(|row| row.iter().all(|&x| x == 0))
     );
-    if n_vecs == 1 {
+    if let [vector] = vectors {
+        debug_assert_eq!(n_vecs, 1);
         let gcd = double_hermite[0][0];
         if gcd == 0 {
-            return None;
+            debug_assert!(vector.iter().all(|&x| x == 0));
+            return Some(vectors.to_vec());
         }
-        let result = vec![vectors[0].iter().map(|x| x / gcd).collect()];
-        return Some(result);
+        return Some(vec![vector.iter().map(|x| x / gcd).collect()]);
     }
-    double_hermite.drain(n_vecs..);
-    let double_hermite = float_matrix_from_mapping(&double_hermite);
+    let double_hermite = float_matrix_from_mapping(&double_hermite[..n_vecs]);
     debug_assert_eq!(double_hermite.shape(), (n_vecs, n_vecs));
 
     let transformation = double_hermite.try_inverse()?;
@@ -182,8 +177,8 @@ fn transpose<T: Clone>(m: &[Vec<T>]) -> Vec<Vec<T>> {
     }
 }
 
-fn float_matrix_from_mapping(m: &Mapping) -> DMatrix<f64> {
-    let n_cols = if m.is_empty() { 0 } else { m[0].len() };
+fn float_matrix_from_mapping(m: &[ETMap]) -> DMatrix<f64> {
+    let n_cols = m.first().map_or(0, Vec::len);
     debug_assert!(m.iter().all(|row| row.len() == n_cols));
     DMatrix::from_row_iterator(
         m.len(),
@@ -198,6 +193,17 @@ fn mapping_from_float_matrix(m: DMatrix<f64>) -> Mapping {
         .collect()
 }
 
+/// Recursive Tenney-weighted LLL
+pub fn rtlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
+    if vectors.len() < 2 {
+        return vectors.to_vec();
+    }
+    let mut lll = tlll(plimit, vectors);
+    let mut result = vec![lll.swap_remove(0)];
+    result.append(&mut rtlll(plimit, &lll));
+    result
+}
+
 /// Tenney-weighted LLL
 pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
     LLLReducer::new(plimit).reduce(vectors)
@@ -205,8 +211,9 @@ pub fn tlll(plimit: &[Cents], vectors: &[ETMap]) -> Mapping {
 
 /// The book sets this it 2.  Lower numbers mean closer convergence.
 /// I think it works from 2 to 4 but I'm not sure.
-/// c.f. https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf)
-const LLL_TERMINATION_CONSTRAINT: f64 = 2.0;
+/// c.f. <https://math.mit.edu/~apost/courses/18.204-2016/18.204_Xinyue_Deng_final_paper.pdf>)
+/// Testing shows it does work lower than 2, however
+const LLL_TERMINATION_CONSTRAINT: f64 = 1.3;
 
 /// LLL reduction with a Euclidean inner product
 /// Based on Modern Computer Algebra,
@@ -217,9 +224,7 @@ struct LLLReducer {
 
 impl LLLReducer {
     pub fn new(plimit: &[Cents]) -> Self {
-        LLLReducer {
-            weights: plimit.iter().map(|x| x * x).collect(),
-        }
+        LLLReducer { weights: plimit.iter().map(|x| x * x).collect() }
     }
 
     pub fn reduce(&self, vectors: &[ETMap]) -> Mapping {
@@ -230,10 +235,7 @@ impl LLLReducer {
         debug_assert!(
             vectors.iter().all(|row| row.len() == vectors[0].len()),
         );
-        let mut g: Vec<Vec<f64>> = vectors
-            .iter()
-            .map(|row| row.iter().map(|&x| x as f64).collect())
-            .collect();
+        let mut g = vectors.to_vec();
         let (mut gs, mut m) = self.gram_schmidt_orthogonalization(&g);
         let mut i = 1;
         while i < n {
@@ -241,7 +243,7 @@ impl LLLReducer {
                 g[i] = g[i]
                     .iter()
                     .zip(&g[j])
-                    .map(|(&x, &y)| x - round_lll(m[i][j]) * y)
+                    .map(|(&gi, &gj)| gi - round_lll(m[i][j]) * gj)
                     .collect();
                 (gs, m) = self.gram_schmidt_orthogonalization(&g);
             }
@@ -249,21 +251,19 @@ impl LLLReducer {
                 && self.prod(&gs[i - 1], &gs[i - 1])
                     > LLL_TERMINATION_CONSTRAINT * self.prod(&gs[i], &gs[i])
             {
-                (g[i - 1], g[i]) = (g[i].clone(), g[i - 1].clone());
+                g.swap(i - 1, i);
                 (gs, m) = self.gram_schmidt_orthogonalization(&g);
                 i -= 1;
             } else {
                 i += 1;
             }
         }
-        g.iter()
-            .map(|row| row.iter().map(|&x| x.round() as Exponent).collect())
-            .collect()
+        g
     }
 
     fn gram_schmidt_orthogonalization(
         &self,
-        basis: &[Vec<f64>],
+        basis: &[ETMap],
     ) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         debug_assert!(
             basis.iter().all(|row| row.len() == self.weights.len()),
@@ -275,11 +275,12 @@ impl LLLReducer {
         for _ in 0..basis.len() {
             idrow.push(0.0);
         }
-        for frow in basis {
+        for row in basis {
+            let frow: Vec<f64> = row.iter().map(|&x| x as f64).collect();
             idrow.pop();
             let row: Vec<f64> = gramian
                 .iter()
-                .map(|g| self.prod(frow, g) / self.prod(g, g))
+                .map(|g| self.prod(&frow, g) / self.prod(g, g))
                 .chain(idrow.clone())
                 .collect();
             let mut new_row = frow.clone();
@@ -311,8 +312,8 @@ impl LLLReducer {
 }
 
 /// Rounding function the book I copied from specifies
-fn round_lll(x: f64) -> f64 {
-    (x + 0.5).next_down().floor()
+fn round_lll(x: f64) -> Exponent {
+    (x + 0.5).next_down().floor() as Exponent
 }
 
 #[test]
@@ -597,7 +598,7 @@ fn mystery17_uvs() {
             "2080:2079",
             "5831:5808",
             "53508:53125",
-            "[-83, -47, 61, 24, -25, -27, 33⟩",
+            "18830774421468890345242624:18277964950103308174248225",
         ],
         ratios,
     );
@@ -657,7 +658,14 @@ fn saturate_empty() {
 
 #[test]
 fn saturate_zero() {
-    assert_eq!(saturate(&vec![vec![0]]), None);
+    // A single zero vector going in is valid
+    assert_eq!(saturate(&vec![vec![0]]), Some(vec![vec![0]]));
+    assert_eq!(
+        saturate(&vec![vec![0, 0, 0, 0]]),
+        Some(vec![vec![0, 0, 0, 0]]),
+    );
+    // Two zero vectors count as linearly dependent
+    assert_eq!(saturate(&vec![vec![0, 0, 0], vec![0, 0, 0]]), None);
 }
 
 #[test]
@@ -766,8 +774,8 @@ fn gram_schmidt_limit11() {
     // Compared to Python implemetation
     let reducer = LLLReducer::new(&super::PrimeLimit::new(11).pitches);
     let (g, m) = reducer.gram_schmidt_orthogonalization(&vec![
-        vec![1.0, 2.0, 3.0, 4.0, 5.0],
-        vec![3.0, 4.0, 2.0, 2.0, 3.0],
+        vec![1, 2, 3, 4, 5],
+        vec![3, 4, 2, 2, 3],
     ]);
     assert_eq!(g.len(), 2);
     // First row is unchanged from the input so will be exact
@@ -789,10 +797,7 @@ fn lll_unewighted_prod() {
     let reducer = LLLReducer::new(&vec![1.0, 1.0, 1.0]);
     let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(0.999999, prod, 1.000001);
-    assert_eq!(
-        0.0,
-        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
-    );
+    assert_eq!(0.0, reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]));
     let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(1.999999, prod, 2.000001);
     let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
@@ -804,10 +809,7 @@ fn lll_weighted_prod() {
     let reducer = LLLReducer::new(&vec![2.0, 3.0, 4.0]);
     let prod = reducer.prod(&vec![1.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(3.999999, prod, 4.000001);
-    assert_eq!(
-        0.0,
-        reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]),
-    );
+    assert_eq!(0.0, reducer.prod(&vec![1.0, 0.0, 0.0], &vec![0.0, 1.0, 1.0]));
     let prod = reducer.prod(&vec![2.0, 0.0, 0.0], &vec![1.0, 0.0, 0.0]);
     super::assert_between!(7.999999, prod, 8.000001);
     let prod = reducer.prod(&vec![3.0, 3.0, 3.0], &vec![2.0, 2.0, 2.0]);
@@ -816,15 +818,15 @@ fn lll_weighted_prod() {
 
 #[test]
 fn round_lll_checks() {
-    assert_eq!(round_lll(0.4), 0.0);
-    assert_eq!(round_lll(0.5), 0.0);
-    assert_eq!(round_lll(0.500001), 1.0);
-    assert_eq!(round_lll(0.6), 1.0);
-    assert_eq!(round_lll(1.5), 1.0);
-    assert_eq!(round_lll(17.499999999), 17.0);
-    assert_eq!(round_lll(17.5), 17.0);
-    assert_eq!(round_lll(17.500001), 18.0);
-    assert_eq!(round_lll(-0.4999999), 0.0);
-    assert_eq!(round_lll(-0.5), -1.0);
-    assert_eq!(round_lll(-0.5000001), -1.0);
+    assert_eq!(round_lll(0.4), 0);
+    assert_eq!(round_lll(0.5), 0);
+    assert_eq!(round_lll(0.500001), 1);
+    assert_eq!(round_lll(0.6), 1);
+    assert_eq!(round_lll(1.5), 1);
+    assert_eq!(round_lll(17.499999999), 17);
+    assert_eq!(round_lll(17.5), 17);
+    assert_eq!(round_lll(17.500001), 18);
+    assert_eq!(round_lll(-0.4999999), 0);
+    assert_eq!(round_lll(-0.5), -1);
+    assert_eq!(round_lll(-0.5000001), -1);
 }

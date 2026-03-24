@@ -53,11 +53,7 @@ impl PrimeLimit {
         let pitches = map(|p| cents(f64::from(*p)), &prime_numbers);
         let label = join(".", &prime_numbers);
         let headings = map(Harmonic::to_string, &prime_numbers);
-        PrimeLimit {
-            label,
-            pitches,
-            headings,
-        }
+        PrimeLimit { label, pitches, headings }
     }
 
     /// Harmonic numbers or ratios specified as strings
@@ -80,21 +76,13 @@ impl PrimeLimit {
         let label = join(".", labels);
         // Take ownership of the labels so that they can be stored
         let headings = labels.iter().map(|&s| s.to_string()).collect();
-        Some(PrimeLimit {
-            label,
-            pitches,
-            headings,
-        })
+        Some(PrimeLimit { label, pitches, headings })
     }
 
     /// Partials specified in cents
     pub fn inharmonic(pitches: Tuning) -> Self {
         let headings = map(Cents::to_string, &pitches);
-        PrimeLimit {
-            label: "inharmonic".to_string(),
-            pitches,
-            headings,
-        }
+        PrimeLimit { label: "inharmonic".to_string(), pitches, headings }
     }
 
     pub fn interval_size(&self, interval: &ETSlice) -> Cents {
@@ -152,17 +140,20 @@ impl FromStr for PrimeLimit {
 /// The letters the start of the alphabet for prime limits
 /// or letters from q for non-prime harmonics.
 pub fn warted_et_name(plimit: &PrimeLimit, et: &ETSlice) -> String {
-    debug_assert_ne!(et, vec![]);
+    debug_assert!(!et.is_empty());
+    debug_assert_eq!(et.len(), plimit.headings.len());
+    debug_assert_eq!(et.len(), plimit.pitches.len());
+    let octave = et[0];
     let warts = plimit.warts();
-    let mut name = et[0].to_string();
+    let mut name = octave.to_string();
     if plimit.headings[0] != "2" {
         name.insert(0, warts[0]);
     }
-    let prime_et = prime_mapping(&plimit.pitches, et[0]);
+    let prime_et = prime_mapping(&plimit.pitches, octave);
     if prime_et == et {
         return name + "p";
     }
-    let n_notes_scale = et[0] as f64 / plimit.pitches[0];
+    let n_notes_scale = octave as f64 / plimit.pitches[0];
     for (&et_i, (&pet_i, (&pitch, &wart))) in et
         .iter()
         .zip(prime_et.iter().zip(plimit.pitches.iter().zip(warts.iter())))
@@ -189,9 +180,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
     let warts = plimit.warts();
     let octave_size = if warts.contains(&name.chars().next()?) {
         let octave_wart = name.remove(0);
-        *plimit
-            .pitches
-            .get(warts.iter().position(|&c| c == octave_wart)?)?
+        *plimit.pitches.get(warts.iter().position(|&c| c == octave_wart)?)?
     } else {
         match name.parse::<usize>() {
             // A plain integer is the number of steps
@@ -229,11 +218,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
                         (!nearest_sharp, (count + 1) / 2)
                     };
                     nearest as Exponent
-                        + if approx_sharp {
-                            correction
-                        } else {
-                            -correction
-                        }
+                        + if approx_sharp { correction } else { -correction }
                 } else {
                     nearest as Exponent
                 }
@@ -294,11 +279,8 @@ impl fmt::Display for ParseLimitError {
 }
 
 pub fn normalize_positive(limit: &[Cents], rsvec: ETMap) -> ETMap {
-    let pitch_width: Cents = limit
-        .iter()
-        .zip(rsvec.iter())
-        .map(|(&x, &y)| x * (y as Cents))
-        .sum();
+    let pitch_width: Cents =
+        limit.iter().zip(rsvec.iter()).map(|(&x, &y)| x * (y as Cents)).sum();
     if pitch_width < 0.0 {
         rsvec.iter().map(|x| -x).collect()
     } else {
@@ -350,6 +332,8 @@ fn primes_below(n: Harmonic) -> Vec<Harmonic> {
 /// and within the same lattice (determinant conserved)
 pub fn hermite_normal_form(ets: &[ETMap]) -> Mapping {
     let mut echelon = echelon_form(ets);
+    // Looks like rows and columns are the other way round from normal
+    debug_assert!(ets.iter().all(|col| col.len() == ets[0].len()));
     for col in 1..echelon.len() {
         let mut col_iter = echelon[..=col].iter_mut().rev();
         // Getting top_col from the mutable iterator
@@ -381,10 +365,11 @@ pub fn echelon_form(ets: &[ETMap]) -> Mapping {
 }
 
 fn echelon_rec(mut working: Mapping, row: usize) -> Mapping {
-    if working.is_empty() {
+    let Some(first) = working.first() else {
         return working;
-    }
-    let nrows = working[0].len();
+    };
+    let nrows = first.len();
+    debug_assert!(working.iter().all(|col| col.len() == nrows));
 
     // Normalize so the first nonzero entry in each column is positive
     for column in working.iter_mut() {
@@ -480,8 +465,7 @@ impl<T> PriorityQueue<T> {
 
     fn sort(&mut self) {
         self.items.sort_unstable_by(|(bad1, _), (bad2, _)| {
-            bad1.partial_cmp(bad2)
-                .expect("Bad comparison: NaN or something")
+            bad1.partial_cmp(bad2).expect("Bad comparison: NaN or something")
         });
     }
 
