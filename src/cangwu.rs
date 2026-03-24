@@ -86,7 +86,7 @@ impl<'a> CangwuTemperament<'a> {
     }
 
     /// Matrix used to determine the badness
-    fn cangwu_metric(&self, ek:Cents) -> DMatrix<f64> {
+    fn cangwu_metric(&self, ek: Cents) -> DMatrix<f64> {
         let rank = self.melody.len();
         let dimension = self.plimit.len();
         let ek = ek / 1200.0;
@@ -102,7 +102,6 @@ impl<'a> CangwuTemperament<'a> {
         }
         m - translation.transpose()
     }
-
 
     /// Get equal temperaments of a specific size belonging to the class.
     /// If more than one match is legal, they might not all be found.
@@ -455,11 +454,11 @@ impl<'a> MoreMappings<'a> {
 
 /// ET generator based on a positive definite quadratic form
 struct QuadraticMappings<'a> {
-    metric: &' DMatrix<f64>, // a matrix defining quadratic form
-    cap: f64,                // the highest badness (squared) to keep
-    mapping: ETMap,          // working result
-    results: Mapping,        // final result
-    diagonals: Vec<f64>,     // copy of useful values for the calculation
+    metric: &'a DMatrix<f64>, // a matrix defining quadratic form
+    cap: f64,                 // the highest badness (squared) to keep
+    mapping: ETMap,           // working result
+    results: Mapping,         // final result
+    diagonals: Vec<f64>,      // copy of useful values for the calculation
 }
 
 impl<'a> QuadraticMappings<'a> {
@@ -467,7 +466,7 @@ impl<'a> QuadraticMappings<'a> {
         let rank = metric.nrows();
         let mapping = vec![n_notes; rank];
         let mut diagonals = Vec::with_capacity(rank);
-        for row in metric.row
+        for row in metric.row {
             diagonals.push(row.iter().map(|x| x * x).sum());
         }
         let results = Vec::new();
@@ -489,12 +488,13 @@ impl<'a> QuadraticMappings<'a> {
         let a = diagonals[i];
         let b = 2.0 * btot; // FIXME is this right?
         let c = tot - cap;
-        let discriminant = b*b - 4*a*c;
+        let discriminant = b * b - 4 * a * c;
         if discriminant < 0 {
             // nothing will work
             return;
         }
     }
+}
 
 fn square(x: f64) -> f64 {
     x.powi(2)
