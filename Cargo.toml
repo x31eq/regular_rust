@@ -1,6 +1,6 @@
 [package]
 name = "regular"
-version = "1.3.4"
+version = "1.3.5"
 authors = ["Graham Breed <gbreed@gmail.com>"]
 edition = "2024"
 
