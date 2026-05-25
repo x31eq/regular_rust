@@ -3,7 +3,7 @@ use na::DMatrix;
 
 use super::cangwu::filtered_equal_temperaments;
 use super::{
-    Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form,
+    Cents, ETMap, ETSlice, Exponent, Mapping, echelon_form, echelon_non_zero,
     hermite_normal_form, normalize_positive,
 };
 
@@ -12,6 +12,9 @@ use super::{
 pub fn only_unison_vector(mapping: &Mapping) -> Option<ETMap> {
     let rank = mapping.len();
     if rank == 0 {
+        return None;
+    }
+    if rank != echelon_non_zero(mapping).len() {
         return None;
     }
     let dimension = mapping[0].len();
@@ -326,6 +329,12 @@ fn meantone5() {
     let uv = only_unison_vector(&mapping).expect("no UV");
     let uv = normalize_positive(&super::PrimeLimit::new(5).pitches, uv);
     assert_eq!(expected, uv);
+}
+
+#[test]
+fn meantone5_redundant() {
+    let mapping = vec![vec![12, 19, 28], vec![7, 11, 16], vec![19, 30, 44]];
+    assert_eq!(only_unison_vector(&mapping), None);
 }
 
 #[test]
