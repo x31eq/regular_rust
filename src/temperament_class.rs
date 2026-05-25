@@ -1,5 +1,8 @@
 use super::names::NAMES_BY_LIMIT;
-use super::{ETMap, ETSlice, Exponent, Mapping, PrimeLimit, map};
+use super::{
+    ETMap, ETSlice, Exponent, Mapping, PrimeLimit, echelon_non_zero,
+    hermite_normal_form, map,
+};
 
 pub trait TemperamentClass {
     fn mapping(&self) -> &Mapping;
@@ -17,18 +20,12 @@ pub trait TemperamentClass {
     }
 
     fn reduced_mapping(&self) -> Mapping {
-        super::hermite_normal_form(self.mapping())
+        hermite_normal_form(self.mapping())
     }
 
     /// Actual rank of the mapping matrix
     fn rank(&self) -> usize {
-        let mut result = 0;
-        for col in self.reduced_mapping().iter() {
-            if col.iter().any(|&x| x != 0) {
-                result += 1;
-            }
-        }
-        result
+        echelon_non_zero(self.mapping()).len()
     }
 
     fn name(&self, limit: &PrimeLimit) -> Option<&'static str> {
