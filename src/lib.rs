@@ -366,7 +366,7 @@ pub fn echelon_form(ets: &[ETMap]) -> Mapping {
 
 /// Echelon form with zero entries removed
 pub fn echelon_non_zero(vectors: &[ETMap]) -> Mapping {
-    echelon_form(&vectors)
+    echelon_form(vectors)
         .into_iter()
         .filter(|v| v.iter().any(|&x| x != 0))
         .collect()
