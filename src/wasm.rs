@@ -22,7 +22,7 @@ use super::uv::{
 };
 use super::web_context::{Exceptionable, WebContext};
 use super::{
-    Cents, ETMap, Exponent, Mapping, PrimeLimit, hermite_normal_form, map,
+    Cents, ETMap, Exponent, Mapping, PrimeLimit, echelon_non_zero, map,
     normalize_positive, warted_et_name,
 };
 
@@ -430,7 +430,8 @@ fn unison_vector_search(
     }
     let ek = ek_for_search(&limit.pitches, &uvs) * ek_multiplier;
     let dimension = limit.pitches.len();
-    let corank = hermite_normal_form(&uvs).len();
+    let corank = echelon_non_zero(&uvs).len();
+    assert!(corank <= dimension);
     if corank == dimension {
         return Err(
             "Too many unison vectors: whole space matches".to_string()
