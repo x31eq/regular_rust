@@ -366,7 +366,6 @@ fn hermite_reduction() {
     assert_eq!(redundant_normal[2], vec![0, 0, 0, 0]);
 }
 
-
 #[test]
 fn linearly_dependent_echelon() {
     let redundant =
@@ -374,6 +373,14 @@ fn linearly_dependent_echelon() {
     let reduced = echelon_form(&redundant);
     assert_eq!(reduced.len(), 3);
     assert_eq!(reduced[2], vec![0, 0, 0, 0]);
+}
+
+#[test]
+fn linearly_dependent_echelon_non_zero() {
+    let redundant =
+        vec![vec![1, 2, 3, 4], vec![1, 2, 3, 4], vec![4, 5, 6, 7]];
+    let reduced = echelon_non_zero(&redundant);
+    assert_eq!(reduced.len(), 2);
 }
 
 #[test]
