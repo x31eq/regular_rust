@@ -280,6 +280,16 @@ fn name_gpv() {
 }
 
 #[test]
+fn name_gpv12() {
+    // the optimal 13-limit 12=
+    let limit = PrimeLimit::new(13);
+    let et = et_from_name(&limit, "12.1").expect("no named ET");
+    let warted_name = warted_et_name(&limit, &et);
+    assert_eq!(warted_name, "12f");
+    assert_eq!(et, vec![12, 19, 28, 34, 42, 45]);
+}
+
+#[test]
 fn rt12_from_name() {
     let limit = PrimeLimit::new(7);
     assert_eq!(
