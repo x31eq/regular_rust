@@ -201,7 +201,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
         wart_counts.insert(wart, wart_counts.get(&wart).unwrap_or(&0) + 1);
     }
     let n_notes: f64 = name.parse().ok()?;
-    let scaler = n_notes as f64 / octave_size;
+    let scaler = n_notes / octave_size;
     Some(
         plimit
             .pitches
