@@ -270,6 +270,16 @@ fn name_4efggg() {
 }
 
 #[test]
+fn name_gpv() {
+    // a generalized patent val is specified by a fractional octave
+    let limit = PrimeLimit::new(7);
+    let et = et_from_name(&limit, "88.1").expect("no named ET");
+    let warted_name = warted_et_name(&limit, &et);
+    assert_eq!(warted_name, "88bc");
+    assert_eq!(et, vec![88, 140, 205, 247]);
+}
+
+#[test]
 fn rt12_from_name() {
     let limit = PrimeLimit::new(7);
     assert_eq!(
