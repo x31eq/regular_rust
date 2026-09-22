@@ -183,7 +183,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
         *plimit.pitches.get(warts.iter().position(|&c| c == octave_wart)?)?
     } else {
         match name.parse::<usize>() {
-            // A plain integer is the number of steps
+            // A plain number is the number of steps
             // to the first element of the plimit
             Ok(_) => *plimit.pitches.first()?,
             // A warted name is based on 1200 cents
@@ -200,7 +200,7 @@ pub fn et_from_name(plimit: &PrimeLimit, name: &str) -> Option<ETMap> {
         let wart = name.pop()?;
         wart_counts.insert(wart, wart_counts.get(&wart).unwrap_or(&0) + 1);
     }
-    let n_notes: usize = name.parse().ok()?;
+    let n_notes: f64 = name.parse().ok()?;
     let scaler = n_notes as f64 / octave_size;
     Some(
         plimit
